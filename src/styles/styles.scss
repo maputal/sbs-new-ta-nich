@@ -1,0 +1,45 @@
+// Write your overrides
+.layout-nav-type-vertical .layout-vertical-nav{
+  background-color: #fff;
+}
+
+.depLoginText{
+  position: absolute !important;
+  z-index: 1 !important;
+  inset-block-start: 16rem;
+  inset-inline-start: 7.3rem;
+}
+
+.vcardtext--terms{
+  // max-width:500px;
+  max-height:500px
+}
+
+.black-text{
+  color: #000;
+}
+
+//wabaEmbeddedSignup
+.alertwaba{
+  background: linear-gradient(0deg, #FBF4E8, #FBF4E8),
+  linear-gradient(0deg, #FFE7BC, #FFE7BC) !important;
+}
+
+.v-icon .mb-5{
+  margin: 0;
+  padding: 0;
+}
+
+.mb-0{
+  color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
+}
+
+.custom-card-hello-login {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
+}
+
+.error-overlay-bg > .v-overlay__scrim {
+  background: rgb(var(--v-theme-on-surface)) !important;
+  opacity: 0.5 !important;
+}

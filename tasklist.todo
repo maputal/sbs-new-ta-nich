@@ -1,0 +1,21 @@
+☐ Diperlukan backend validasi jika email telah digunakan pada landing page 
+☐ warna primary pada input login email dan password sama sama merah perlu diganti supaya ngga nyaru sama yang error messages
+✔ Posisi Error messages pada login page perlu di rubah @done(23-05-27 12:56)
+☐ tambahin pop up harus dicentang terms & condition karena bisa saja disablednya di hapus lewat inspect
+☐ appID facebook perlu di parameterize (lewat env. file ???)
+✔ 404 page @done(23-05-22 09:59)
+✔ bikin profile information UI @done(23-05-23 07:17)
+✔ login function @done(23-05-23 08:32)
+✔ error ui pada saat login dirubah jangan jadi alert aja (tinggal tahap error itu mengeluarkan kode 403 dll pada error.vue) @done(23-05-27 12:55)
+✔ logout functions @done(23-05-23 07:30)
+✔ portalite href @done(23-05-23 17:04)
+✔ dashboard UI @done(23-05-23 07:30)
+✔ narik data untuk keperluan profile information @done(23-05-23 08:31)
+✔ response kalo lewat akun sangmaker atau ioh waba(dikerjain pagi sama dapid) @done(23-05-24 08:53)
+☐ hit op untuk passing phoneid dan waba id
+☐ session timeout
+☐ tambahin dialog buat warning  harus allow popup di browser sebelum klik button connect with facebook
+✔ route protection balik ke login-waba kalo user ketik di url dashboard (harus ada key yang menujukan dia sudah daftar atau belum pada onmounted dashboard) solution -> langsung route ke '/' @done(23-05-24 09:14)
+notes
+*pada saat passing phoneid dan waba id kalo error pada saat kirim request ke backend
+*bagaimana perlakuannya?

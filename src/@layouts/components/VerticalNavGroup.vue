@@ -1,17 +1,17 @@
 <script setup>
 import {
-injectionKeyIsVerticalNavHovered,
-useLayouts,
+  injectionKeyIsVerticalNavHovered,
+  useLayouts,
 } from '@layouts'
 import {
-TransitionExpand,
-VerticalNavLink,
+  TransitionExpand,
+  VerticalNavLink,
 } from '@layouts/components'
 import { config } from '@layouts/config'
 import { canViewNavMenuGroup } from '@layouts/plugins/casl'
 import {
-isNavGroupActive,
-openGroups,
+  isNavGroupActive,
+  openGroups,
 } from '@layouts/utils'
 
 const props = defineProps({
@@ -21,7 +21,7 @@ const props = defineProps({
   },
 })
 
-defineOptions({ name: 'VerticalNavGroup' })
+// defineOptions({ name: 'VerticalNavGroup' })
 
 const route = useRoute()
 const router = useRouter()

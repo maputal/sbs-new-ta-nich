@@ -40,7 +40,13 @@ export default defineConfig({
       imports: ['vue', 'vue-router', '@vueuse/core', '@vueuse/math', 'pinia'],
       vueTemplate: true,
     }),
-    DefineOptions(),
+    DefineOptions({
+      include: [/\.vue$/, /\.vue\?vue/],
+      exclude: [
+        /HorizontalNavGroup\.vue$/,
+        /VerticalNavGroup\.vue$/,
+      ],
+    }),
     splitVendorChunkPlugin(),
     visualizer(),
   ],

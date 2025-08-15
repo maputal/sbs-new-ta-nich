@@ -1,6 +1,6 @@
 <script setup>
+  import { useGlobalStore } from '@/store/useGlobalStore'
   import { useDocumentStore } from '@/store/useDocumentStore'
-import { useGlobalStore } from '@/store/useGlobalStore'
   const store = useGlobalStore()
   const myUser = computed(() => ({
     name: store.user?.name,
@@ -34,13 +34,13 @@ import { useGlobalStore } from '@/store/useGlobalStore'
   }
 
   const days = {
-    0:'Sunday',
     1:'Monday',
     2:'Tuesday',
     3:'Wednesday',
     4:'Thursday',
     5:'Friday',
     6:'Saturday',
+    7:'Sunday',
   }
 
   const todayDateF = () => {

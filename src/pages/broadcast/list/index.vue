@@ -122,7 +122,7 @@ const successDialogProps = ref({
 
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
-const priv = userData?.priv
+const priv = userData.priv
 
 console.log("---------- hasil priv=", priv)
 
@@ -157,7 +157,6 @@ const onGetSyncs = data => {
 }
 
 const onDataError = e => {
-  showProgressCircular.value = false
   isErrorVisible.value = true
   customErrorMessages.value = e
 }

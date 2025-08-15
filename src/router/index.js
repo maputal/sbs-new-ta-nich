@@ -31,6 +31,7 @@ router.beforeEach((to, from, next) => {
   // PROD
   if (to.meta.requiresAuth && (!store.token || store.token === 'null')
   ) {
+    console.log('MASOK SINI SA')
     // return next({ name: 'login', query: { to: to.name !== 'index' ? to.fullPath : undefined }})
     next({
       path: '/login',

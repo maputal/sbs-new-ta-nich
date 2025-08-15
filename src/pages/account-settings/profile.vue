@@ -1,10 +1,12 @@
 <script setup>
-import { useGlobalStore } from '@/store/useGlobalStore'
+import { useGlobalStore } from '@/store/useGlobalStore';
 const store = useGlobalStore()
-
+console.log('store di profile=', store)
 const myUser = computed(() => ({
   name: store.user?.name,
+  phone_number: store.user?.account_obj.phone_number,
   email: store.user?.account_obj.email ? store.user.account_obj.email : store.user.username,
+  company_name: store.user?.company_name,
   role_name: store.user?.role_name,
 }))
 
@@ -19,49 +21,103 @@ const onLoadOwnInfo = (data) => {}
 
 onMounted(() => {
   let pload = {}
-  window.moffas.do_request('getProfile', pload, onLoadOwnInfo, onDataError)
+  window.moffas.do_request(
+    'getProfile',
+    pload,
+    onLoadOwnInfo,
+    onDataError,
+  )
 })
 </script>
 
 <template>
   <div>
-    <!-- error dialogs -->
+    <!-- erorr dialogs -->
     <LazyErrorDialogs
       v-if="isErrorVisible"
-      v-model:isDialogVisible="isErrorVisible"
+      v-model:isDialogVisible="isErrorVisible" 
       :custom-error-message="customErrorMessages"
-    />
-
+    >
+    </LazyErrorDialogs>
     <VRow>
       <VCol cols="12">
         <VCard>
-          <VCardText>
+          <VCardText class="d-flex">
             <VRow>
-              <!-- Judul agak geser kanan -->
-              <VCol cols="12" md="6">
-                <h4 class="text-h4" style="padding-left: 150px">Profile Information</h4>
+              <VCol
+                md="6"
+                cols="12"
+              >
+                <h4 class="text-center text-h4">Profile Information</h4>
               </VCol>
-
-
-              <!-- Kolom kanan: form -->
-              <VCol cols="12" md="6">
+              <VCol
+                md="6"
+                cols="12"
+              >
                 <VTextField
                   v-model="myUser.name"
                   label="Name"
                   readonly
-                  class="mb-4"
                 />
+              </VCol>
+              <VCol
+                md="6"
+                cols="12"
+              >
+              </VCol>
+              <VCol
+                md="6"
+                cols="12"
+              >
+                <VTextField
+                  v-model="myUser.phone_number"
+                  label="Phone Number"
+                  readonly
+                />
+              </VCol>
+              <VCol
+                md="6"
+                cols="12"
+              >
+              </VCol>
+              <VCol
+                md="6"
+                cols="12"
+              >
                 <VTextField
                   v-model="myUser.role_name"
                   label="Role"
                   readonly
-                  class="mb-4"
                 />
+              </VCol>
+              <VCol
+                md="6"
+                cols="12"
+              >
+              </VCol>
+              <VCol
+                md="6"
+                cols="12"
+              >
                 <VTextField
                   v-model="myUser.email"
                   label="Email"
                   readonly
-                  class="mb-4"
+                />
+              </VCol>
+              <VCol
+                md="6"
+                cols="12"
+              >
+              </VCol>
+              <VCol
+                md="6"
+                cols="12"
+              >
+                <VTextField
+                  v-model="myUser.company_name"
+                  label="Company Name"
+                  readonly
                 />
               </VCol>
             </VRow>

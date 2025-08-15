@@ -1,9 +1,8 @@
 <script setup>
-const props = defineProps([
+defineProps([
   'listOfNotes', 
   'toTimeDMYHM',
   'project',
-  'formatHeader',
 ])
 
 const emits = defineEmits([
@@ -68,32 +67,6 @@ const downloadAttachment = fileId => {
             </VListItemSubtitle>
           </div>
           <div
-            v-if="activity.changes.user_name"
-            class="d-flex align-center pa-0"
-          >
-            <VListItemSubtitle class="text-black font-weight-bold">
-              Assignee:
-            </VListItemSubtitle>
-            <VListItemSubtitle class="no-wrap pl-1">
-              {{ activity.changes.user_name }}
-            </VListItemSubtitle>
-          </div>
-          <div 
-            v-if="Object.keys(activity.changes).some(
-              key => !['status', 'category_ticket', 'priority', 'activity', 'user_id', 'user_name'].includes(key)
-            )" 
-            class="d-flex align-center pa-0"
-          >
-            <div v-for="(value, key, index) in activity.changes" :key="index">
-              <VListItemSubtitle class="text-black font-weight-bold">
-                {{ props.formatHeader(key) }}
-              </VListItemSubtitle>
-              <VListItemSubtitle class="no-wrap pl-1">
-                {{ value }}
-              </VListItemSubtitle>
-            </div>
-          </div>
-          <div
             v-if="activity.note.content"
             class="d-flex align-center"
           >
@@ -106,11 +79,11 @@ const downloadAttachment = fileId => {
           </div>
           <VListItemSubtitle class="no-wrap text-black text-sm">
             <div v-if="activity.changes.activity">
-              {{ activity.changes.activity }} by {{ activity.user_name }} {{ activity.created_tstamp ? toTimeDMYHM(activity.created_tstamp) : '' }}
+              {{ activity.changes.activity }} by {{ activity.user_name }} ({{ activity.user_role }}) {{ toTimeDMYHM(activity.created_tstamp) }}
               
             </div>
             <div v-else>
-              updated by {{ activity.user_name }} {{ activity.updated_tstamp ? toTimeDMYHM(activity.updated_tstamp) : '' }}
+              updated by {{ activity.user_name }} ({{ activity.user_role }}) {{ toTimeDMYHM(activity.created_tstamp) }}
             </div>
           </VListItemSubtitle>
           <VDivider />

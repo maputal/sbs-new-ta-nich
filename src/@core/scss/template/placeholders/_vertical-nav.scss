@@ -18,7 +18,8 @@
 
     &::before,
     &::after {
-      border-block-end: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+      // border-block-end: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+      border-block-end: 1px solid white;
       content: "";
     }
 

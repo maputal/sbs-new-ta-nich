@@ -149,7 +149,6 @@ function dummymoffasdoconversationretrieves (params, onSuccess, onError) { //ref
 /////////////////////////////////////////////////////////////
 
 const onDataError = e => {
-  showProgressCircular.value = false
   isErrorVisible.value = true
   customErrorMessages.value = e
 }

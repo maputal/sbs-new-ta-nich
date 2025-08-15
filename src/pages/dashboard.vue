@@ -1,5 +1,7 @@
 <script setup>
   import { useGlobalStore } from '@/store/useGlobalStore'
+  import icon from '@/assets/images/svg/gg_hello.svg'
+  import axios from '@axios'
 
   const store = useGlobalStore()
   const myUser = computed(() => ({
@@ -70,6 +72,48 @@
     customErrorMessages.value = e
   }
   const onLoadOwnInfo = (data) => {}
+
+  const urlBE = ref(window.moffas.config.url_backoffice_helper_api)
+  const companyID = ref(window.moffas.config.param_company_id)
+  const sessionID = ref(localStorage.getItem('moffas.token'))
+
+  const fetchDepartment = () => {
+    let params = {
+      company_id: companyID.value,
+      session_id: sessionID.value,
+      row_length: 100,
+      current_page: 1, 
+      search_filter: '',
+    }
+    // if (filter.value.group_name != '') {
+    //   params.group_name = filter.value.group_name
+    // }
+
+    axios.post(urlBE.value + 'retrieve_page_access', params)
+    .then(function (response) {
+      console.log('response department list=', response);
+      const responseData = response.data
+
+      console.log('response')
+      console.log(response)
+
+      if(response.data.error_code) {
+        onDataError(response.data)
+
+        return
+      }
+
+      tableData.value = responseData.data
+      totalPage.value = responseData.page_total
+      totalDepartment.value = responseData.recordsTotal 
+
+      showProgressCircular.value = false
+    })
+    .catch(function (error) {
+      console.log(error);
+      onDataError(error)
+    });
+  }
   
   onMounted(() => {
     let isEmbeddedSignup = store.payloadFin.embedded_signup
@@ -85,6 +129,8 @@
       )
     }
     todayDate.value = todayDateF()
+
+    // fetchDepartment()
   })
 </script>
 <template>
@@ -96,32 +142,33 @@
       :custom-error-message="customErrorMessages"
     >
     </LazyErrorDialogs>
-    <h6 class="text-2xl font-weight-bold mb-2">
-      Hi, {{myUser.name}}
-    </h6>
-    <div class="d-flex flex-wrap justify-space-between flex-column flex-sm-row">
-      <!-- 👉 Left Content -->
-      <div class="mb-4">
-        <!-- 👉 Address -->
-        <p class="mb-0 font-weight-medium">
-          Here what’s going on with Teleakses CRM Ticket 
-        </p>
-      </div>
-
-      <!-- 👉 Right Content -->
-      <div class="mb-4">
-        <!-- 👉 Issue Date -->
-        <p class="mb-2 font-weight-medium">
-          <span>{{ todayDate }} </span>
-          <!-- <span>{{ invoiceData.issuedDate }}</span> -->
-        </p>
-      </div>
-    </div>
     <div>
       <VCard
         class="mb-6"
-        title="Welcome To Teleakses CRM Ticket!"
+        color="primary"
       >
+        <VCardText class="d-flex flex-wrap justify-space-between align-center flex-column flex-sm-row">
+          <!-- 👉 Left Content -->
+          <div>
+            <div class="text-2xl font-weight-bold mb-2">
+              Welcome Back, {{myUser.name}} !
+            </div>
+            <div class="">
+              <p class="text-white mb-0 font-weight-medium">
+                Here what’s going on with Secure Bundling System 
+              </p>
+            </div>
+          </div>
+    
+          <!-- 👉 Right Content -->
+          <div class="">
+            <img
+              class="size-img"
+              :src="icon"
+              alt="img"
+            />
+          </div>
+        </VCardText>
       </VCard>
     </div>
   </div>

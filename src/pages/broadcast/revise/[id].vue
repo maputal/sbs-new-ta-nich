@@ -126,7 +126,7 @@ const status = ref('APPROVED')
 
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
-const priv = userData?.priv
+const priv = userData.priv
 
 const successDialogProps = ref({
   subject: '',

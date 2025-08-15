@@ -41,7 +41,7 @@ const hideTitleAndBadge = isVerticalNavMini(windowWidth)
           :is="config.app.enableI18n ? 'i18n-t' : 'span'"
           v-show="!hideTitleAndBadge"
           key="title"
-          class="nav-item-title"
+          class="text-subtitle-2 text-white nav-item-title"
           v-bind="dynamicI18nProps(item.title, 'span')"
         >
           {{ item.title }}

@@ -32,10 +32,10 @@ $header: ".layout-navbar";
         dialog is opened and window don't have any scroll. This removes window-scrolled class from layout and out style broke
     */
     /* #piki override navbar become white */
-    /* html.v-overlay-scroll-blocked:not([style*="--v-body-scroll-y:0px;"]) .layout-navbar-sticky,
-      &.window-scrolled.layout-navbar-sticky */
-      html.v-overlay-scroll-blocked:not([style*="--v-body-scroll-y:0px;"]) .layout-navbar-sticky,
-      &.layout-navbar-sticky {
+    html.v-overlay-scroll-blocked:not([style*="--v-body-scroll-y:0px;"]) .layout-navbar-sticky,
+      &.window-scrolled.layout-navbar-sticky {
+      // html.v-overlay-scroll-blocked:not([style*="--v-body-scroll-y:0px;"]) .layout-navbar-sticky,
+      // &.layout-navbar-sticky {
 
         #{$header} {
           @extend %default-layout-vertical-nav-scrolled-sticky-elevated-nav;

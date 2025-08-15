@@ -6,43 +6,14 @@ moffas.config = {}
 
 
 moffas.config.dev = {
-  url: 'https://servobot.tel-access.com/portal-be',
-  urldev: 'https://servobot.tel-access.com/portal-be',
-  url_backoffice_helper_api: 'https://servobot.tel-access.com/backoffice-helper-crm/',
+  url: 'https://latihan.servobot.ai/portal-be',
+  urldev: 'https://latihan.servobot.ai/portal-be',
+  url_backoffice_helper_api: 'https://latihan.servobot.ai/backoffice-helper-crm/',
   param_company_id: 1,
-  project_title: 'danareksa',
   dev: false,
-  version_footer: 'V0.1.1.0',
-  fields_to_show: ['response', 'sales', 'ao_code'],
+  project_title: '',
   fields_to_keep_on_desc: ['sales', 'email', 'clcode', 'note'],
-  options_contact_type: [
-    {
-      title: 'Address',
-      value: 'address',
-    },
-    {
-      title: 'Phone Number',
-      value: 'phone_number',
-    },
-    {
-      title: 'Email',
-      value: 'email',
-    },
-  ],
-  listOfResponseCustomer: [
-    {
-      title: 'Interested',
-      value: 1
-    },
-    {
-      title: 'Not Interested',
-      value: 2
-    },
-    {
-      title: 'Follow Up Again',
-      value: 3
-    },
-  ],
+  version_footer: 'V0.1.2.0',
 }
 
 if(moffas.build_production === true) {

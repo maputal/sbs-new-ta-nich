@@ -10,6 +10,7 @@ import {
 } from '@layouts/components'
 import { config } from '@layouts/config'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
+import { VNodeRenderer } from './VNodeRenderer'
 
 const props = defineProps({
   tag: {
@@ -87,53 +88,51 @@ const handleNavScroll = evt => {
     ]"
   >
     <!-- 👉 Header -->
-    <div class="nav-header">
+    <div class="nav-header" style="padding: 1rem 0.25rem 1rem 0.5rem;">
       <slot name="nav-header">
         <RouterLink
           to="/"
-          class="app-logo d-flex align-center gap-x-3 app-title-wrapper pl-6"
+          class="app-logo d-flex align-center  app-title-wrapper"
         >
           <!-- #piki hide vnoderenderer and show image -->
-          <!-- <VNodeRenderer :nodes="config.app.logo" /> -->
-          <img
-            src="@images/telakses/Tel-Access_Finalv2.svg"
-            alt="Logo Dep ioh"
-          >
+          <VNodeRenderer :nodes="config.app.logo" />
+          <!-- <img
+            src="@images/telakses/Tel-Access_Logo_white.svg"
+            alt="Logo"
+          > -->
 
           <!-- #piki overridin title sidebarleft -->
-          <!--
-            <Transition name="vertical-nav-app-title">
-            <h1
-            v-show="!hideTitleAndIcon"
-            class="font-weight-medium leading-normal text-xl text-uppercase"
+          
+          <Transition name="vertical-nav-app-title">
+            <h5
+              v-show="!hideTitleAndIcon"
+              class="text-white font-weight-medium leading-normal text-wrap app-title"
             >
-            {{ config.app.title }}
-            </h1>
-            </Transition> 
-          -->
+              {{ config.app.title }}
+            </h5>
+          </Transition> 
+         
         </RouterLink>
         <!-- 👉 Vertical nav actions -->
         <!-- Show toggle collapsible in >md and close button in <md -->
         <!-- #piki overridin hide toggle collapsible sidebarleft -->
-        <template v-if="!isLessThanOverlayNavBreakpoint(windowWidth)">
-          <!--
-            <Component
-            :is="config.app.iconRenderer || 'div'"
-            v-show="isCollapsed && !hideTitleAndIcon"
-            class="header-action"
-            v-bind="config.icons.verticalNavUnPinned"
-            @click="isCollapsed = !isCollapsed"
-            />  
-          -->
-          <!--
-            <Component
-            :is="config.app.iconRenderer || 'div'"
-            v-show="!isCollapsed && !hideTitleAndIcon"
-            class="header-action"
-            v-bind="config.icons.verticalNavPinned"
-            @click="isCollapsed = !isCollapsed"
-            /> 
-          -->
+        <template v-if="!isLessThanOverlayNavBreakpoint(windowWidth)">          
+          <!-- <Component
+          :is="config.app.iconRenderer || 'div'"
+          v-show="isCollapsed && !hideTitleAndIcon"
+          class="header-action"
+          v-bind="config.icons.verticalNavUnPinned"
+          @click="isCollapsed = !isCollapsed"
+          />  
+        
+        
+          <Component
+          :is="config.app.iconRenderer || 'div'"
+          v-show="!isCollapsed && !hideTitleAndIcon"
+          class="header-action"
+          v-bind="config.icons.verticalNavPinned"
+          @click="isCollapsed = !isCollapsed"
+          />           -->
         </template>
         <template v-else>
           <Component
@@ -234,5 +233,11 @@ const handleNavScroll = evt => {
       }
     }
   }
+}
+
+.app-title {
+  white-space: normal;
+  word-break: break-word;
+  max-width: 100%;
 }
 </style>

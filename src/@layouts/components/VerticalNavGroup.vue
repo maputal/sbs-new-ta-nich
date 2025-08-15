@@ -125,7 +125,7 @@ watch(isVerticalNavMini(windowWidth, isVerticalNavHovered), val => {
           v-bind="dynamicI18nProps(item.title, 'span')"
           v-show="!hideTitleAndBadge"
           key="title"
-          class="nav-item-title"
+          class="text-subtitle-2 text-white nav-item-title"
         >
           {{ item.title }}
         </Component>

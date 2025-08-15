@@ -1,7 +1,7 @@
 <script setup>
 import { useGlobalStore } from '@/store/useGlobalStore'
-import depBuildingBackground from '@images/telakses/BG_Login_CRM.png'
-import depLogoGrey from '@images/telakses/Teleakses_Solusindo_Logo_cropt.png'
+import buildingBackground from '@images/telakses/BG_Login.png'
+import Logo from '@images/telakses/Teleakses_Solusindo_Logo_cropt.png'
 import {
   emailValidator,
   requiredValidator,
@@ -17,12 +17,12 @@ const route = useRoute()
 const router = useRouter()
 
 const errors = ref({
-  email: undefined,
+  nip: undefined,
   password: undefined,
 })
 
 const refVForm = ref()
-const email = ref('')
+const nip = ref('')
 const password = ref('')
 const response = ref('')
 const token = ref('')
@@ -81,8 +81,10 @@ const onLoadOwnInfo = data => {
   
   // Redirect to `to` query if exist or redirect to index route
   console.log('route.query.redirect', route.query.redirect)
-  router.push(route.query.redirect ? String(route.query.redirect) : '/')
-  // router.replace(route.query.redirect ? String(route.query.redirect) : '/')
+  // router.push(route.query.redirect ? String(route.query.redirect) : '/')
+  router.replace(route.query.redirect ? String(route.query.redirect) : '/')
+
+  // router.replace('/otp')
 }
 
 const onUnauth = () => {
@@ -110,13 +112,13 @@ const onError = e => {
 }
 
 const resetCredential = () => {
-  email.value = ''
+  nip.value = ''
   password.value = ''
 }
 
 const login = () => {
   window.moffas.login_start(
-    email.value,
+    nip.value,
     onProceed,
     onUnauth,
     onDenied,
@@ -175,31 +177,23 @@ const onSubmit = () => {
     >
       <VCol
         md="7"
-        class="d-none d-md-flex position-relative"
+        class="d-none d-md-flex position-relative align-center"
       >
         <div
-          class="d-flex w-100 h-100"
+          class="w-100 h-100"
         >
           <VImg
             :max-height="windowInnerHeight"
-            :src="depBuildingBackground"
-            cover="true"
-            style="border-top-right-radius: 15px; border-bottom-right-radius: 15px;"
+            :src="buildingBackground"
+            :cover="true"
+            class="position-absolute top-0 start-0 w-100 h-100"
+            style="border-top-right-radius: 15px; border-bottom-right-radius: 15px; z-index: 1;"
           />
+          <div
+            class="position-absolute top-0 start-0 w-100 h-100"
+            style="background: linear-gradient(140.39deg, #ED1C24 10.43%, rgba(255, 203, 5, 0) 60.76%, #F67415 91.24%); border-top-right-radius: 15px; border-bottom-right-radius: 15px; z-index: 2;"
+          ></div>
         </div>
-        <!-- <VImg
-          :width="500"
-          :src="depHeaderLogo"
-          class="depLoginText"
-        /> -->
-
-         <div class="depLoginText pt-10 mr-16">
-          <div class="custom-card-hello-login px-4 py-3">
-            <h2 class="text-white">Hello, Welcome Back to</h2>
-            <h1 class="text-white">Customer Relationship Management</h1>
-          </div>
-          <h3 class="text-white font-weight-light px-4">Sign in to access your CRM dashboard and manage customer relationships effectively</h3>
-				</div>
       </VCol>
 
       <VCol
@@ -215,15 +209,27 @@ const onSubmit = () => {
         >
           <VImg
             :width="270"
-            :src="depLogoGrey"
-            class="mx-auto mb-4"
+            :src="Logo"
+            class="mx-auto"
           />
+
+          <VCardTitle align="center">
+            <div class="d-flex justify-center mb-5">
+              <h1 class="text-primary font-weight-black mb-1 pr-1">
+                Secure
+              </h1>
+              <h1 class="text-black font-weight-black mb-1">
+                Bundling
+              </h1>
+            </div>
+          </VCardTitle>
+
           <VCardText>
-            <h5 class="text-h5 font-weight-black mb-1">
+            <h2 class="font-weight-black mb-1">
               Sign In
-            </h5>
+            </h2>
             <p class="mb-0">
-              Please sign-in to your account
+              Welcome back! Sign in to start your session
             </p>
           </VCardText>
           <VCardText>
@@ -235,11 +241,10 @@ const onSubmit = () => {
                 <!-- email -->
                 <VCol cols="12">
                   <VTextField
-                    v-model="email"
-                    label="Email"
-                    type="email"
-                    :rules="[requiredValidator, emailValidator]"
-                    :error-messages="errors.email"
+                    v-model="nip"
+                    label="NIP"
+                    :rules="[requiredValidator]"
+                    :error-messages="errors.nip"
                   />
                 </VCol>
 
@@ -268,8 +273,9 @@ const onSubmit = () => {
                   <VBtn
                     block
                     type="submit"
+                    class="text-none"
                   >
-                    Login
+                    Sign In
                   </VBtn>
                 </VCol>             
               </VRow>

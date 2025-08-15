@@ -39,13 +39,13 @@ const months = {
 }
 
 const days = {
-  0:'Sunday',
   1:'Monday',
   2:'Tuesday',
   3:'Wednesday',
   4:'Thursday',
   5:'Friday',
   6:'Saturday',
+  7:'Sunday',
 }
 
 const todayDateF = () => {
@@ -85,7 +85,7 @@ const customErrorMessages = ref('')
 
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
-const priv = userData?.priv
+const priv = userData.priv
 
 console.log("---------- hasil priv=", priv)
 
@@ -153,7 +153,7 @@ const createUser = () => {
     }
   }
 
-  axios.post(urlBE.value + 'do_management_user', params)
+  axios.post(urlBE.value + 'do_management_user_crud', params)
   .then(function (response) {
     console.log('response updateUser=', response)
     const responseData = response.data
@@ -176,6 +176,46 @@ const createUser = () => {
   })
 }
 
+// const createUser = () => {
+//   console.log('createUser')
+
+//   const params = {
+//     nip: formSubmit.value.nip,
+//     name: formSubmit.value.name,
+//     email: formSubmit.value.email,
+//     phone_number: formSubmit.value.phone_number,
+//     password: formSubmit.value.password,
+//     role_id: role.value.filter(r => r.name == formSubmit.value.role)[0].id,
+//   }
+
+//   window.moffas.do_request(
+//     'user_create',
+//     params, 
+//     onCreateUser,
+//     onDataError,
+//   )
+// }
+
+// const onCreateUser = data => {
+//   const response = JSON.parse(data)
+
+//   if (response.hasOwnProperty('trace_id')){
+//     customErrorMessages.value = response
+//     isErrorVisible.value = true
+    
+//     return
+//   }
+  
+//   isSuccess.value.success = response.success
+//   isSuccess.value.id = response.data.id
+
+//   confirmationDialog.value = false
+//   if(isSuccess.value.success) {
+//     successDialog.value = true
+//   }
+//   isSuccess.value.success = false
+// }
+
 const onSubmit = () => {
   refVForm.value?.validate().then(({ valid: isValid }) => {
     if (isValid)
@@ -186,8 +226,7 @@ const onSubmit = () => {
 const getRoles = () => {
   let params = {
     company_id: companyID.value,
-    session_id: sessionID.value,
-    search_filter: '',   
+    session_id: sessionID.value   
   }
 
   axios.post(urlBE.value + 'retrieve_management_user_roles', params)
@@ -212,6 +251,32 @@ const getRoles = () => {
     onDataError(error.response)
   })
 }
+
+// const getRoles = () => {
+//   console.log('createUser')
+
+//   const params = {}
+
+//   window.moffas.do_request(
+//     'role_get_all',
+//     params, 
+//     onGetRoles,
+//     onDataError,
+//   )
+// }
+
+// const onGetRoles = data => {
+//   const response = JSON.parse(data)
+
+//   if (response.hasOwnProperty('trace_id')){
+//     customErrorMessages.value = response
+//     isErrorVisible.value = true
+    
+//     return
+//   }
+
+//   role.value = response.data
+// }
 
 const confirmYes = () => { 
   createUser()        

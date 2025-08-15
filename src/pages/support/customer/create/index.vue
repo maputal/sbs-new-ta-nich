@@ -1,10 +1,10 @@
 <script setup>
 import CustomConfirmDialog from '@/components/CustomConfirmDialog.vue'
 import CustomNotifDialog from '@/components/CustomNotifDialog.vue'
-import DetailLeftSidebarOnConversation from '@/components/DetailLeftSidebarOnConversation.vue'
-import DetailTicketOnConversation from '@/components/DetailTicketOnConversation.vue'
+// import DetailLeftSidebarOnConversation from '@/components/DetailLeftSidebarOnConversation.vue'
+// import DetailTicketOnConversation from '@/components/DetailTicketOnConversation.vue'
 // import ListOfTemplates from '@/components/ListOfTemplates.vue'
-import TicketsOnConversation from '@/components/TicketsOnConversation.vue'
+// import TicketsOnConversation from '@/components/TicketsOnConversation.vue'
 import { useGlobalStore } from '@/store/useGlobalStore'
 
 const store = useGlobalStore()
@@ -198,9 +198,9 @@ const paginationData = computed(() => {
 })
 
 // =============================================== Error handling
-const LazyErrorDialogs = defineAsyncComponent(
-  () => import('@/views/pages/dialogs/Error-chatlive.vue'),
-)
+// const LazyErrorDialogs = defineAsyncComponent(
+//   () => import('@/views/pages/dialogs/Error-chatlive.vue'),
+// )
 
 const isError = ref(false)
 const errorMessage = ref("")
@@ -225,7 +225,7 @@ const successDialog = ref(false)
 
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
-const priv = userData?.priv
+const priv = userData.priv
 
 console.log("---------- hasil priv=", priv)
 
@@ -277,11 +277,11 @@ onBeforeRouteLeave ((to, from) => {
 
 <template>
   <section>
-    <LazyErrorDialogs
+    <!-- <LazyErrorDialogs
       v-if="isError"
       v-model:isDialogVisible="isError" 
       :custom-error-message="errorMessage"
-    />
+    /> -->
     <VCard class="mb-2">
       <VCardActions class="pt-2 pb-0">
         <VBtn 
@@ -324,8 +324,8 @@ onBeforeRouteLeave ((to, from) => {
           confirmationDialog = true
         }"
       />
-    </VCard>
-    <VCard>
+    </VCard> 
+    <!-- <VCard>
       <div v-if="!isTicketDetailOpen">
         <TicketsOnConversation 
           v-model:row-per-page="rowPerPage"
@@ -398,11 +398,10 @@ onBeforeRouteLeave ((to, from) => {
           }"
         />
       </div> 
-    </VCard>
+    </VCard> -->
 
     <VDialog
       v-model="showProgressCircular"
-      class="error-overlay-bg"
       persistent
     >
       <div class="text-center">

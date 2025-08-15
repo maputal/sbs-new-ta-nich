@@ -13,12 +13,11 @@ const props = defineProps([
   'toTime',
   'priv',
   'project',
-  'replaceCategory',
-  'setResponse',
+  'filterDesc',
   'getNameFromDesc',
 ])
 
-const emit = defineEmits(['update:rowPerPage', 'update:currentPage', 'todetail', 'close', 'download'])
+const emit = defineEmits(['update:rowPerPage', 'update:currentPage', 'todetail', 'close'])
 
 const rowPerPageLocal = ref(structuredClone(toRaw(props.rowPerPage)))
 const currentPageLocal = ref(props.currentPage)
@@ -63,23 +62,13 @@ onMounted(() => {
     </div>
     <span class="ms-3">entries</span>
     <VSpacer />
-    <VSpacer />    
-    <VBtn
-      class="text-none"
-      rounded="lg"
-      variant="flat"
-      prepend-icon="mdi-download"
-      @click="$emit('download')"
-      :disabled="!tableDataTickets.length"
-    >
-      Download
-    </VBtn>
+    <VSpacer />
     <VBtn
       v-if="
         priv.hasOwnProperty('create_ticket') || 
         Object.keys(priv).length === 0
       "        
-      class="text-none mx-5"
+      class="text-none px-5"
       rounded="lg"
       variant="flat"
       @click="$emit('close')"
@@ -110,35 +99,21 @@ onMounted(() => {
           <span
             class="th-span-border d-flex justify-center"
           > 
-            Assignee 
+            Status 
           </span>
         </th>
         <th class=" th-background-color">
           <span
             class="th-span-border d-flex justify-center"
           > 
-            Status 
+            Name 
           </span>
-        </th> 
+        </th>
         <th class=" th-background-color">
           <span
             class="th-span-border d-flex justify-center"
           > 
-            Name 
-          </span>
-        </th>            
-        <th v-if="currentProject === 'danareksa'" class=" th-background-color">
-          <span
-            class="th-span-border-row-count d-flex justify-center"
-          > 
-            Clcode
-          </span>
-        </th> 
-        <th v-if="currentProject === 'danareksa'" class=" th-background-color">
-          <span
-            class="th-span-border-row-count d-flex justify-center"
-          > 
-            Client Response
+            Phone Number 
           </span>
         </th>
         <th class=" th-background-color">
@@ -169,32 +144,25 @@ onMounted(() => {
             Category 
           </span>
         </th>
-        <th v-if="currentProject === 'danareksa'" class=" th-background-color">
-          <span
-            class="th-span-border-row-count d-flex justify-center"
-          > 
-            Sales
-          </span>
-        </th>
-        <th v-if="currentProject === 'danareksa'" class=" th-background-color">
-          <span
-            class="th-span-border-row-count d-flex justify-center"
-          > 
-            Note
-          </span>
-        </th>
-        <th v-if="currentProject === 'danareksa'" class=" th-background-color">
-          <span
-            class="th-span-border-row-count d-flex justify-center"
-          > 
-            Activity Note
-          </span>
-        </th>
-        <th v-if="currentProject !== 'danareksa'" class=" th-background-color">
+        <th class=" th-background-color">
           <span
             class="th-span-border d-flex justify-center"
           > 
-            Description 
+            Sales 
+          </span>
+        </th>
+        <th class=" th-background-color">
+          <span
+            class="th-span-border d-flex justify-center"
+          > 
+            Clcode 
+          </span>
+        </th>
+        <th class=" th-background-color">
+          <span
+            class="th-span-border d-flex justify-center"
+          > 
+            Note 
           </span>
         </th>
         <th class=" th-background-color">
@@ -219,15 +187,12 @@ onMounted(() => {
           {{ numberTable + index }}
         </td>
         <td 
-          class="pl-5"
+          class="bg-hover"
         >             
           {{ row.ticket_id }}
         </td>
-        <td class="text-black pl-5">
-          {{ row.assigned_name || '' }}          
-        </td>
         <td
-          class="text-no-wrap pl-5"                
+          class="text-no-wrap"                
           :class="{
             'status-field-color-red': row['status'] == 'Closed',
             'status-field-color-blue': row['status'] == 'Open',
@@ -238,73 +203,50 @@ onMounted(() => {
             icon="mdi-circle-medium"
           />              
           {{ row.status }}
-        </td>  
-        <td class="text-no-wrap text-center text-black">
-          {{ 
-            row.data?.content?.name || 
-            row.data?.content?.nama || 
-            row.data?.content?.full_name ||
-            props.getNameFromDesc(row.description)?.name || 
-            props.getNameFromDesc(row.description)?.nama || 
-            props.getNameFromDesc(row.description)?.full_name || 
-            '' 
-          }}           
-        </td>              
-        <td v-if="currentProject == 'danareksa'" class="text-black">
-          {{ props.getNameFromDesc(row.description)?.clcode || row.contact_id || '' }}           
         </td>
-        <td
-          v-if="currentProject == 'danareksa'"
-          class="text-no-wrap pl-5"                
-          :class="{
-            'status-field-color-dark-green': row?.data?.content?.response == 1,
-            'status-field-color-red': row?.data?.content?.response == 2,
-            'status-field-color-blue': row?.data?.content?.response == 3,
-          }"
-        >            
-          <VIcon
-            v-if="row?.data?.content?.response"
-            icon="mdi-circle-medium"
-          />              
-          {{ setResponse(row.data?.content?.response) || '-' }}
+        <td class="bg-hover text-center text-black">
+          {{ props.getNameFromDesc(row.description)?.name || getNameFromDesc(row.description)?.nama || getNameFromDesc(row.description)?.full_name || '' }}           
         </td>
-        <td class="text-center text-black">
-          {{ row.data?.content?.email || props.getNameFromDesc(row.description)?.email || '' }}           
+        <td class="bg-hover text-center text-black">
+          {{ row.customer_phone_number }}           
         </td>
-        <td class="text-no-wrap text-black pl-5">         
+        <td class="bg-hover text-center text-black">
+          {{ props.getNameFromDesc(row.description)?.email || '' }}           
+        </td>
+        <td class="text-no-wrap text-black pl-3">         
           <!-- {{ toTimeDMYHM(row.created_tstamp) }} -->
           {{ toDate(row.created_tstamp) }}
           <br>          
-          {{ toTime(row.created_tstamp) }} 
+          {{ toTime(row.created_tstamp) }}  
         </td>
-        <td class="text-black pl-5">  
+        <td class="text-black text-center">  
           {{ row.category }}
         </td>
-        <td v-if="currentProject == 'danareksa'" class="text-black">
-          {{ row.data?.content?.sales || props.getNameFromDesc(row.description)?.sales || '' }}           
+        <td class="bg-hover text-black">
+          {{ props.getNameFromDesc(row.description)?.sales || '' }}           
         </td>
-        <td v-if="currentProject == 'danareksa'" class="text-black">
-          <v-col cols="12" class="pa-0">
-            {{ props.getNameFromDesc(row.description)?.note || '' }}          
-          </v-col>
+        <td class="bg-hover text-black">
+          {{ props.getNameFromDesc(row.description)?.clcode || '' }}           
         </td>
-        <td v-if="currentProject == 'danareksa'" class="text-black">
-          <v-col cols="12" class="pa-0">
-            {{ row?.activity_note?.content || '' }}          
-          </v-col>
+        <td class="bg-hover text-black">
+          {{ props.getNameFromDesc(row.description)?.note || '' }}           
         </td>
-        <td
-          v-if="currentProject !== 'danareksa'"
-          class="text-black pl-5"
-        >            
-          {{ row.description }}  
-        </td>
-        <td class="text-center pl-5">
+        <!-- <td
+          class="text-black"
+        >          
+          <div v-if="currentProject == 'danareksa'" style="white-space: pre-wrap;">
+            {{ props.filterDesc(row.description) }}    
+          </div>    
+          <div v-else>
+            {{ row.description }}     
+          </div>
+        </td> -->
+        <td class="text-center">
           <VBtn
-            class="text-none text-white mx-2"
+            class="text-none text-white ma-2"
             density="compact"
             size="small"
-            color="#32BCAD"
+            color="#B65608"
             @click="$emit('todetail', row)"
           >
             Detail
@@ -392,10 +334,6 @@ onMounted(() => {
 
   .status-field-color-green {
     color: #05ff0d;
-  }
-
-  .status-field-color-dark-green {
-    color: #4CAF50;
   }
 
   .to-red {

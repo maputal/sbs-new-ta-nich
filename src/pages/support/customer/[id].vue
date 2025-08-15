@@ -5,9 +5,7 @@ import DetailLeftSidebarOnConversation from '@/components/DetailLeftSidebarOnCon
 import DetailTicketOnConversation from '@/components/DetailTicketOnConversation.vue'
 // import ListOfTemplates from '@/components/ListOfTemplates.vue'
 import TicketsOnConversation from '@/components/TicketsOnConversation.vue'
-import { downloadFile } from '@/plugins/downloadFile'
 import { useGlobalStore } from '@/store/useGlobalStore'
-import axios from '@axios'
 
 const store = useGlobalStore()
 const route = useRoute()
@@ -40,9 +38,9 @@ const toTimeDMYHM = unixTimestamp => {
     ' ' +
     hours + 
     ':' + 
-    formattedMinutes
-    // ':' + 
-    // formattedSeconds
+    formattedMinutes+ 
+    ':' + 
+    formattedSeconds
   )
 }
 
@@ -86,27 +84,20 @@ const toTime = unixTimestamp => {
 
 const showProgressCircular = ref(true)
 const projectTitle = ref('')
-const listResponse = ref([])
 
-const urlBE = ref(window.moffas.config.url_backoffice_helper_api)
-const companyID = ref(window.moffas.config.param_company_id)
-const sessionID = ref(localStorage.getItem('moffas.token'))
-
-// =============================================== contact detail variables
-const contactDetailData = ref({
+// =============================================== customer detail variables
+const customerDetailData = ref({
   customer_id: '',
-  contact_id: '',
   name: '',
   address: '',
   phone_number: route.params.id,
   email: '',
 })
 
-const contactDetailsData = ref([])
-const contactDetailsDataStore = ref([])
+const responseErrorNotFound = ref('')
 
 // =============================================== ticket variables
-const tableHeader = ref(['No', 'Ticket ID', 'Assignee', 'Status', 'Create Time', 'Category', 'Description', 'Action'])
+const tableHeader = ref(['No', 'Ticket ID', 'Status', 'Phone Number', 'Create Time', 'Category', 'Description'])
 const tableDataTickets = ref([])
 
 const totalPage = ref(1)
@@ -119,219 +110,164 @@ const listNote = ref([])
 
 const base64ForAttachment = ref('')
 
-const currentAssigneeUser = ref(0)
-
-const isCreateCustomer = ref(false)
-
 const ticketDetailData = ref({
   ticket_id: '',
   status: '',
   category: '',
   priority: '',
+  servicing_agent: '',
   description: '',
   created_tstamp: '',
-  note: '',
-  file_id_attachment: '',
-  assigned_group: 0,
-  assigned_user: 0,
-  target_time: '',
-  data: {
-    // {client_response: 2},
-    // {cobain_dlu: 'apa aja deh'},
-  },
+  note:'',
+  file_id_attachment:'',
 })
 
-// const currentTicketData = ref({
-//   status: '',
-//   category: '',
-//   priority: '',
-// })
+const currentTicketData = ref({
+  status: '',
+  category: '',
+  priority: '',
+})
 
-// const setTicketDetailData = r => {
-//   currentTicketData.value.status = r.status,
-//   currentTicketData.value.category = r.category
-//   currentTicketData.value.priority = r.priority
-// }
+const setTicketDetailData = r => {
+  currentTicketData.value.status = r.status,
+  currentTicketData.value.category = r.category
+  currentTicketData.value.priority = r.priority
+}
 
 // =============================================== customer operation
-const fetchContact = () => {
+function fetchCustomerDetail () {
   showProgressCircular.value = true
+  console.log("customer_retrieve")
 
-  let params = {
-    company_id: companyID.value,
-    session_id: sessionID.value,
-    op_crud: 2,
-    data: {
-      customer_id: route.params.id,
-      contact_id: route.query.contact_id,
-    }
+  const op = "customer_retrieve"
+
+  const params = {
+    phone_number: route.params.id,
   }
 
-  console.log('params di fetchContact', params)
+  console.log("params", params)
 
-  axios.post(urlBE.value + 'do_contact', params)
-  .then(function (response) {
-    console.log('response fetchContact=', response)
-    const responseData = response.data
+  function onSuccess(payload) {
+    console.log("on fetching customer detail")
 
-    console.log('responseData', responseData)
-
-    if(response.data.error_code) {
-      onError(response.data)
-
+    const response = JSON.parse(payload)
+    if (response.hasOwnProperty('trace_id')){
+      showProgressCircular.value = false
+      console.log("It's error having trace_id, show pop-up", response)
+      if(response.error_code === '404001'){
+        responseErrorNotFound.value = response.error_code
+        return
+      }
+      showPopUp(response)
+      
       return
-    }    
+    }
 
-    contactDetailData.value.customer_id = responseData.data[0]?.customer_id || ''
-    contactDetailData.value.contact_id = responseData.data[0]?.contact_id || ''
-    contactDetailData.value.name = responseData.data[0]?.contact_name || ''
+    customerDetailData.value.customer_id = response.customer_id
+    customerDetailData.value.name = response.name
+    customerDetailData.value.address = response.address
+    customerDetailData.value.phone_number = response.phone_number
+    customerDetailData.value.email = response.email
 
     showProgressCircular.value = false
-    fetchContactDetails()
-  })
-  .catch(function (error) {
-    console.log(error)
-    onError(error.response)
-  })
+
+    showingTicketDetailFirst()
+  }
+
+  // Fetch customer data to backend
+  // window.moffas.do_request | dummymoffasdocustomerretrieve
+  window.moffas.do_request(
+    op,
+    params, 
+    onSuccess,
+    onError,
+  )
 }
 
-const fetchContactDetails = () => {
+function updateCustomer () {
   showProgressCircular.value = true
-  let params = {
-    company_id: companyID.value,
-    session_id: sessionID.value,
-    current_page: 1,
-    row_length: 100,
-    search_filter: '',
-    data: {
-      customer_id: route.params.id,
-      contact_id: route.query.contact_id,
+  console.log("updateCustomer")
+
+  const op = "customer_update"
+
+  const params = {
+    customer_id: customerDetailData.value.customer_id,
+	  name: customerDetailData.value.name,
+	  address: customerDetailData.value.address,
+	  phone_number: customerDetailData.value.phone_number,
+	  email: customerDetailData.value.email,
+  }
+
+  console.log('params di update customer=', params)
+  successDialogProps.value.subject = 'submit'
+  successDialog.value = true
+
+  function onSuccess(payload) {
+    console.log("on updating customer detail")
+
+    const response = JSON.parse(payload)
+    if (response.hasOwnProperty('trace_id')){
+      showProgressCircular.value = false
+      console.log("It's error having trace_id, show pop-up")
+      showPopUp(response)
+    }else {
+      successDialogProps.value.subject = 'submit'
+      successDialog.value = true
+
+      showProgressCircular.value = false
     }
   }
 
-  console.log('params di fetchContactDetails', params)
-
-  axios.post(urlBE.value + 'retrieve_contact_details', params)
-  .then(function (response) {
-    console.log('response fetchContactDetails=', response)
-    const responseData = response.data
-
-    console.log('responseData', responseData)
-
-    if(response.data.error_code) {
-      onError(response.data)
-
-      return
-    }
-
-    contactDetailsData.value = responseData.data
-    contactDetailsDataStore.value = JSON.parse(JSON.stringify(responseData.data))
-
-    const addressObj = responseData.data.find(dataA => dataA.contact_type === 'address')
-    const phoneObj = responseData.data.find(dataA => dataA.contact_type === 'phone_number')
-    const emailObj = responseData.data.find(dataA => dataA.contact_type === 'email')
-
-    contactDetailData.value.address = addressObj ? addressObj.contact_value : ''
-    contactDetailData.value.phone_number = phoneObj ? phoneObj.contact_value : ''
-    contactDetailData.value.email = emailObj ? emailObj.contact_value : ''
-
-    showProgressCircular.value = false
-
-    if(confirmDialogProps.value.op == 'save') return
-
-    if(dictionariesData.value.length === 0) {
-      getDictionaries()
-    } else {
-      showingTicketDetailFirst()
-    }
-  })
-  .catch(function (error) {
-    console.log(error)
-    onError(error.response)
-  })
+  // Update customer to backend
+  window.moffas.do_request(
+    op,
+    params, 
+    onSuccess,
+    onError,
+  )
 }
 
-function updateContactAndDetail () {
-  console.log('masuk updateContactAndDetail')
-  console.log('contactDetailsData.value updateContactAndDetail', contactDetailsData.value)
-  console.log('contactDetailsDataStore.value updateContactAndDetail', contactDetailsDataStore.value)
+function createCustomer () {
   showProgressCircular.value = true
+  console.log("createCustomer")
 
-  let filterContactDetail = []
+  const op = "customer_create"
 
-  // Map of contact types to their corresponding form input values
-  const formValues = {
-    address: contactDetailData.value.address,
-    phone_number: contactDetailData.value.phone_number,
-    email: contactDetailData.value.email,
+  const params = {
+	  name: customerDetailData.value.name,
+	  address: customerDetailData.value.address,
+	  phone_number: customerDetailData.value.phone_number,
+	  email: customerDetailData.value.email,
   }
 
-  // Loop through each contact type
-  for (const type in formValues) {
-    const newValue = formValues[type]
+  console.log('params di create customer=', params)
+  successDialogProps.value.subject = 'submit'
+  successDialog.value = true
 
-    const stored = contactDetailsDataStore.value.find(a => a.contact_type === type)
-    const current = contactDetailsData.value.find(a => a.contact_type === type)
+  function onSuccess(payload) {
+    console.log("on creating customer detail")
 
-    // If stored doesn't exist or the value has changed
-    if (!stored || stored.contact_value !== newValue) {
-      if (current) {
-        current.contact_value = newValue // update current data
-        filterContactDetail.push(current)
-      } else {
-        // Fallback if current entry doesn't exist (optional)
-        filterContactDetail.push({
-          contact_id: contactDetailData.value.contact_id,
-          contact_type: type,
-          contact_value: newValue,
-        })
-      }
-    }
-  }
-  console.log('filterContactDetail =', filterContactDetail)
+    const response = JSON.parse(payload)
+    if (response.hasOwnProperty('trace_id')){
+      showProgressCircular.value = false
+      console.log("It's error having trace_id, show pop-up")
+      showPopUp(response)
+    }else {
+      successDialogProps.value.subject = 'submit'
+      successDialog.value = true
+      responseErrorNotFound.value = ''
 
-  const newFields = filterContactDetail.map(a => a.contact_type)
-  console.log('newFields =', newFields)
-
-  let params = {
-    company_id: companyID.value,
-    session_id: sessionID.value,
-    op_crud: 3,
-    data: {
-      customer_id: route.params.id,
-      contact_id: contactDetailData.value.contact_id,
-      contact_name: contactDetailData.value.name || "",
-      contact_details:filterContactDetail,
-      data: {
-        fields: newFields
-      }
+      showProgressCircular.value = false
     }
   }
 
-  console.log('params di updateContactAndDetail', params)
-
-  axios.post(urlBE.value + 'create_contact', params)
-  .then(function (response) {
-    console.log('response updateContactAndDetail=', response)
-    const responseData = response.data
-
-    console.log('responseData', responseData)
-
-    if(response.data.error_code) {
-      onError(response.data)
-
-      return
-    }
-
-    successDialog.value = true
-    showProgressCircular.value = false
-
-    fetchContact()
-  })
-  .catch(function (error) {
-    console.log(error)
-    onError(error.response)
-  })
+  // Update customer to backend
+  window.moffas.do_request(
+    op,
+    params, 
+    onSuccess,
+    onError,
+  )
 }
 
 // =============================================== ticket operation
@@ -345,20 +281,19 @@ const resetFormTicket = () => {
   ticketDetailData.value.description = '',
   ticketDetailData.value.note = '',
   ticketDetailData.value.file_id_attachment = ''
-  ticketDetailData.value.assigned_group = 0
-  ticketDetailData.value.assigned_user = 0
-  ticketDetailData.value.target_time = ''
-  ticketDetailData.value.data = {}
-  // ticketDetailData.value.data = [
-  //   // {client_response: 2},
-  //   // {cobain_dlu: 'apa aja deh'},
-  // ]
 }
 
 const chooseOP = () => {
   switch (confirmDialogProps.value.op) {
   case 'save':
-    updateContactAndDetail()
+    if (responseErrorNotFound.value !== '') {
+      console.log('masuk disini1')
+      createCustomer()
+
+    } else {
+      console.log('masuk disini2')
+      updateCustomer()
+    }
     break
   case 'update':
     if (ticketDetailData.value.file_id_attachment) {
@@ -366,7 +301,7 @@ const chooseOP = () => {
       convertToBase64('update')
     } else {
       console.log('masuk disini2')
-      crudTicket(3)
+      updateTicket()
     }
     break
   case 'create':
@@ -375,8 +310,7 @@ const chooseOP = () => {
       convertToBase64('create')
     } else {
       console.log('masuk disini4')
-      // createTicket()
-      crudTicket(1)
+      createTicket()
     }
     break
   default:
@@ -388,188 +322,179 @@ const epoch = date => {
   return Math.floor(new Date(date).getTime()/1000)
 }
 
-// const covertEpoch = (data) => {
-//   const dateObject = new Date(data)
-//   let epochTime = Math.floor(dateObject.getTime() / 1000)
+function updateTicket () {
+  console.log("updateTicket")
+  showProgressCircular.value = true
 
-//   return epochTime
-// }
-const covertEpoch = (data) => {
-  // If data is a number or numeric string
-  if (typeof data === 'number' || (typeof data === 'string' && /^\d+$/.test(data))) {
-    const num = Number(data);
-    // Check if num is a valid epoch seconds (e.g., after 1 Jan 2000)
-    if (num > 946684800) {
-      return num;  // Already epoch, return as is
-    }
-  }
-
-  // Otherwise try to convert to Date and then to epoch seconds
-  const dateObject = new Date(data);
-  if (isNaN(dateObject.getTime())) {
-    // Invalid date input, handle how you want (throw, return null, etc)
-    return null;
+  let note = {
+    content: ticketDetailData.value.note,
   }
   
-  return Math.floor(dateObject.getTime() / 1000);
-}
+  const op = "ticket_update"
 
-const setResponse = (data) => {
-  const match = listResponse.value.find(x => x.value == data); // use == if types may differ
-
-  return match ? match.title : null
-}
-
-const downloadAsDoc = (type) => {
-  showProgressCircular.value = true
-
-  let headers
-  let rows
-
-  // Prepare CSV data
-  if(projectTitle.value === 'danareksa'){
-    headers = ["No", "Ticket ID", "Assignee", "Status", "Name", "Client Response", "Email", "Create Time", "Campagin", "Sales", "Clcode", "Note", "Activity Note"];
-    rows = tableDataTickets.value.map((item, index) => [
-      numberTable.value + index,
-      item.ticket_id,
-      item.assigned_name || '',
-      item.status,
-      getNameFromDesc(item.description)?.name || getNameFromDesc(item.description)?.nama || getNameFromDesc(item.description)?.full_name || '',
-      setResponse(item.data?.content?.response) || '-',
-      getNameFromDesc(item.description)?.email || '',
-      toTimeDMYHM(item.created_tstamp),
-      item.category,
-      // filterDesc(item.description),
-      getNameFromDesc(item.description)?.sales || '',
-      getNameFromDesc(item.description)?.clcode || '',
-      getNameFromDesc(item.description)?.note || '',
-      item?.activity_note?.content || '',
-    ]);
-  } else {
-    headers = ["No", "Ticket ID", "Assignee", "Status", "Create Time", "Category", "Description"];
-    rows = tableDataTickets.value.map((item, index) => [
-      numberTable.value + index,
-      item.ticket_id,
-      item.assigned_name || '',
-      item.status,
-      toTimeDMYHM(item.created_tstamp),
-      item.category,
-      item.description,
-    ]);
+  const params = {
+    ticket_id: ticketDetailData.value.ticket_id,
+    user_name: JSON.parse(localStorage.getItem('user')).name,
+    user_id: JSON.parse(localStorage.getItem('user')).user_id,
+    user_role: JSON.parse(localStorage.getItem('user')).role_name,
   }
 
-  downloadFile({
-    headers,
-    rows,
-    fileName: 'Ticket List',
-    type
-  })
-
-  showProgressCircular.value = false
-}
-
-
-const crudTicket = (op) => {
-  console.log('masuk crudTicket', ticketDetailData.value)
-  console.log('masuk crudTicket', ticketDetailData.value.target_time)
-  showProgressCircular.value = true
-
-  let params = {
-    company_id: companyID.value,
-    session_id: sessionID.value,
-    op_crud: op,
-    data: {
-      created_by: JSON.parse(localStorage.getItem('user')).user_id,
-      contact_id: route.query.contact_id || '',
-      customer_id: route.params.id || '',
-
-      ticket_id: ticketDetailData.value.ticket_id,
-      description: ticketDetailData.value.description,
-
-      updated_tstamp: Math.floor(new Date().getTime()/1000),
-
-      status: ticketDetailData.value.status,
-      category: ticketDetailData.value.category,
-      priority: ticketDetailData.value.priority?.dictkey || ticketDetailData.value.priority,
-      assigned_group: ticketDetailData.value.assigned_group,
-      assigned_user: ticketDetailData.value.assigned_user,
-      target_time: covertEpoch(ticketDetailData.value.target_time) || 0,
-      
-      activity_note: {content: ticketDetailData.value.note},
-      attachment: '',
-      data: {},
-      // data: ticketDetailData.value.data || {},
-    }
+  if(currentTicketData.value.status !== ticketDetailData.value.status){
+    params.status = ticketDetailData.value.status
+  } 
+  
+  if (currentTicketData.value.category !== ticketDetailData.value.category) {
+    params.category = ticketDetailData.value.category
+  } 
+  
+  if (currentTicketData.value.priority !== ticketDetailData.value.priority) {
+    params.priority = ticketDetailData.value.priority
   }
 
-  if(Object.keys(ticketDetailData.value.data).length !== 0){
-    params.data.ticket_data = ticketDetailData.value.data
-  } else if (
-    Object.keys(ticketDetailData.value.data).length == 0 && 
-    projectTitle.value == 'danareksa' &&
-    (params.op_crud == 1 || params.op_crud == 3)
-  ) {
-    params.data.ticket_data = {
-      'content': {
-        'response': ticketDetailData.value.data
-      }
-    }
-  } else {
-    params.data.ticket_data = {}
+  if(ticketDetailData.value.file_id_attachment){
+    console.log('mssk attachment di ticketUpdate')
+    // note.attachment = { file_base64: base64ForAttachment.value }
   }
 
+  params.note = note
 
-  console.log('params di crudTicket', params)
-  // if(params.op_crud == 1 || params.op_crud == 3) return
+  console.log('params di updateTicket=', params)
 
-  axios.post(urlBE.value + 'do_ticket', params)
-  .then(function (response) {
-    console.log('response crudTicket=', response)
-    const responseData = response.data
+  function onSuccess(payload) {
+    console.log("on updating ticket")
 
-    console.log('responseData', responseData)
-
-    if(response.data.error_code) {
-      onError(response.data)
-
-      return
-    }
-
-    if(op === 1){
-      successDialogProps.value.subject = 'submit'
-      successDialog.value = true
-      resetFormTicket()
-    } else if(op === 2){
-      // setTicketDetailData(responseData)
-      let dataDetail = responseData.data[0]
-      console.log('dataDetail=', dataDetail)
-      ticketDetailData.value.ticket_id = dataDetail.ticket_id
-      ticketDetailData.value.created_tstamp = toTimeDMYHM(dataDetail.created_tstamp)
-      ticketDetailData.value.status = dataDetail.status
-      ticketDetailData.value.category = dataDetail.category
-      ticketDetailData.value.priority = dataDetail.priority
-      ticketDetailData.value.description = dataDetail.description
-
-      ticketDetailData.value.assigned_group = dataDetail.assigned_group || 0
-      ticketDetailData.value.assigned_user = dataDetail.assigned_user || 0
-      ticketDetailData.value.target_time = dataDetail.target_time || ''
-      ticketDetailData.value.data = dataDetail.data || []
-
-      isTicketDetailOpen.value = true
-      getActivity()
-    } else if(op === 3){
+    const response = JSON.parse(payload)
+    if (response.hasOwnProperty('trace_id')){
+      showProgressCircular.value = false
+      console.log("It's error having trace_id, show pop-up")
+      showPopUp(response)
+    } else {
       successDialogProps.value.subject = 'submit'
       successDialog.value = true
       ticketDetailData.value.note = '',
+      showProgressCircular.value = false
       getActivity()
-    }   
+    }
+  }
+
+  // Sending message to backend
+  window.moffas.do_request(
+    op,
+    params, 
+    onSuccess,
+    onError,
+  )
+}
+
+function createTicket () {
+  showProgressCircular.value = true
+  console.log("createTicket")
+
+  let note = {
+    content: ticketDetailData.value.note,
+  }
+  const op = "ticket_create"
+
+  const params = {
+    customer_phone_number: route.params.id,
+    customer_name: customerDetailData.value.name,
+    status: ticketDetailData.value.status,
+    category: ticketDetailData.value.category,
+    priority: ticketDetailData.value.priority,
+    description: ticketDetailData.value.description,
+    user_name: JSON.parse(localStorage.getItem('user')).name,
+    user_id: JSON.parse(localStorage.getItem('user')).user_id,
+    user_role: JSON.parse(localStorage.getItem('user')).role_name,
+  }
+
+  if(ticketDetailData.value.note){
+    console.log('mssk note di ticketCreate')
+    params.note = note
+    console.log('note di ticketCreate1=', note)
+  }
+
+  if(ticketDetailData.value.file_id_attachment){
+    console.log('mssk attachment di ticketCreate')
+    // note.attachment = { file_base64: base64ForAttachment.value }
+  }
+
+  console.log('params di createTicket=', params)
+
+  function onSuccess(payload) {
+    console.log("on creating new ticket")
+
+    const response = JSON.parse(payload)
+    if (response.hasOwnProperty('trace_id')){
+      showProgressCircular.value = false
+      console.log("It's error having trace_id, show pop-up")
+      showPopUp(response)
+    }else {
+      successDialogProps.value.subject = 'submit'
+      successDialog.value = true
+      resetFormTicket()
+
+      showProgressCircular.value = false
+    }
+
+  }
+
+  // Update customer to backend
+  window.moffas.do_request(
+    op,
+    params, 
+    onSuccess,
+    onError,
+  )
+}
+
+function fetchTicketDetail () {
+  showProgressCircular.value = true
+  console.log("masuk fetchTicketDetail")
+
+  const op = "ticket_retrieve"
+
+  const params = {
+    ticket_id: ticketDetailData.value.ticket_id,
+  }
+
+  console.log("params", params)
+
+  function onSuccess(payload) {
+    console.log("on fetching ticket detail")
+
+    const response = JSON.parse(payload)
+    if (response.hasOwnProperty('trace_id')){
+      showProgressCircular.value = false
+      console.log("It's error having trace_id, show pop-up")
+      showPopUp(response)
+      
+      return
+    }
+
+    setTicketDetailData(response)
+    ticketDetailData.value.ticket_id = response.ticket_id
+    ticketDetailData.value.created_tstamp = toTimeDMYHM(response.created_tstamp)
+    ticketDetailData.value.servicing_agent = response.user_name
+    ticketDetailData.value.status = response.status
+    ticketDetailData.value.category = response.category
+    ticketDetailData.value.priority = response.priority
+    ticketDetailData.value.description = response.description
+    
 
     showProgressCircular.value = false
-  })
-  .catch(function (error) {
-    console.log(error)
-    onError(error.response)
-  })
+
+    isTicketDetailOpen.value = true
+    getActivity()
+  }
+
+  // Fetch customer data to backend
+  // window.moffas.do_request dummymoffasdoticketretrieve
+  window.moffas.do_request(
+    op,
+    params, 
+    onSuccess,
+    onError,
+  )
 }
 
 watch(rowPerPage, () => {
@@ -582,87 +507,52 @@ watch(currentPage, () => {
   fetchTickets()
 })
 
-
-function dummymoffasdoticketretrieves (op,params, onSuccess, onError) { //ref untuk ke tampilan
-  let dummyData = {
-    tickets : [
-      {
-        ticket_id: params.ticket_id || 'TCK-001',
-        status: 'Open',
-        category: 'SR022',
-        priority: 'medium',
-        description: 'Customer reports intermittent connectivity problems.; note: apa aja bole; name: rafif',
-        company_id: 101,
-        created_tstamp: 1721026200, // UNIX timestamp
-        updated_tstamp: 1721030000,
-        data: {},
-        created_by: 23,
-        assigned_group: 2,
-        assigned_user: 2,
-        target_time: 1721040000,
-        contact_id: 888800001122,
-        customer_id: 555500009999,
-      },
-    ],
-    total_pages : 1,
-    total_rows : 2,
-  }
-  let dummyJSON = JSON.stringify(dummyData)
-  setTimeout(function(){
-    onSuccess(dummyJSON)
-  }, 1000)
-}
-
-const fetchTickets = () => {
+function fetchTickets () {
   showProgressCircular.value = true
+  console.log("masuk fetchTickets")
 
-  const userDataString = localStorage.getItem('user')
-  const userData = JSON.parse(userDataString)
-  if(Object.keys(priv).length !== 0 ){
-    currentAssigneeUser.value = userData.user_id || 0
-  }
+  const op = "ticket_retrieves"
 
-  let params = {
-    company_id: companyID.value,
-    session_id: sessionID.value,
+  const params = {
+    current_page: currentPage.value,
     row_length: rowPerPage.value,
-    current_page: currentPage.value,    
-    search_filter: '',   
-    filter_status: '',   
-    filter_response: 0,   
-    data:{
-      assigned_user: currentAssigneeUser.value || 0,
-      contact_id: route.query.contact_id || '',
-    }
+    filter_by: {
+      phone_number:route.params.id,
+    },
   }
 
-  console.log('params di fetchTickets =', params)
+  console.log("params", params)
 
-  axios.post(urlBE.value + 'retrieve_tickets', params)
-  .then(function (response) {
-    console.log('response fetchTickets=', response)
-    const responseData = response.data
+  function onSuccess(payload) {
+    console.log("on fetching ticket list")
 
-    console.log('response', response)
-
-    if(response.data.error_code) {
-      onError(response.data)
-
+    const response = JSON.parse(payload)
+    if (response.hasOwnProperty('trace_id')){
+      showProgressCircular.value = false
+      console.log("It's error having trace_id, show pop-up")
+      showPopUp(response)
+      
       return
     }
 
-    tableDataTickets.value = responseData.data
-    totalPage.value = responseData.page_total
-    totalRowTickets.value = responseData.recordsTotal 
+    tableDataTickets.value = response.tickets   
+    totalPage.value = response.total_pages
+    totalRowTickets.value = response.total_rows
 
     isTicketDetailOpen.value = false
     showProgressCircular.value = false
-  })
-  .catch(function (error) {
-    console.log(error)
-    onError(error.response)
-  })
+  }
+
+  // Fetch customer data to backend
+  // window.moffas.do_request dummymoffasdoticketretrieves
+  window.moffas.do_request(
+    op,
+    params, 
+    onSuccess,
+    onError,
+  )
 }
+
 
 // 👉 Watch currentPage
 watchEffect(() => {
@@ -683,197 +573,6 @@ const paginationData = computed(() => {
   return `Showing ${ firstIndex } to ${ lastIndex } of ${ totalRowTickets.value } entries`
 })
 
-// =============================================== group operation
-const groupList = ref([
-  {
-    group_name: 'None',
-    group_id: 0,
-  },
-])
-// Only for development purposes
-function dummymoffasdofetchAssigneeGroup (op,params, onSuccess, onError) { //ref untuk ke tampilan
-  let dummyData = {
-    groups : [
-      {
-        group_name: 'Finance',
-        group_id: 1,
-      },
-      {
-        group_name: 'Sales',
-        group_id: 2,
-      },
-    ],
-    total_pages : 1,
-    total_rows : 2,
-  }
-  let dummyJSON = JSON.stringify(dummyData)
-  setTimeout(function(){
-    onSuccess(dummyJSON)
-  }, 1000)
-}
-
-// const fetchAssigneeGroups = () => {
-//   showProgressCircular.value = true
-
-//   let params = {
-//     company_id: companyID.value,
-//     session_id: sessionID.value,
-//     row_length: rowPerPage.value,
-//     current_page: currentPage.value,    
-//     search_filter: '',   
-//     filter_status: '',   
-//     filter_response: 0,   
-//     data:{}
-//   }
-
-//   console.log('params di fetchAssigneeGroups =', params)
-
-//   axios.post(urlBE.value + 'retrieve_groups', params)
-//   .then(function (response) {
-//     console.log('response fetchAssigneeGroups=', response)
-//     const responseData = response.data
-
-//     console.log('response', response)
-
-//     if(response.data.error_code) {
-//       onError(response.data)
-
-//       return
-//     }
-
-//     groupList.value.push(responseData.groups)
-//     showProgressCircular.value = false
-//   })
-//   .catch(function (error) {
-//     console.log(error)
-//     onError(error.response)
-//   })
-// }
-
-function fetchAssigneeGroups () {
-  showProgressCircular.value = true
-  console.log("get_assigned_groups")
-
-  const op = "get_assigned_groups"
-
-  const params = {}
-
-  console.log("params di fetchAssigneeGroups", params)
-
-  function onSuccess(payload) {
-    console.log("on fetchAssigneeGroup", payload)
-
-    const response = JSON.parse(payload)
-
-    if (response.hasOwnProperty('trace_id')){
-      showProgressCircular.value = false
-      console.log("It's error having trace_id, show pop-up", response)
-      // if(response.error_code === '404001'){
-      //   responseErrorNotFound.value = response.error_code
-      //   return
-      // }
-      showPopUp(response)
-      
-      return
-    }
-
-    groupList.value = [
-      {
-        group_name: 'None',
-        group_id: 0,
-      },
-    ]
-    groupList.value.push(response.groups)
-
-    showProgressCircular.value = false
-  }
-
-  // Fetch customer data to backend
-  // window.moffas.do_request | dummymoffasdofetchAssigneeGroup
-  dummymoffasdofetchAssigneeGroup(
-    op,
-    params, 
-    onSuccess,
-    onError,
-  )
-}
-
-// =============================================== user operation
-const userList = ref([])
-
-const fetchAssigneeStaffs = () => {
-  let params = {
-    company_id: companyID.value,
-    session_id: sessionID.value,
-    row_length: 100,
-    current_page: 1,    
-    nip: '',    
-    name: '', 
-    search_filter: '',   
-  }
-
-  axios.post(urlBE.value + 'retrieve_users', params)
-  .then(function (response) {
-    console.log('response fetchAssigneeStaffs=', response)
-    const responseData = response.data
-
-    console.log('response', response)
-
-    if(response.data.error_code) {
-      onError(response.data)
-
-      return
-    }
-    
-    userList.value = responseData.data
-  })
-  .catch(function (error) {
-    console.log(error)
-    onError(error.response)
-  })
-}
-
-// =============================================== dictionaries operation
-const dictionariesData = ref([])
-
-const getDictionaries = () => {
-  showProgressCircular.value = true
-  let params = {
-    company_id: companyID.value,
-    session_id: sessionID.value,
-    current_page: 1,
-    row_length: 100,
-    search_filter: '',
-    data: {}
-  }
-
-  console.log('params di getDictionaries', params)
-
-  axios.post(urlBE.value + 'retrieve_priority', params)
-  .then(function (response) {
-    console.log('response getDictionaries=', response)
-    const responseData = response.data
-
-    console.log('responseData', responseData)
-
-    if(response.data.error_code) {
-      onError(response.data)
-
-      return
-    }
-
-    dictionariesData.value = responseData.data
-    showProgressCircular.value = false
-
-    showingTicketDetailFirst()
-  })
-  .catch(function (error) {
-    console.log(error)
-    onError(error.response)
-  })
-}
-
-
 // =============================================== Notes and Attachment Operation
 const download = url => {
   const a = document.createElement('a')
@@ -885,91 +584,44 @@ const download = url => {
   // a.setAttribute('download', 'Attachment' + '.csv')
 }
 
-function dummymoffasdonotes (op,params, onSuccess, onError) { //ref untuk ke tampilan
-  let dummyData = {
-    activities : [
-      {
-        user_id: 1,
-        user_name: 'Lisa',
-        user_role: 'Agent',
-        created_tstamp: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
-        changes: {
-          status: 'In Progress',
-          priority: 'High',
-          category_ticket: 'SR022',
-          activity: 'Changed ticket properties'
-        },
-        note: {
-          content: 'Customer has confirmed the issue is ongoing.',
-          // Uncomment if you want to test attachments
-          // attachment: {
-          //   file_id: 'file-12345',
-          // }
-        },
-      },
-      {
-        user_id: 2,
-        user_name: 'Bang Capt',
-        user_role: 'Supervisor',
-        created_tstamp: Math.floor(Date.now() / 1000) - 7200, // 2 hours ago
-        changes: {
-          status: 'Open',
-          activity: 'Initial ticket assignment'
-        },
-        note: {
-          content: 'Ticket created and assigned to network team.',
-        },
-      },
-    ],
-    total_pages : 1,
-    total_rows : 2,
-  }
-  let dummyJSON = JSON.stringify(dummyData)
-  setTimeout(function(){
-    onSuccess(dummyJSON)
-  }, 1000)
-}
-
-const getActivity = () => {
+function getActivity () {
   showProgressCircular.value = true
+  console.log("getActivity")
 
-  let params = {
-    company_id: companyID.value,
-    session_id: sessionID.value,
-    row_length: 200,
-    current_page: 1,    
-    search_filter: '',   
-    filter_status: '',   
-    filter_response: 0,   
-    data:{
-      ticket_id: ticketDetailData.value.ticket_id,   
-    }
+  const op = "activity_retrieves"
+
+  const params = {
+    filter_by: { ticket_id : ticketDetailData.value.ticket_id },
   }
 
-  console.log('params di getActivity =', params)
+  console.log("params getActivity=", params)
 
-  axios.post(urlBE.value + 'retrieve_ticket_activities', params)
-  .then(function (response) {
-    console.log('response getActivity=', response)
-    const responseData = response.data
+  function onSuccess(payload) {
+    console.log("onSuccess getting activities")
 
-    console.log('response', response)
-
-    if(response.data.error_code) {
-      onError(response.data)
-
+    const response = JSON.parse(payload)
+    if (response.hasOwnProperty('trace_id')){
+      showProgressCircular.value = false
+      console.log("It's error having trace_id, show pop-up")
+      showPopUp(response)
+      
       return
     }
 
-    listNote.value = responseData.data
-    showProgressCircular.value = false
+    listNote.value = response.activities
+    console.log('listNote.value=', listNote.value)
 
-    fetchAssigneeGroups()
-  })
-  .catch(function (error) {
-    console.log(error)
-    onError(error.response)
-  })
+    showProgressCircular.value = false
+  }
+
+  // Fetch customer data to backend
+  // window.moffas.do_request dummymoffasdonotes
+  window.moffas.do_request(
+    op,
+    params, 
+    onSuccess,
+    onError,
+  )
 }
 
 // =============================================== Convert input file to base64
@@ -996,9 +648,9 @@ const getBase64 = (file, type='') => {
 }
 
 // =============================================== Error handling
-const LazyErrorDialogs = defineAsyncComponent(
-  () => import('@/views/pages/dialogs/Error.vue'),
-)
+// const LazyErrorDialogs = defineAsyncComponent(
+//   () => import('@/views/pages/dialogs/Error-chatlive.vue'),
+// )
 
 const isError = ref(false)
 const errorMessage = ref("")
@@ -1021,10 +673,9 @@ const isTicketDetailOpen = ref(true)
 const confirmationDialog = ref(false)
 const successDialog = ref(false)
 
-const userData = ref(null)
 const userDataString = localStorage.getItem('user')
-userData.value = JSON.parse(userDataString)
-const priv = userData.value.priv
+const userData = JSON.parse(userDataString)
+const priv = userData.priv
 
 console.log("---------- hasil priv=", priv)
 
@@ -1040,10 +691,6 @@ const confirmDialogProps = ref({
 
 const toConversationList = () => {
   router.replace('/support/list')
-}
-
-const goBackPrevious = () => {
-  router.go(-1)
 }
 
 const toTicketListOnConversation = () => {  
@@ -1067,11 +714,9 @@ const showingTicketDetailFirst = () => {
   console.log('disni adakah localstorage ticket_id?=', localStorage.getItem('ticket_id'))
   if (localStorage.getItem('ticket_id')) {
     ticketDetailData.value.ticket_id = localStorage.getItem('ticket_id')
-    // fetchTicketDetail()
-    crudTicket(2)
+    fetchTicketDetail()
   } else {
     fetchTickets()
-    // isTicketDetailOpen.value = false
   }
 }
 
@@ -1085,10 +730,6 @@ const isEpoch = (value) => {
 }
 
 // const replaceCategory = (data) => {
-//   if (typeof data !== 'string') {
-//     return data;
-//   }
-
 //   let result = data.replace("category", "campaign")
 
 //   // Replace any 10-digit number that is a valid epoch
@@ -1122,8 +763,7 @@ const replaceCategory = (data) => {
   });
 
   return result;
-};
-
+}
 
 const replaceCategoryAndSemicolon = (data) => {
   if (typeof data !== 'string') {
@@ -1201,16 +841,16 @@ const getNameFromDesc = (data) => {
 const interval = ref(null)
 
 onMounted(() => {
+  console.log('Chat finish initiated di [id]')
+
   const isEmbeddedSignup = store.payloadFin.embedded_signup
   if(!isEmbeddedSignup){
     toLoginWaba()
   }
 
-  // fetchContactDetails()
-  fetchContact()
+  fetchCustomerDetail()
 
   projectTitle.value = moffas.config.project_title || ''
-  listResponse.value = moffas.config.listOfResponseCustomer || []
 })
 
 onUnmounted (() => {
@@ -1226,18 +866,18 @@ onBeforeRouteLeave ((to, from) => {
 
 <template>
   <section>
-    <LazyErrorDialogs
+    <!-- <LazyErrorDialogs
       v-if="isError"
       v-model:isDialogVisible="isError" 
       :custom-error-message="errorMessage"
-    />
+    /> -->
     <VCard class="mb-2">
       <VCardActions class="pt-2 pb-0">
         <VBtn 
           class="mr-5 my-3"
           variant="flat"
           icon="mdi-arrow-left"
-          @click="goBackPrevious"
+          @click="toConversationList"
         />
         <VSpacer />
         <VBtn
@@ -1256,22 +896,16 @@ onBeforeRouteLeave ((to, from) => {
         </VBtn>
       </VCardActions>
       <VDivider />
-      <div v-if="contactDetailsData.length > 0">
-      </div>
       <DetailLeftSidebarOnConversation
-        :contact-detail="contactDetailData"
-        :all-contact-detail="contactDetailsData"
-        :contact-detail-store="contactDetailsDataStore"
+        :customer-detail="customerDetailData"
         :priv="priv"
-        :is-create-customer="isCreateCustomer"
-        :project-title="projectTitle"
+        :isCreateCustomer="false"
         @save="dataC => {
-          contactDetailData.customer_id = dataC.customer_id
-          contactDetailData.name = dataC.name
-          contactDetailData.address = dataC.address
-          contactDetailData.phone_number = dataC.phone_number
-          contactDetailData.email = dataC.email
-
+          customerDetailData.customer_id = dataC.customer_id
+          customerDetailData.name = dataC.name
+          customerDetailData.address = dataC.address
+          customerDetailData.phone_number = dataC.phone_number
+          customerDetailData.email = dataC.email
           confirmDialogProps.confirmationStyling = '2'
           confirmDialogProps.messageTitle = 'Are you sure you want to submit this?'
           confirmDialogProps.op = 'save'
@@ -1296,86 +930,62 @@ onBeforeRouteLeave ((to, from) => {
           :toTime="toTime"
           :priv="priv"
           :project="projectTitle"
-          :set-response="setResponse"
+          :filterDesc="filterDesc"
           :getNameFromDesc="getNameFromDesc"
           @close="() => {
             resetFormTicket()
-            isCreateCustomer = true
             isTicketDetailOpen = true
           }"
           @todetail=" row => {
-            ticketDetailData = row
-            isCreateCustomer = false
-            // isTicketDetailOpen = true
-            crudTicket(2)
-          }"
-          @download="() => {
-            downloadAsDoc()
+            ticketDetailData.ticket_id = row.ticket_id
+            isTicketDetailOpen = true
+            fetchTicketDetail()
           }"
         />
       </div>
       <div v-else-if="isTicketDetailOpen">       
         <DetailTicketOnConversation 
           :ticket-detail="ticketDetailData"
-          :is-create-customer="isCreateCustomer"
+          :isCreateCustomer="false"
           :list-note="listNote"
           :to-time-d-m-y-h-m="toTimeDMYHM"
           :priv="priv"
           :project="projectTitle"
-          :replace-category="filterDesc"
-          :user-data="userData"
-          :group-options="groupList"
-          :user-options="userList"
-          :dictionary="dictionariesData"
-          :response-options="listResponse"
+          :replaceCategory="filterDesc"
           @close="() => {
             toTicketListOnConversation()
           }"
-          @get-all-user="() => {
-            fetchAssigneeStaffs()
+          @createnotes="data => {
+            ticketDetailData.ticket_id = data.ticket_id
+            ticketDetailData.note = data.note
+            ticketDetailData.file_id_attachment = data.file_id_attachment
+            confirmDialogProps.confirmationStyling = '2'
+            confirmDialogProps.messageTitle = 'Are you sure you want to submit this?'
+            confirmDialogProps.op = 'createNotes'
+            successDialogProps.subject = 'submit'
+            confirmationDialog = true
           }"
-          @create="(data,dataAssignee) => {
-            ticketDetailData.assigned_user = dataAssignee
-            ticketDetailData.assigned_group = data.assigned_group
-
-            ticketDetailData.data = data.data
+          @create="data => {
             ticketDetailData.status = data.status
             ticketDetailData.category = data.category
+            ticketDetailData.priority = data.priority
             ticketDetailData.description = data.description
             ticketDetailData.note = data.note
             ticketDetailData.file_id_attachment = data.file_id_attachment
-
-            ticketDetailData.priority = data.priority
-            ticketDetailData.target_time = data.target_time
-            
             confirmDialogProps.confirmationStyling = '2'
             confirmDialogProps.messageTitle = 'Are you sure you want to submit this?'
             confirmDialogProps.op = 'create'
             successDialogProps.subject = 'submit'
             confirmationDialog = true
           }"
-          @update="(dataT, dataAssignee) => {
-            ticketDetailData.assigned_user = dataAssignee
-            ticketDetailData.assigned_group = dataT.assigned_group
-
-            ticketDetailData.data = dataT.data
+          @update="(dataT) => {
+            ticketDetailData.ticket_id = dataT.ticket_id
             ticketDetailData.status = dataT.status
             ticketDetailData.category = dataT.category
+            ticketDetailData.priority = dataT.priority
             ticketDetailData.description = dataT.description
             ticketDetailData.note = dataT.note
             ticketDetailData.file_id_attachment = dataT.file_id_attachment
-
-            ticketDetailData.priority = dataT.priority
-            ticketDetailData.target_time = dataT.target_time
-
-            // ticketDetailData.ticket_id = dataT.ticket_id
-            // ticketDetailData.status = dataT.status
-            // ticketDetailData.category = dataT.category
-            // ticketDetailData.priority = dataT.priority
-            // ticketDetailData.description = dataT.description
-            // ticketDetailData.note = dataT.note
-            // ticketDetailData.file_id_attachment = dataT.file_id_attachment
-
             confirmDialogProps.confirmationStyling = '2'
             confirmDialogProps.messageTitle = 'Are you sure you want to submit this?'
             confirmDialogProps.op = 'update'
@@ -1388,7 +998,6 @@ onBeforeRouteLeave ((to, from) => {
 
     <VDialog
       v-model="showProgressCircular"
-      class="error-overlay-bg"
       persistent
     >
       <div class="text-center">

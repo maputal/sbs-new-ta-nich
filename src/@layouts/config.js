@@ -3,9 +3,10 @@ import { breakpointsVuetify } from '@vueuse/core'
 
 export const config = {
   app: {
-    title: 'Title',
-    logo: h('img', { src: '/src/assets/images/telakses/Teleakses_Solusindo_Logo.png' }),
+    title: 'Secure Bundling System',
+    // logo: h('img', { src: '/src/assets/images/telakses/Teleakses_Solusindo_Logo.png' }),
     // logo: h('img', { src: '/src/assets/logo.svg' }),
+    logo: h('img', { src: '/src/assets/telakses/Tel-Access_Logo_white.svg' }),
 
     // logo: () => h('img', { src: 'assets/colored-logo.png' }, null),
     contentWidth: ref(ContentWidth.Boxed),

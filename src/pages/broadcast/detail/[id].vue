@@ -162,7 +162,7 @@ const showProgressCircular = ref(false)
 
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
-const priv = userData?.priv
+const priv = userData.priv
 
 const broadcastDetail = ref({
   title: '',

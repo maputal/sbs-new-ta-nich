@@ -4,6 +4,7 @@ import { useThemeConfig } from '@core/composable/useThemeConfig'
 
 // Components
 import Footer from '@/layouts/components/Footer.vue'
+import NavBarNotifications from '@/layouts/components/NavBarNotifications.vue'
 import UserProfile from '@/layouts/components/UserProfile.vue'
 
 // @layouts plugin
@@ -35,8 +36,10 @@ const { width: windowWidth } = useWindowSize()
           />
         </VBtn>
 
+
         <VSpacer />
 
+        <NavBarNotifications class="me-2" />
         <UserProfile />
       </div>
     </template>

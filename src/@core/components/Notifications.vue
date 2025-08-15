@@ -17,15 +17,33 @@ const props = defineProps({
     required: false,
     default: 'bottom end',
   },
+  notifDetailData: {
+    type: Array,
+  },  
+  totalUnread: {
+    type: Number,
+  },
+  totalPackageExp: {
+    type: Number,
+  },
 })
 
-const emit = defineEmits(['click:readAllNotifications'])
+const emit = defineEmits(['click:readAllNotifications', 'getData'])
+
+const isMenuOpen = ref(false)
+
+watch(isMenuOpen, val => {
+  console.log('val=', val)
+  if(val) {
+    emit('getData')
+  }
+})
 </script>
 
 <template>
   <VBadge
     :model-value="!!props.badgeProps"
-    v-bind="props.badgeProps"
+    v-bind="props.badgeProps"    
   >
     <VBtn
       icon
@@ -34,9 +52,9 @@ const emit = defineEmits(['click:readAllNotifications'])
       size="small"
     >
       <VBadge
-        dot
-        :model-value="!!props.notifications.length"
-        color="error"
+        :model-value="!!props.totalUnread"
+        :content="totalUnread"
+        color="info"
         bordered
         offset-x="1"
         offset-y="1"
@@ -48,25 +66,29 @@ const emit = defineEmits(['click:readAllNotifications'])
       </VBadge>
 
       <VMenu
+        v-model="isMenuOpen"
         activator="parent"
-        width="380px"
+        width="35%"
+        height="90%"
         :location="props.location"
         offset="14px"
       >
         <VCard class="d-flex flex-column">
           <!-- 👉 Header -->
-          <VCardItem class="notification-section">
-            <VCardTitle class="text-base">
-              Notifications
+          <VCardItem class="py-3">
+            <VCardTitle class="text-base font-weight-bold">
+              Expired Packages
             </VCardTitle>
+            <div class="text-subtitle-2 text-medium-emphasis">
+              Packages expiring or already expired
+            </div>
 
             <template #append>
               <VChip
-                v-if="props.notifications.length"
                 color="primary"
                 size="small"
               >
-                {{ props.notifications.length }} New
+                {{ props.totalPackageExp || 0 }} Package
               </VChip>
             </template>
           </VCardItem>
@@ -81,15 +103,16 @@ const emit = defineEmits(['click:readAllNotifications'])
                 :key="notification.title"
               >
                 <VListItem
-                  :title="notification.title"
-                  :subtitle="notification.subtitle"
+                  v-if="notification.title !== 'Expired'"
                   link
                   lines="one"
-                  min-height="66px"
+                  min-height="60px"
+                  @click="$emit('click:readAllNotifications', notification.title)"
+                  :class="{'custom-bg-secondary font-weight-bold': !notification?.is_read && notification.count > 0}"
                 >
                   <!-- Slot: Prepend -->
                   <!-- Handles Avatar: Image, Icon, Text -->
-                  <template #prepend>
+                  <!-- <template #prepend>
                     <VListItemAction start>
                       <VAvatar
                         :color="notification.color || 'primary'"
@@ -101,10 +124,18 @@ const emit = defineEmits(['click:readAllNotifications'])
                         <span v-if="notification.text">{{ avatarText(notification.text) }}</span>
                       </VAvatar>
                     </VListItemAction>
-                  </template>
+                  </template> -->
+
+                  <VListItemTitle class="text-subtitle-2">
+                    {{ notification.title }}
+                  </VListItemTitle>
+                  <VListItemSubtitle class="text-caption">
+                    {{ notification.subtitle }}
+                  </VListItemSubtitle>
+
                   <!-- Slot: Append -->
                   <template #append>
-                    <small class="whitespace-no-wrap text-medium-emphasis">{{ notification.time }}</small>
+                    <small class="whitespace-no-wrap">{{ notification.count }}</small>
                   </template>
                 </VListItem>
                 <VDivider />
@@ -114,12 +145,20 @@ const emit = defineEmits(['click:readAllNotifications'])
 
           <!-- 👉 Footer -->
           <VCardText class="notification-section">
-            <VBtn
-              block
-              @click="$emit('click:readAllNotifications')"
+            <div
+              v-for="notification in props.notifications"
+              :key="notification.title"
             >
-              READ ALL NOTIFICATIONS
-            </VBtn>
+              <VBtn
+                v-if="notification.title === 'Expired'"
+                block
+                class="text-none"
+                style="pointer-events: none;"
+              >
+                <!-- Packages already expired 10 package -->
+                Packages already expired: <b class="px-2">{{ notification.count }} {{ notification.count === 1 ? 'package' : 'packages' }}</b>
+              </VBtn>
+            </div>
           </VCardText>
         </VCard>
       </VMenu>

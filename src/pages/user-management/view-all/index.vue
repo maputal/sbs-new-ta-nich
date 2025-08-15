@@ -1,11 +1,12 @@
 <script setup>
 import CustomConfirmDialog from '@/components/CustomConfirmDialog.vue'
+import CustomFilter from '@/components/CustomFilter.vue'
 import CustomNotifDialog from '@/components/CustomNotifDialog.vue'
-import CustomDetailDialog from '@/components/user-management/CustomDetailDialog.vue'
-import CustomEditDialog from '@/components/user-management/CustomEditDialogToBeOne.vue'
-import CustomTable from '@/components/user-management/CustomTable.vue'
+// import CustomDetailDialog from '@/components/user-management/CustomDetailDialog.vue'
+// import CustomEditDialog from '@/components/user-management/CustomEditDialog.vue'
+// import CustomTable from '@/components/user-management/CustomTable.vue'
 import { useGlobalStore } from '@/store/useGlobalStore'
-import { useUserManagementStore } from '@/store/useUserManagementStore'
+// import { useUserManagementStore } from '@/store/useUserManagementStore'
 import axios from '@axios'
 
 const store = useGlobalStore()
@@ -35,13 +36,13 @@ const months = {
 }
 
 const days = {
-  0:'Sunday',
   1:'Monday',
   2:'Tuesday',
   3:'Wednesday',
   4:'Thursday',
   5:'Friday',
   6:'Saturday',
+  7:'Sunday',
 }
 
 const todayDateF = () => {
@@ -64,7 +65,7 @@ const todayDateF = () => {
   )
 }
 
-const userManagementListStore = useUserManagementStore()
+// const userManagementListStore = useUserManagementStore()
 
 const LazyErrorDialogs = defineAsyncComponent(() => import('@/views/pages/dialogs/Error.vue'))
 const isErrorVisible = ref(false)
@@ -76,8 +77,8 @@ const urlBE = ref(window.moffas.config.url_backoffice_helper_api)
 const companyID = ref(window.moffas.config.param_company_id)
 const sessionID = ref(localStorage.getItem('moffas.token'))
 
-const tableHeader = ref(['No', 'User', 'Role', 'Status', 'Action'])
-const dataHeader = ref(['name', 'role_name'])
+const tableHeader = ref(['No', 'NIP', 'Name', 'Email', 'Phone Number', 'Role', 'Status', 'Action'])
+const dataHeader = ref(['nip', 'name', 'email', 'phone_number', 'role_name'])
 const editTableHeader = ref(['NIP', 'Name', 'Email', 'Phone Number', 'Role'])
 const editDataHeader = ref(['nip', 'name', 'email', 'phone_number', 'role_name'])
 
@@ -132,46 +133,39 @@ const detailDialogProps = ref({
 
 const editDialogProps = ref({
   editProps: [
-    // {
-    //   headerName: 'NIP',
-    //   dataName: 'nip',
-    //   inputType: 'text-field',
-    // },
+    {
+      headerName: 'NIP',
+      dataName: 'nip',
+      inputType: 'text-field',
+    },
     {
       headerName: 'Name',
       dataName: 'name',
       inputType: 'text-field',
-    },    
-    {
-      headerName: 'Role',
-      dataName: 'role_name',
-      inputType: 'text-field',
-      items: [],
     },
-    // {
-    //   headerName: 'Role',
-    //   dataName: 'role_name',
-    //   inputType: 'select',
-    //   items: [],
-    // },
     {
       headerName: 'Email',
       dataName: 'email',
       inputType: 'text-field',
     },
-    // {
-    //   headerName: 'Change Password',
-    //   dataName: 'password',
-    //   inputType: 'text-field',
-    // },
-    // {
-    //   headerName: 'Phone Number',
-    //   dataName: 'phone_number',
-    //   inputType: 'text-field',
-    // },
+    {
+      headerName: 'Change Password',
+      dataName: 'password',
+      inputType: 'text-field',
+    },
+    {
+      headerName: 'Phone Number',
+      dataName: 'phone_number',
+      inputType: 'text-field',
+    },
+    {
+      headerName: 'Role',
+      dataName: 'role_name',
+      inputType: 'select',
+      items: [],
+    },
   ],
-  formRequired: [],
-  // formRequired: ['Name', 'Email', 'Role'],
+  formRequired: ['Name', 'Email', 'Role'],
   row: {},
 })
 
@@ -189,7 +183,7 @@ const successDialogProps = ref({
 
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
-const priv = userData?.priv
+const priv = userData.priv
 
 console.log("---------- hasil priv=", priv)
 
@@ -205,8 +199,6 @@ const resetDialogProps = () => {
 }
 
 const chooseOP = () => {
-  console.log('confirmDialogProps.value di chooseOP', confirmDialogProps.value)
-  console.log('editDialogProps.value di chooseOP', editDialogProps.value)
   switch (confirmDialogProps.value.op) {
   case 'update':
     updateUser()
@@ -215,10 +207,10 @@ const chooseOP = () => {
     modifyUser('4', confirmDialogProps.value.id)
     break
   case 'activate':
-    modifyUser(3, editDialogProps.value)
+    modifyUser('user_activate', confirmDialogProps.value.id)
     break
   case 'deactivate':
-    modifyUser(3, editDialogProps.value)
+    modifyUser('user_deactivate', confirmDialogProps.value.id)
     break  
   default:
     break
@@ -241,8 +233,7 @@ const getRoleNames = () => {
 const getRoles = () => {
   let params = {
     company_id: companyID.value,
-    session_id: sessionID.value,
-    search_filter: '',   
+    session_id: sessionID.value   
   }
 
   axios.post(urlBE.value + 'retrieve_management_user_roles', params)
@@ -267,6 +258,33 @@ const getRoles = () => {
     onDataError(error.response)
   })
 }
+
+// const getRoles = () => {
+//   console.log('getAllRoles')
+
+//   const params = {}
+
+//   window.moffas.do_request(
+//     'role_get_all',
+//     params, 
+//     onGetRoles,
+//     onDataError,
+//   )
+// }
+
+// const onGetRoles = data => {
+//   const response = JSON.parse(data)
+
+//   if (response.hasOwnProperty('trace_id')){
+//     customErrorMessages.value = response
+//     isErrorVisible.value = true
+    
+//     return
+//   }
+
+//   role.value = response.data
+//   console.log ('iniiiiiii',response.data)
+// }
 
 const isActive = n => {
   if (n) {
@@ -300,10 +318,10 @@ const fetchUsers = () => {
     company_id: companyID.value,
     session_id: sessionID.value,
     row_length: rowPerPage.value,
-    current_page: currentPage.value,    
+    current_page: currentPage.value,
     nip: filter.value.nip,    
     name: '', 
-    search_filter: filter.value.name || '',   
+    search_filter: filter.value.name || '',  
   }
 
   axios.post(urlBE.value + 'retrieve_management_users', params)
@@ -331,6 +349,44 @@ const fetchUsers = () => {
   })
 }
 
+// const fetchUsers = () => {
+//   console.log('fetchUsers')
+
+//   let params = {
+//     perPage: rowPerPage.value,
+//     currentPage: currentPage.value,
+    
+//   }
+//   if (filter.value.nip != '') {
+//     params.nip = filter.value.nip
+//   }
+//   if (filter.value.name != '') {
+//     params.name = filter.value.name
+//   }
+
+//   window.moffas.do_request(
+//     'user_get_all',
+//     params, 
+//     onFetchUsers,
+//     onDataError,
+//   )
+// }
+
+// const onFetchUsers = data => {
+//   const response = JSON.parse(data)
+
+//   if (response.hasOwnProperty('trace_id')){
+//     customErrorMessages.value = response
+//     isErrorVisible.value = true
+    
+//     return
+//   }
+
+//   tableData.value = response.data.users
+//   totalPage.value = response.data.totalPage
+//   totalUser.value = response.data.totalUsers
+// }
+
 const updateUser = () => {
   let params = {
     company_id: companyID.value,
@@ -351,7 +407,7 @@ const updateUser = () => {
 
   console.log('params di updateUser', params)
 
-  axios.post(urlBE.value + 'do_management_user', params)
+  axios.post(urlBE.value + 'do_management_user_crud', params)
   .then(function (response) {
     console.log('response updateUser=', response)
     const responseData = response.data
@@ -374,36 +430,45 @@ const updateUser = () => {
   })
 }
 
+// const updateUser = () => {
+//   console.log('updateUser')
+
+//   const params = {
+//     id: editTableData.value.id,
+//     nip: editTableData.value.nip,
+//     name: editTableData.value.name,
+//     email: editTableData.value.email,
+//     phone_number: editTableData.value.phone_number,
+//     role_id: editTableData.value.role_id,
+//     password: editTableData.value.password,
+//   }
+
+//   window.moffas.do_request(
+//     'user_update',
+//     params, 
+//     onModifyUser,
+//     onDataError,
+//   )
+// }
+
 // user_delete, user_activate, user_deactivate
 
-const modifyUser = (op, data) => {
+const modifyUser = (op, id) => {
   let params = {
     company_id: companyID.value,
     session_id: sessionID.value,
     op_crud: op,
 
     data: {
-      user_id: data.row.user_id,
-      nip: data.row.nip,
-      name: data.row.name,
-      email: data.row.email,
-      phone_number: data.row.phone_number,
-      password: data.row?.password || '',
-      role_id: data.row.role_id,
+      user_id: id,
     } 
-  }
-
-  if(confirmDialogProps.value.op == 'activate'){
-    params.data.status = 1
-  } else if(confirmDialogProps.value.op == 'deactivate'){
-    params.data.status = 0
   }
 
   console.log('params di modifyUser', params)
 
-  axios.post(urlBE.value + 'do_management_user', params)
+  axios.post(urlBE.value + 'do_management_user_crud', params)
   .then(function (response) {
-    console.log('response modifyUser=', response)
+    console.log('response user list=', response)
     const responseData = response.data
 
     console.log('responseData', responseData)
@@ -424,7 +489,42 @@ const modifyUser = (op, data) => {
   })
 }
 
+// const modifyUser = (op, id) => {
+//   console.log(op)
+
+//   const params = {
+//     id: id,
+//   }
+
+//   window.moffas.do_request(
+//     op,
+//     params, 
+//     onModifyUser,
+//     onDataError,
+//   )
+// }
+
+// const onModifyUser = data => {
+//   const response = JSON.parse(data)
+
+//   if (response.hasOwnProperty('trace_id')){
+//     customErrorMessages.value = response
+//     isErrorVisible.value = true
+    
+//     return
+//   }
+  
+//   isSuccess.value.success = response.success
+//   isSuccess.value.id = response.data.id
+
+//   if(isSuccess.value.success) {
+//     successDialog.value = true
+//   }
+//   isSuccess.value.success = false
+// }
+
 // 👉 Fetch UserManagement
+
 watch(fetchUsers)
 
 // 👉 Watch currentPage
@@ -467,7 +567,7 @@ onMounted(() => {
   todayDate.value = todayDateF()
   
   // fetchUsers()
-  // getRoles()
+  getRoles()
 })
 </script>
 
@@ -501,7 +601,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <!-- <VCard
+    <VCard
       class="pa-5 mb-6"
     >
       <CustomFilter
@@ -526,10 +626,10 @@ onMounted(() => {
               }"
             />
           </VCol>
-          <span class="text-black font-weight-bold mx-4">User</span>
+          <span class="text-black font-weight-bold mx-4">Name</span>
           <VCol
             cols="12"
-            md="6"
+            md="3"
           >
             <VTextField
               v-model="tempFilter.name"
@@ -543,7 +643,7 @@ onMounted(() => {
           </VCol>
         </VRow>
       </CustomFilter>
-    </VCard> -->
+    </VCard>
     <VCard>
       <VCardText class="d-flex flex-row align-center text-black font-weight-bold row2">
         <span class="me-3">Show</span>
@@ -557,32 +657,6 @@ onMounted(() => {
           />
         </div>
         <span class="ms-3">entries</span>
-        <VSpacer />
-        <VSpacer />
-        <span class="text-black font-weight-bold mx-2">Search: </span>
-        <VCol
-          class="d-flex"
-        >
-          <VTextField
-            v-model="tempFilter.name"
-            cols="12"
-            class="mr-2"
-            placeholder="User"
-            focused
-            density="compact"
-            @keydown.enter.prevent 
-            @keyup.enter="filter.name = tempFilter.name"
-            clearable
-          />
-          <VBtn
-            variant="text"
-            icon="mdi-magnify"
-            color="red-lighten-2"
-            @click="() => {
-              filter.name = tempFilter.name
-            }"
-          />            
-        </VCol>
       </VCardText>
       <VSpacer />
       <CustomTable
@@ -603,7 +677,7 @@ onMounted(() => {
             <td
               v-for="(data, index1) in dataHeader"
               :key="index1"
-              class="pl-7"
+              class="pl-7 text-center"
             >
               <span class="text-black">
                 {{ row[data] }}
@@ -612,22 +686,16 @@ onMounted(() => {
             <td class="pl-8">
               <span class="justify-center">
                 <span 
-                  v-if="row['status'] == 1 || row['status'] == 0"
-                  class="text-no-wrap"
-                  :class="{
-                    'status-field-color-red': row['status'] == 0,
-                    'status-field-color-green': row['status'] == 1,
-                  }"
+                  v-if="row['status']"
+                  class="w-90"
+                  :class="{'status-field-boxing-color-active': row['status'] == 1, 'status-field-boxing-color-inactive': row['status'] == 0}"
                 >
-                  <VIcon
-                    icon="mdi-circle-medium"
-                  />
                   {{ isActive(row['status']) }}
                 </span>
               </span>
             </td>
             <td class="d-flex justify-center align-center text-xenter">
-              <!-- <VBtn
+              <VBtn
                 class="text-none text-white ma-2"
                 density="compact"
                 size="small"
@@ -639,8 +707,8 @@ onMounted(() => {
                 }"
               >
                 Detail
-              </VBtn> -->
-              <!-- <VBtn
+              </VBtn>
+              <VBtn
                 class="text-none ma-2"
                 density="compact"
                 size="small"
@@ -653,18 +721,6 @@ onMounted(() => {
                 }"
               >
                 Edit
-              </VBtn> -->
-              <VBtn
-                class="text-none ma-2"
-                size="small"
-                :disabled="disabledButton"
-                @click="() => {
-                  setEditData(row)
-                  editDialogProps.row = row
-                  editDialog = true
-                }"
-              >
-                Detail
               </VBtn>
             </td>
           </tr>
@@ -686,7 +742,7 @@ onMounted(() => {
         />
       </VCardText>
     </VCard>
-    <CustomDetailDialog
+    <!-- <CustomDetailDialog
       v-model:is-dialog-visible="detailDialog"
       rounded="lg"
       width="30%"
@@ -697,7 +753,7 @@ onMounted(() => {
       @activate="() => {
         confirmDialogProps.confirmationStyling = '1'
         confirmDialogProps.messageTitle = 'You are about to activated account'
-        confirmDialogProps.messageSubtitle = ['Are you sure you want to activated account?', 'This account cannot be undone.']
+        confirmDialogProps.messageSubtitle = ['Are you sure you want to activated account?', 'This account cannot be undone']
         confirmDialogProps.op = 'activate'
         confirmDialogProps.id = detailDialogProps.row['id']
         successDialogProps.subject = 'actived account'
@@ -706,7 +762,7 @@ onMounted(() => {
       @deactivate="() => {
         confirmDialogProps.confirmationStyling = '1'
         confirmDialogProps.messageTitle = 'You are about to deactivated account'
-        confirmDialogProps.messageSubtitle = ['Are you sure you want to deactivated account?', 'This account cannot be undone.']
+        confirmDialogProps.messageSubtitle = ['Are you sure you want to deactivated account?', 'This account cannot be undone']
         confirmDialogProps.op = 'deactivate'
         confirmDialogProps.id = detailDialogProps.row['id']
         successDialogProps.subject = 'deactived account'
@@ -717,13 +773,12 @@ onMounted(() => {
       v-model:is-dialog-visible="editDialog"
       rounded="lg"
       width="40%"
-      title="User Details"
+      title="Edit User Management"
       :edit-props="editDialogProps.editProps"
       :user-data="editTableData"
       :list-of-role="role"
       :form-required="editDialogProps.formRequired"
-      :row="editDialogProps.row"      
-      :priv="priv"
+      :row="editDialogProps.row"
       @delete="() => {
         confirmDialogProps.confirmationStyling = '1'
         confirmDialogProps.messageTitle = 'You are about to delete user'
@@ -749,25 +804,7 @@ onMounted(() => {
         successDialogProps.subject = 'submit'
         confirmDialog = true
       }"
-      @activate="() => {
-        confirmDialogProps.confirmationStyling = '1'
-        confirmDialogProps.messageTitle = 'You are about to activated account'
-        confirmDialogProps.messageSubtitle = ['Are you sure you want to activated account?', 'This account cannot be undone.']
-        confirmDialogProps.op = 'activate'
-        confirmDialogProps.id = editDialogProps.row['user_id']
-        successDialogProps.subject = 'actived account'
-        confirmDialog = true
-      }"
-      @deactivate="() => {
-        confirmDialogProps.confirmationStyling = '1'
-        confirmDialogProps.messageTitle = 'You are about to deactivated account'
-        confirmDialogProps.messageSubtitle = ['Are you sure you want to deactivated account?', 'This account cannot be undone.']
-        confirmDialogProps.op = 'deactivate'
-        confirmDialogProps.id = editDialogProps.row['user_id']
-        successDialogProps.subject = 'deactived account'
-        confirmDialog = true
-      }"
-    />
+    /> -->
     <CustomConfirmDialog
       v-model:is-dialog-visible="confirmDialog"
       rounded="lg"
@@ -830,13 +867,6 @@ onMounted(() => {
 
   .bg-hover:hover {
     background-color: rgba(68, 73, 74, 5%);
-  }
-
-  .status-field-color-green {
-    color: #05ff0d;
-  }
-  .status-field-color-red {
-    color: #ff1f00;
   }
   </style>
   

@@ -42,18 +42,19 @@ const handleKeyDown = (event, index) => {
         inputEl.focus()
     }
   }
+
   emit('updateOtp', digits.value.join(''))
 }
 </script>
 
 <template>
   <div>
-    <h6 class="text-base font-weight-medium mb-3">
+    <!-- <h6 class="text-base font-weight-medium mb-3">
       Type your 6 digit security code
-    </h6>
+    </h6> -->
     <div
       ref="refOtpComp"
-      class="d-flex align-center gap-4"
+      class="d-flex align-center gap-4 field-otp"
     >
       <VTextField
         v-for="i in props.totalInput"
@@ -68,6 +69,7 @@ const handleKeyDown = (event, index) => {
 </template>
 
 <style lang="scss">
+.field-otp
 .v-field__field {
   input {
     padding: 0.5rem;

@@ -1,7 +1,7 @@
 <script setup>
 import router from '@/router'
 import axios from '@axios'
-import depLogoGrey from '@images/telakses/Teleakses_Solusindo_Logo_cropt.png'
+import logo from '@images/telakses/Teleakses_Solusindo_Logo_cropt.png'
 import {
   emailValidator,
   requiredValidator,
@@ -23,7 +23,7 @@ const errors = ref({
   password: undefined,
 })
 
-const ForgetErrorDialogs = defineAsyncComponent(() => import('@/views/pages/dialogs/Error-forgot-password.vue'))
+// const ForgetErrorDialogs = defineAsyncComponent(() => import('@/views/pages/dialogs/Error-forgot-password.vue'))
 const isErrorVisible = ref(false)
 const customErrorMessage = ref('')
 const isSetEmail = ref (false)
@@ -68,7 +68,7 @@ const toLogin = () =>{
         <div class="d-flex">
           <VImg
             :width="160"
-            :src="depLogoGrey"
+            :src="logo"
           />          
         </div>
       </VCardItem>
@@ -119,7 +119,7 @@ const toLogin = () =>{
                   icon="mdi-chevron-left"
                   class="flip-in-rtl"
                 />
-                <span>Back to login</span>
+                <span>Return To Login</span>
               </RouterLink>
             </VCol>
           </VRow>
@@ -135,7 +135,7 @@ const toLogin = () =>{
         <div class="d-flex">
           <VImg
             :width="160"
-            :src="depLogoGrey"
+            :src="logo"
           />          
         </div>
       </VCardItem>        

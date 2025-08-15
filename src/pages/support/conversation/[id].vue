@@ -1004,9 +1004,9 @@ const getBase64 = (file, type='') => {
 }
 
 // =============================================== Error handling
-const LazyErrorDialogs = defineAsyncComponent(
-  () => import('@/views/pages/dialogs/Error-chatlive.vue'),
-)
+// const LazyErrorDialogs = defineAsyncComponent(
+//   () => import('@/views/pages/dialogs/Error-chatlive.vue'),
+// )
 
 const isError = ref(false)
 const errorMessage = ref("")
@@ -1030,7 +1030,7 @@ const successDialog = ref(false)
 
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
-const priv = userData?.priv
+const priv = userData.priv
 
 console.log("---------- hasil priv=", priv)
 
@@ -1144,11 +1144,11 @@ onBeforeRouteLeave ((to, from) => {
 
 <template>
   <section>
-    <LazyErrorDialogs
+    <!-- <LazyErrorDialogs
       v-if="isError"
       v-model:isDialogVisible="isError" 
       :custom-error-message="errorMessage"
-    />
+    /> -->
     <VCard>
       <VNavigationDrawer
         v-model="isLeftSidebarOpen"

@@ -1,8 +1,10 @@
 <script setup>
+import { useAppStore } from '@/store/app'
+
 const props = defineProps({
   isDialogVisible: {
     type: Boolean,
-    required: true,
+    // required: true,
   },
   customErrorMessage: {
     // type: String,
@@ -10,13 +12,17 @@ const props = defineProps({
   },
 })
 
+const appStore = useAppStore()
+
 const emit = defineEmits([
   'update:isDialogVisible',
 ])
 
 const updateModelValue = val => {
-  console.log('val updateModelValue', val)
-  emit('update:isDialogVisible', val)
+  // console.log('val updateModelValue', val)
+  // emit('update:isDialogVisible', val)
+
+  appStore.hideError()
 
   console.log('errorCode.value di updateModelValue', errorCode.value)
   if (errorCode.value == '403004'){
@@ -29,10 +35,9 @@ const onConfirmation = () => {
   updateModelValue(false)
 }
 
-const localErrorMessage = ref(structuredClone(toRaw(props.errorMessage)))
 const localCustomErrorMessage = ref(toRaw(props.customErrorMessage))
 // const localCustomErrorMessage = ref(structuredClone(toRaw(props.customErrorMessage)))
-const isLocalDialogVisible = ref(structuredClone(toRaw(props.isDialogVisible)))
+
 const errorResult = ref()
 const errorStatus = ref()
 const errorCode = ref()
@@ -53,13 +58,6 @@ const onDataError = e => {
   if(typeof e.value == 'string'){
     errorResult.value = e.value
   } else if (typeof e.value == 'object' && e.value.error_code) {
-    if(e.value.status && e.value.status === 401){
-      onConfirmation()
-      router.replace('/logout')
-
-      return
-    }
-    
     errorResultObject.value.code = e.value.error_code
     errorResultObject.value.message = e.value.error_message
   } else {
@@ -79,25 +77,16 @@ const onDataError = e => {
       router.replace('/logout')
     } else if(e.value.hasOwnProperty('trace_id')){
       errorResult.value = e.value
-      if (e.value.error_code === "403007") {
-        console.log('masuk hasOwnProperty(trace_id), tapi error_code = 403007')
-        console.log(e)
-        isInsufficientWallet.value = true
-      } else {
-        console.log('masuk hasOwnProperty(trace_id), tapi error_code != 403007')
-        console.log(e)
-        isTraceID.value = true
-        errorCode.value = e.value.error_code
-      }
+      console.log(e)
+      isTraceID.value = true
+      errorCode.value = e.value.error_code
     }
   }
 }
 
 onMounted(() => {
   // console.log(props.isDialogVisible)
-  // console.log(props.errorMessage)
   // console.log(props.customErrorMessage)
-  // console.log(localErrorMessage.value)
   // console.log(localCustomErrorMessage.value)
   if(typeof localCustomErrorMessage.value !== 'undefined'){
     onDataError(localCustomErrorMessage)
@@ -107,27 +96,17 @@ onMounted(() => {
 
 <template>
   <!-- 👉 Confirm Dialog -->
-  <VDialog
-    max-width="500"
-    class="error-dialog"
-    :persistent="props.isDialogVisible"
-    :model-value="props.isDialogVisible"
-    @update:model-value="updateModelValue"
+  <VOverlay
+    :model-value="appStore.isErrorVisible"
+    class="error-dialog d-flex justify-center mt-3"
+    location-strategy="connected"
+    scroll-strategy="none"
+    persistent
+    :z-index="3000"
   >
-    <VCard class="text-center px-10 py-6">
-      <VCardText v-if="isInsufficientWallet">
-        <div class="d-flex align-center pl-1">
-          <VIcon color="error" icon="mdi-alert-outline" size="large"></VIcon>
-          <h4 class="text-lg font-weight-bold pl-2">
-            {{ errorResult.error_message }}
-          </h4> 
-        </div>
-        <p class="text-black pt-2">
-          Please ensure you have sufficient balance/limit
-        </p> 
-      </VCardText>
-      <VCardText v-else>
-        <VBtn
+    <VCard min-width="500px">
+      <VCardText class="d-flex align-center pb-3">
+        <!-- <VBtn
           icon
           variant="outlined"
           color="warning"
@@ -135,62 +114,53 @@ onMounted(() => {
           style="width: 88px; height: 88px; pointer-events: none;"
         >
           <span class="text-5xl">!</span>
-        </VBtn>
-        <div 
-          v-if="isTraceID"
-          class="text-2xl font-weight-medium "
-        >
-          <p>{{ errorResult.error_message }}</p>
-          <p 
-            class="text-caption text-disabled"
-          > 
-            <b>Please attach the trace id below for report purpose</b><br>
-            Trace ID : {{ errorResult.trace_id }}
-          </p>
+        </VBtn> -->
+
+        <VIcon color="error" icon="mdi-close-circle" size="x-large" class="mr-2"></VIcon>
+        <div>
+          <h2 class="text-subtitle-1 text-black font-weight-bold">
+            Error!
+          </h2>
+
+          <div v-if="isTraceID" class="text-subtitle-2 font-weight-medium">
+            <p>{{ errorResult.error_message }}</p>
+            <p class="text-caption text-disabled">
+              <b>Please attach the trace id below for report purpose</b><br />
+              Trace ID : {{ errorResult.trace_id }}
+            </p>
+          </div>
+  
+          <h6 v-else-if="isStatus403" class="text-subtitle-2 font-weight-medium">
+            [{{ errorStatus }}] {{ errorResult }}
+          </h6>
+  
+          <h6 v-else-if="errorResultObject.code" class="text-subtitle-2 font-weight-medium">
+            [{{ errorResultObject.code }}] {{ errorResultObject.message }}
+          </h6>
+  
+          <h6 v-else class="text-subtitle-2 font-weight-medium">
+            {{ errorResult }}
+          </h6>
         </div>
-        <h6
-          v-else-if="isStatus403"
-          class="text-lg font-weight-medium"
-        >
-          [{{ errorStatus }}] {{ errorResult }} 
-        </h6>
-        <h6
-          v-else-if="errorResultObject.code"
-          class="text-lg font-weight-medium"
-        >
-          [{{ errorResultObject.code }}] {{ errorResultObject.message }} 
-        </h6>        
-        <h6
-          v-else
-          class="text-lg font-weight-medium"
-        >
-          {{ errorResult }}
-        </h6>
       </VCardText>
-      <VCardActions 
-        class="align-center gap-2"
-        :class="isInsufficientWallet ? 'justify-end' : 'justify-center'"
-      >
-        <VBtn
-          variant="elevated"
-          @click="onConfirmation"
-        >
-          Ok
-        </VBtn>
+
+      <VCardActions class="align-center gap-2 justify-end">
+        <VBtn size="small" variant="elevated" @click="onConfirmation">Ok</VBtn>
       </VCardActions>
     </VCard>
-  </VDialog>
+  </VOverlay>
 </template>
 
 <style lang="scss">
 .error-dialog .v-overlay__scrim {
-  backdrop-filter: blur(5px);
+  // backdrop-filter: blur(5px);
 }
 
+.error-dialog
 .v-overlay__scrim,
 .v-navigation-drawer__scrim {
-  background: rgba(var(--v-overlay-scrim-background), var(--v-overlay-scrim-opacity)) !important;
-  opacity: 1 !important;
+  background: grey !important;
+  opacity: 0.2 !important;
 }
 </style>
 

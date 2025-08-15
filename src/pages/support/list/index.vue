@@ -1,7 +1,6 @@
 <script setup>
 import { downloadFile } from '@/plugins/downloadFile'
 import { useGlobalStore } from '@/store/useGlobalStore'
-import axios from '@axios'
 
 const store = useGlobalStore()
 
@@ -55,7 +54,7 @@ const todayDateF = () => {
   )
 }
 
-const toTimeDMYHM = unixTimestamp => {
+const toDateDMY = unixTimestamp => {
   let today = new Date(unixTimestamp * 1000)
   let dd = today.getDate()
   let year = today.getFullYear()
@@ -125,19 +124,11 @@ const toTime = unixTimestamp => {
   )
 }
 
-const userData = ref(null)
-const userDataString = localStorage.getItem('user')
-userData.value = JSON.parse(userDataString)
-const priv = userData.value.priv
-
-console.log("---------- hasil priv=", priv)
-
 const LazyErrorDialogs = defineAsyncComponent(() => import('@/views/pages/dialogs/Error.vue'))
 const isErrorVisible = ref(false)
 const customErrorMessages = ref('')
 
 const projectTitle = ref('')
-const listResponse = ref([])
 
 const tableHeader = ref(['No', 'Ticket ID', 'Status', 'Phone Number', 'Create Time', 'Category', 'Description'])
 
@@ -150,20 +141,14 @@ const currentPage = ref(1)
 const selectedRows = ref([])
 const showProgressCircular = ref(true)
 
-const currentAssigneeUser = ref(0)
-
-const urlBE = ref(window.moffas.config.url_backoffice_helper_api)
-const companyID = ref(window.moffas.config.param_company_id)
-const sessionID = ref(localStorage.getItem('moffas.token'))
-
 const tempFilter = ref({
   search: '',
+  phone_number: '',
 })
 
 const filter = ref({
   search: '',
-  status: null,
-  response: null,
+  phone_number: '',
 })
 
 // Only for development purposes
@@ -275,18 +260,12 @@ const isEpoch = (value) => {
   )
 }
 
-const setResponse = (data) => {
-  const match = listResponse.value.find(x => x.value == data); // use == if types may differ
-
-  return match ? match.title : null
-}
-
 // const replaceCategory = (data) => {
 //   let result = data.replace("category", "campaign")
 
 //   // Replace any 10-digit number that is a valid epoch
 //   result = result.replace(/\b\d{10}\b/g, (match) => {
-//     return isEpoch(match) ? toTimeDMYHM(Number(match)) : match
+//     return isEpoch(match) ? toDateDMY(Number(match)) : match
 //   })
 
 //   return result 
@@ -311,11 +290,42 @@ const replaceCategory = (data) => {
     if (key === 'action_id') return match;
 
     // Otherwise replace if it's a valid epoch
-    return isEpoch(match) ? toTimeDMYHM(Number(match)) : match;
-  });  
+    return isEpoch(match) ? toDateDMY(Number(match)) : match;
+  });
 
   return result;
-};
+}
+
+const replaceCategoryAndSemicolon = (data) => {
+  if (typeof data !== 'string') {
+    return data;
+  }
+
+  let result = data.replace("category", "campaign");
+
+  // Replace any 10-digit number that is a valid epoch
+  result = result.replace(/\b(\d{10})\b/g, (match, p1, offset, string) => {
+    // Check if the match is part of a key (like action_id: 1753606392)
+    const before = string.slice(0, offset);
+    const keyMatch = /(\w+):\s*$/.exec(before);
+    const key = keyMatch ? keyMatch[1] : null;
+
+    // If the key is 'action_id', skip replacement
+    if (key === 'action_id') return match;
+
+    // Otherwise replace if it's a valid epoch
+    return isEpoch(match) ? toDateDMY(Number(match)) : match;
+  });
+
+  // result = result.replace(/\b\d{10}\b/g, (match) => {
+  //   return isEpoch(match) ? toDateDMY(Number(match)) : match;
+  // });
+
+  // Replace semicolon followed by optional whitespace with newline
+  result = result.replace(/;\s*/g, '\n');
+
+  return result;
+}
 
 const filterDesc = (data, noReplace = false) => {
   if (typeof data !== 'string') {
@@ -359,109 +369,78 @@ const getNameFromDesc = (data) => {
   return obj;
 }
 
-const fetchTickets = () => {
+const fetchTikckets = () => {
+  console.log('fetchTikckets')
+
   showProgressCircular.value = true
 
-  const userDataString = localStorage.getItem('user')
-  const userData = JSON.parse(userDataString)
-  if(Object.keys(priv).length !== 0 ){
-    currentAssigneeUser.value = userData.user_id || 0
-  }
-
   let params = {
-    company_id: companyID.value,
-    session_id: sessionID.value,
     row_length: rowPerPage.value,
     current_page: currentPage.value,    
-    search_filter: filter.value.search || '',   
-    filter_status: filter.value.status || '',   
-    filter_response: filter.value.response || 0,
-    data:{
-      assigned_user: currentAssigneeUser.value || 0,
-      contact_id: '',
-    }   
   }
 
-  console.log('params di fetchTickets =', params)
+  if (filter.value.search != '') {
+    params.search = filter.value.search
+  }
 
-  axios.post(urlBE.value + 'retrieve_tickets', params)
-  .then(function (response) {
-    console.log('response fetchTickets=', response)
-    const responseData = response.data
+  // dummymoffasdoticketretrieves(
+  //   params, 
+  //   onFetchTikckets, 
+  //   onDataError,
+  // )
 
-    console.log('response', response)
+  window.moffas.do_request(
+    'ticket_retrieves',
+    params, 
+    onFetchTikckets,
+    onDataError,
+  )
+}
 
-    if(response.data.error_code) {
-      onDataError(response.data)
+const onFetchTikckets = data => {
+  
+  const response = JSON.parse(data)
 
-      return
-    }
+  console.log('response')
+  console.log(response)
 
-    tableData.value = responseData.data
-    totalPage.value = responseData.page_total
-    totalTickets.value = responseData.recordsTotal 
-
+  
+  if (response.hasOwnProperty('trace_id')){
     showProgressCircular.value = false
-  })
-  .catch(function (error) {
-    console.log(error)
-    onDataError(error.response)
-  })
+    customErrorMessages.value = response
+    isErrorVisible.value = true
+    
+    return
+  }
+
+  tableData.value = response.tickets
+  totalPage.value = response.total_pages
+  totalTickets.value = response.total_rows  
+
+  showProgressCircular.value = false
 }
 
 const downloadAsDoc = (type) => {
   showProgressCircular.value = true
 
-  let headers
-  let rows
-
   // Prepare CSV data
-  if(projectTitle.value === 'danareksa'){
-    headers = ["No", "Ticket ID", "Assignee", "Status", "Name", "Client Response", "Email", "Create Time", "Campagin", "Sales", "Clcode", "Note", "Activity Note"];
-    rows = tableData.value.map((item, index) => [
-      numberTable.value + index,
-      item.ticket_id,
-      item.assigned_name || '',
-      item.status,
-      getNameFromDesc(item.description)?.name || getNameFromDesc(item.description)?.nama || getNameFromDesc(item.description)?.full_name || '',
-      setResponse(item.data?.content?.response) || '-',
-      getNameFromDesc(item.description)?.email || '',
-      toTimeDMYHM(item.created_tstamp),
-      item.category,
-      // filterDesc(item.description),
-      getNameFromDesc(item.description)?.sales || '',
-      getNameFromDesc(item.description)?.clcode || '',
-      getNameFromDesc(item.description)?.note || '',
-      item?.activity_note?.content || '',
-    ]); 
+  const headers = ["No", "Ticket ID", "Status", "Name", "Phone Number", "Email", "Create Time", "Campaign", "Sales", "CLcode", "Note"];
+  // const headers = ["No", "Ticket ID", "Status", "Name", "Phone Number", "Email", "Create Time", "Campaign", "Description"];
+  const rows = tableData.value.map((item, index) => [
+    numberTable.value + index,
+    item.ticket_id,
+    item.status,
+    getNameFromDesc(item.description)?.name || getNameFromDesc(item.description)?.nama || getNameFromDesc(item.description)?.full_name || '',
+    item.customer_phone_number,
+    getNameFromDesc(item.description)?.email || '',
+    toDateDMY(item.created_tstamp),
+    item.category,
+    // filterDesc(item.description),
+    getNameFromDesc(item.description)?.sales || '',
+    getNameFromDesc(item.description)?.clcode || '',
+    getNameFromDesc(item.description)?.note || '',
+  ]);
 
-    // headers = ["No", "Ticket ID", "Status", "Name", "Phone Number", "Email", "Create Time", "Campaign", "Sales", "CLcode", "Note"];
-    // rows = tableData.value.map((item, index) => [
-    //   numberTable.value + index,
-    //   item.ticket_id,
-    //   item.status,
-    //   getNameFromDesc(row.description)?.name || getNameFromDesc(row.description)?.nama || getNameFromDesc(row.description)?.full_name || '',
-    //   item.customer_phone_number,
-    //   getNameFromDesc(item.description)?.email || '',
-    //   toTimeDMYHM(item.created_tstamp),
-    //   item.category,
-    //   // filterDesc(item.description),
-    //   getNameFromDesc(item.description)?.sales || '',
-    //   getNameFromDesc(item.description)?.clcode || '',
-    //   getNameFromDesc(item.description)?.note || '',
-    // ]);
-  } else {
-    headers = ["No", "Ticket ID", "Assignee", "Status", "Create Time", "Category", "Description"];
-    rows = tableData.value.map((item, index) => [
-      numberTable.value + index,
-      item.ticket_id,
-      item.assigned_name || '',
-      item.status,
-      toTimeDMYHM(item.created_tstamp),
-      item.category,
-      item.description,
-    ]);
-  }
 
   downloadFile({
     headers,
@@ -474,7 +453,7 @@ const downloadAsDoc = (type) => {
 }
 
 // 👉 Fetch UserManagement
-watch(fetchTickets)
+watch(fetchTikckets)
 
 // 👉 Watch currentPage
 watchEffect(() => {
@@ -505,7 +484,6 @@ onMounted(() => {
   todayDate.value = todayDateF()
 
   projectTitle.value = moffas.config.project_title || ''
-  listResponse.value = moffas.config.listOfResponseCustomer || []
 })
 </script>
 
@@ -537,80 +515,51 @@ onMounted(() => {
     </div>
     <VCard>
       <VCardText 
-        class="align-center text-black font-weight-bold"
+        class="d-flex flex-row align-center text-black font-weight-bold row2"
       >
-        <div class="d-flex justify-end pb-3">
-          <VBtn
-            class="text-none"
-            rounded="md"
-            size="small"
-            prepend-icon="mdi-download"
-            @click="downloadAsDoc()"
-            :disabled="!tableData.length"
-          >
-            Download
-          </VBtn>
+        <span class="me-3">Show</span>
+        <div>
+          <VSelect
+            v-model="rowPerPage"
+            class="pagination-select rounded"
+            density="compact"
+            :items="[10, 20, 30, 50]"
+          />
         </div>
-
-        <VRow>
-          <VCol cols="12" md="3" class="d-flex align-center px-0">
-            <span class="me-3">Show</span>
-            <div>
-              <VSelect
-                v-model="rowPerPage"
-                class="pagination-select rounded"
-                density="compact"
-                :items="[10, 20, 30, 50]"
-              />
-            </div>
-            <span class="ms-3">entries</span>
-          </VCol>
-          <VCol cols="12" md="3" class="d-flex align-center">
-            <VSelect
-              v-model="filter.status"
-              class="rounded"
-              density="compact"
-              label="Status"
-              :items="['Follow Up', 'Closed']"
-              clearable
-            />
-          </VCol>
-          <VCol v-if="projectTitle == 'danareksa'" cols="12" md="3" class="d-flex align-center">
-            <VSelect
-              v-model="filter.response"
-              class="rounded"
-              density="compact"
-              label="Client Response"
-              :items="listResponse"
-              item-title="title"
-              item-value="value"
-              clearable
-            />
-          </VCol>
-          <VCol cols="12" md="3" class="d-flex align-center">
-            <VCol class="d-flex px-0">
-              <VTextField
-                v-model="tempFilter.search"
-                cols="12"
-                class="mr-1"
-                density="compact"
-                label="Search"
-                @keydown.enter.prevent 
-                @keyup.enter="filter.search = tempFilter.search"
-                @click:clear="filter.search = tempFilter.search"
-                clearable
-              />
-              <VBtn
-                variant="text"
-                icon="mdi-magnify"
-                color="red-lighten-2"
-                @click="() => {
-                  filter.search = tempFilter.search
-                }"
-              />            
-            </VCol>
-          </VCol>
-        </VRow>
+        <span class="ms-3">entries</span>
+        <VSpacer />
+        <VSpacer />
+        <span class="text-black font-weight-bold mx-2">Search: </span>
+        <VCol
+          class="d-flex"
+        >
+          <VTextField
+            v-model="tempFilter.search"
+            cols="12"
+            class="mr-2"
+            focused
+            density="compact"
+            @keydown.enter.prevent 
+            @keyup.enter="filter.search = tempFilter.search"
+          />
+          <VBtn
+            variant="text"
+            icon="mdi-magnify"
+            color="red-lighten-2"
+            @click="() => {
+              filter.search = tempFilter.search
+            }"
+          />            
+        </VCol>
+        <VBtn
+          class="text-none"
+          rounded="md"
+          prepend-icon="mdi-download"
+          @click="downloadAsDoc()"
+          :disabled="!tableData.length"
+        >
+          Download
+        </VBtn>
       </VCardText>      
       <VTable
         style="border-radius: 0;"
@@ -635,13 +584,6 @@ onMounted(() => {
               <span
                 class="th-span-border d-flex justify-center"
               > 
-                Assignee 
-              </span>
-            </th>
-            <th class=" th-background-color">
-              <span
-                class="th-span-border d-flex justify-center"
-              > 
                 Status 
               </span>
             </th>
@@ -651,19 +593,12 @@ onMounted(() => {
               > 
                 Name 
               </span>
-            </th>            
+            </th>
             <th class=" th-background-color">
               <span
                 class="th-span-border d-flex justify-center"
               > 
-                Clcode 
-              </span>
-            </th>
-            <th v-if="projectTitle === 'danareksa'" class=" th-background-color">
-              <span
-                class="th-span-border-row-count d-flex justify-center"
-              > 
-                Client Response
+                Phone Number 
               </span>
             </th>
             <th class=" th-background-color">
@@ -705,14 +640,14 @@ onMounted(() => {
               <span
                 class="th-span-border d-flex justify-center"
               > 
-                Note 
+                Clcode 
               </span>
             </th>
             <th class=" th-background-color">
               <span
                 class="th-span-border d-flex justify-center"
               > 
-                Activity Note 
+                Note 
               </span>
             </th>
           </tr>
@@ -732,25 +667,10 @@ onMounted(() => {
             <td>
               <RouterLink
                 class="text-black"
-                :to="{
-                  path: `/support/customer/${row.customer_id}`,
-                  query: { contact_id: row.contact_id }
-                }"
+                :to="'/support/customer/' + row.customer_phone_number"
                 @click="storeTicketId(row.ticket_id)"
               >              
                 {{ row.ticket_id }}
-              </RouterLink> 
-            </td>
-            <td>
-              <RouterLink
-                class="text-black text-no-wrap"
-                :to="{
-                  path: `/support/customer/${row.customer_id}`,
-                  query: { contact_id: row.contact_id }
-                }"
-                @click="storeTicketId(row.ticket_id)"
-              >              
-                {{ row.assigned_name || '' }}
               </RouterLink> 
             </td>
             <td>
@@ -762,10 +682,7 @@ onMounted(() => {
                   'status-field-color-blue': row['status'] == 'Responed',
                   'status-field-color-green': row['status'] == 'Follow Up',
                 }"
-                :to="{
-                  path: `/support/customer/${row.customer_id}`,
-                  query: { contact_id: row.contact_id }
-                }"
+                :to="'/support/customer/' + row.customer_phone_number"
                 @click="storeTicketId(row.ticket_id)"
               >              
                 <VIcon
@@ -774,90 +691,47 @@ onMounted(() => {
                 {{ row.status }}
               </RouterLink> 
             </td>
-            <td class="text-no-wrap text-black">
+            <td class="text-black">
               <RouterLink
-                :to="{
-                  path: `/support/customer/${row.customer_id}`,
-                  query: { contact_id: row.contact_id }
-                }"
+                :to="'/support/customer/' + row.customer_phone_number"
                 @click="storeTicketId(row.ticket_id)"
               >
-                {{ 
-                  row.data?.content?.name || 
-                  row.data?.content?.nama || 
-                  row.data?.content?.full_name || 
-                  getNameFromDesc(row.description)?.name || 
-                  getNameFromDesc(row.description)?.nama || 
-                  getNameFromDesc(row.description)?.full_name || 
-                  '' 
-                }}
-              </RouterLink>              
-            </td>            
-            <td class="text-no-wrap text-black">
-              <RouterLink
-                :to="{
-                  path: `/support/customer/${row.customer_id}`,
-                  query: { contact_id: row.contact_id }
-                }"
-                @click="storeTicketId(row.ticket_id)"
-              >
-                {{ getNameFromDesc(row.description)?.clcode || row.contact_id || '' }}
+                {{ getNameFromDesc(row.description)?.name || getNameFromDesc(row.description)?.nama || getNameFromDesc(row.description)?.full_name || '' }}
               </RouterLink>              
             </td>
-            <td v-if="projectTitle === 'danareksa'" class="text-center">
+            <td class="text-center text-black">
               <RouterLink
-                class="text-no-wrap pl-3"                
-                :class="{ 
-                  'status-field-color-dark-green': row?.data?.content?.response == 1,
-                  'status-field-color-red': row?.data?.content?.response == 2,
-                  'status-field-color-blue': row?.data?.content?.response == 3,
-                }"
-                :to="{
-                  path: `/support/customer/${row.customer_id}`,
-                  query: { contact_id: row.contact_id }
-                }"
+                class="text-black"
+                :to="'/support/customer/' + row.customer_phone_number"
                 @click="storeTicketId(row.ticket_id)"
-              >              
-                <VIcon
-                  v-if="row?.data?.content?.response"
-                  icon="mdi-circle-medium"
-                />              
-                {{ setResponse(row.data?.content?.response) || '-' }}
-              </RouterLink> 
+              >
+                {{ row.customer_phone_number }}
+              </RouterLink>              
             </td>
             <td class="text-no-wrap text-black">
               <RouterLink
-                :to="{
-                  path: `/support/customer/${row.customer_id}`,
-                  query: { contact_id: row.contact_id }
-                }"
+                :to="'/support/customer/' + row.customer_phone_number"
                 @click="storeTicketId(row.ticket_id)"
               >
-                {{ row.data?.content?.email || getNameFromDesc(row.description)?.email || '' }}
+                {{ getNameFromDesc(row.description)?.email || '' }}
               </RouterLink>              
             </td>
             <td class="text-black pl-3">
               <RouterLink
                 class="text-no-wrap text-black"
-                :to="{
-                  path: `/support/customer/${row.customer_id}`,
-                  query: { contact_id: row.contact_id }
-                }"
+                :to="'/support/customer/' + row.customer_phone_number"
                 @click="storeTicketId(row.ticket_id)"
               >              
-                <!-- {{ toTimeDMYHM(row.created_tstamp) }} -->
+                <!-- {{ toDateDMY(row.created_tstamp) }} -->
                 {{ toDate(row.created_tstamp) }}
                 <br>          
-                {{ toTime(row.created_tstamp) }} 
+                {{ toTime(row.created_tstamp) }}           
               </RouterLink>
             </td>
-            <td class="text-black">
+            <td class="text-black text-center">
               <RouterLink
                 class="text-black"
-                :to="{
-                  path: `/support/customer/${row.customer_id}`,
-                  query: { contact_id: row.contact_id }
-                }"
+                :to="'/support/customer/' + row.customer_phone_number"
                 @click="storeTicketId(row.ticket_id)"
               >              
                 {{ row.category }}             
@@ -865,46 +739,34 @@ onMounted(() => {
             </td>
             <td class="text-no-wrap text-black">
               <RouterLink
-                :to="{
-                  path: `/support/customer/${row.customer_id}`,
-                  query: { contact_id: row.contact_id }
-                }"
+                :to="'/support/customer/' + row.customer_phone_number"
                 @click="storeTicketId(row.ticket_id)"
               >
-                {{ row.data?.content?.sales || getNameFromDesc(row.description)?.sales || '' }}
+                {{ getNameFromDesc(row.description)?.sales || '' }}
+              </RouterLink>              
+            </td>
+            <td class="text-no-wrap text-black">
+              <RouterLink
+                :to="'/support/customer/' + row.customer_phone_number"
+                @click="storeTicketId(row.ticket_id)"
+              >
+                {{ getNameFromDesc(row.description)?.clcode || '' }}
               </RouterLink>              
             </td>
             <td class="text-black">
               <RouterLink
-                :to="{
-                  path: `/support/customer/${row.customer_id}`,
-                  query: { contact_id: row.contact_id }
-                }"
+                :to="'/support/customer/' + row.customer_phone_number"
                 @click="storeTicketId(row.ticket_id)"
               >
                 {{ getNameFromDesc(row.description)?.note || '' }}
               </RouterLink>              
             </td>
-            <td class="text-black">
-              <RouterLink
-                :to="{
-                  path: `/support/customer/${row.customer_id}`,
-                  query: { contact_id: row.contact_id }
-                }"
-                @click="storeTicketId(row.ticket_id)"
-              >
-                {{ row?.activity_note?.content || '' }}
-              </RouterLink>              
-            </td>
             <!-- <td
-              class="text-black"
+              class="text-no-wrap text-black"
             >
               <RouterLink
                 class="text-black"
-                :to="{
-                  path: `/support/customer/${row.customer_id}`,
-                  query: { contact_id: row.contact_id }
-                }"
+                :to="'/support/customer/' + row.customer_phone_number"
                 @click="storeTicketId(row.ticket_id)"
               >          
                 <div v-if="projectTitle === 'danareksa'" style="white-space: pre-wrap;">
@@ -955,7 +817,6 @@ onMounted(() => {
     </VCard>
     <VDialog
       v-model="showProgressCircular"
-      class="error-overlay-bg"
       persistent
     >
       <div class="text-center">
@@ -1020,10 +881,6 @@ onMounted(() => {
 
   .status-field-color-green {
     color: #05ff0d;
-  }
-
-  .status-field-color-dark-green {
-    color: #4CAF50;
   }
 
   a {

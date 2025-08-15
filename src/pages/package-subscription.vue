@@ -36,13 +36,13 @@ const months = {
 }
 
 const days = {
-  0:'Sunday',
   1:'Monday',
   2:'Tuesday',
   3:'Wednesday',
   4:'Thursday',
   5:'Friday',
   6:'Saturday',
+  7:'Sunday',
 }
 
 const todayDateF = (type='') => {
@@ -144,7 +144,7 @@ const dataValue = ref({
 
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
-const priv = userData?.priv
+const priv = userData.priv
 
 console.log("---------- hasil priv=", priv)
 

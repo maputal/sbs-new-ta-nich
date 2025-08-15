@@ -9,7 +9,7 @@
       Copyright © 2025 Teleakses Solusindo. All Rights Reserved
     </span>
     <!-- 👉 Footer: right content -->
-    <span class="d-md-flex gap-x-4 d-none">
+    <span class="d-md-flex gap-x-4">
       {{ webVersionFooter }}
     </span>
   </div>

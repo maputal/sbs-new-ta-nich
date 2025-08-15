@@ -21,7 +21,7 @@ const props = defineProps({
   },
 })
 
-// defineOptions({ name: 'VerticalNavGroup' })
+defineOptions({ name: 'VerticalNavGroup' })
 
 const route = useRoute()
 const router = useRouter()

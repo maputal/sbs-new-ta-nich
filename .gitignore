@@ -32,7 +32,6 @@ stats.html
 *.sw?
 *.d.ts
 .eslintrc-auto-import.json
-package-lock.json
 yarn.lock
 
 # iconify dist files

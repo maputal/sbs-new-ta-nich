@@ -1,10 +1,9 @@
 <script setup>
-// import CustomConfirmDialog from '@/components/CustomConfirmDialog.vue'
-// import CustomNotifDialog from '@/components/CustomNotifDialog.vue'
-import CustomDialogGroup from '@/components/group-management/CustomDialogGroup.vue'
-import CustomDialogPackageGroup from '@/components/group-management/CustomDialogPackageGroup.vue'
-import { useNotificationOperations } from '@/plugins/fetchNotifications'
-import { useAppStore } from '@/store/app'
+import CustomDialogGroup from '@/components/group-management/CustomDialogGroup.vue';
+import CustomDialogPackageGroup from '@/components/group-management/CustomDialogPackageGroup.vue';
+import { useNotificationOperations } from '@/plugins/fetchNotifications';
+import globalRequest from '@/plugins/globalRequest';
+import { useAppStore } from '@/store/app';
 
 const appStore = useAppStore()
 const { getPackageExp } = useNotificationOperations()
@@ -109,7 +108,7 @@ const chooseDialogGroup = (typeDo, data) => {
 }
 
 
-function dummymoffasdogetGroupList(op, params, onSuccess, onError) {
+function dummymoffasdogetGroupList(type, op, params, onSuccess, onError) {
   let dummyData = {
     data: [
       {
@@ -173,8 +172,9 @@ const getGroupList = () => {
     search: searchGroup.value,
   }
 
-  // dummymoffasdogetGroupList | window.moffas.do_request
+  // dummymoffasdogetGroupList | taSecure_POST
   dummymoffasdogetGroupList(
+    'taSecure_POST',
     'get_broadcasts',
     params,
     (data) => {
@@ -228,7 +228,8 @@ const createGroup = () => {
     group_name: editAddGroupData.value.groupName,
   }
 
-  window.moffas.do_request(
+  globalRequest(
+    'taSecure_POST',
     'get_broadcasts',
     params,
     (data) => {
@@ -280,7 +281,8 @@ const editGroup = () => {
     group_name: editAddGroupData.value.groupName,
   }
 
-  window.moffas.do_request(
+  globalRequest(
+    'taSecure_POST',
     'get_broadcasts',
     params,
     (data) => {
@@ -332,7 +334,8 @@ const deleteGroup = () => {
     group_name: editAddGroupData.value.groupName,
   }
 
-  window.moffas.do_request(
+  globalRequest(
+    'taSecure_POST',
     'get_broadcasts',
     params,
     (data) => {
@@ -409,7 +412,7 @@ const chooseDialogPackage = () => {
   getAllPackage()
 }
 
-function dummymoffasdogetPackageGroup(op, params, onSuccess, onError) {
+function dummymoffasdogetPackageGroup(type, op, params, onSuccess, onError) {
   let dummyData = {
     data: [
       { package_id: 1, package_name: "Paket StreamMax", msisdn: "6285860653530" },
@@ -454,8 +457,9 @@ const getPackageGroup = () => {
     group_id: selectedGroup.value[0],
   }
 
-  // dummymoffasdogetPackageGroup | window.moffas.do_request
+  // dummymoffasdogetPackageGroup | taSecure_POST
   dummymoffasdogetPackageGroup(
+    'taSecure_POST',
     'get_broadcasts',
     params,
     (data) => {
@@ -503,7 +507,8 @@ const addPackageGroup = () => {
     package: editAddGroupData.value.newPackageGroup,
   }
 
-  window.moffas.do_request(
+  globalRequest(
+    'taSecure_POST',
     'get_broadcasts',
     params,
     (data) => {
@@ -564,7 +569,8 @@ const deletePackageGroup = () => {
     package: editAddGroupData.value.newPackageGroup,
   }
 
-  window.moffas.do_request(
+  globalRequest(
+    'taSecure_POST',
     'get_broadcasts',
     params,
     (data) => {
@@ -595,7 +601,7 @@ const deletePackageGroup = () => {
   )
 }
 
-function dummymoffasdogetAllPackage(op, params, onSuccess, onError) {
+function dummymoffasdogetAllPackage(tyep, op, params, onSuccess, onError) {
   let dummyData = {
     data: [
       {"package_id": 1, "package_name": "Paket Dummy 1", "msisdn": "6289123456001"},
@@ -718,8 +724,9 @@ const getAllPackage = () => {
     // page_number: currentPagePackage.value,
   }
 
-  // dummymoffasdogetAllPackage | window.moffas.do_request
+  // dummymoffasdogetAllPackage | taSecure_POST
   dummymoffasdogetAllPackage(
+    'taSecure_POST',
     'get_broadcasts',
     params,
     (data) => {
@@ -1129,21 +1136,6 @@ onBeforeRouteLeave ((to, from) => {
         chooseConfirmPopup()
       }"
     />
-
-    <!-- <CustomConfirmDialog
-      v-model:is-dialog-visible="confirmationDialog"
-      rounded="lg"
-      confirmation-styling="2"
-      :message-title="confirmDialogProps.messageTitle"
-      @yes="chooseOP"
-    />
-    <CustomNotifDialog
-      v-model:is-dialog-visible="successDialog"
-      rounded="lg"
-      width="auto"
-      :subject="successDialogProps.subject"
-      @ok="closeDialog"
-    /> -->
   </section>
 </template>
   

@@ -163,7 +163,7 @@ watch(isVerticalNavMini(windowWidth, isVerticalNavHovered), val => {
           :item="child"
         />
       </ul>
-    </TransitionExpand>
+    </TransitionExpand> 
   </li>
 </template>
 

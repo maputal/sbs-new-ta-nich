@@ -1,7 +1,8 @@
 <script setup>
-import logo from '@images/telakses/Teleakses_Solusindo_Logo_cropt.png'
-import bgImage from '@images/pages/bg-vector.png'
-import { useAppStore } from '@/store/app'
+import globalRequest from '@/plugins/globalRequest';
+import { useAppStore } from '@/store/app';
+import bgImage from '@images/pages/bg-vector.png';
+import logo from '@images/telakses/Teleakses_Solusindo_Logo_cropt.png';
 
 const router = useRouter()
 
@@ -64,7 +65,8 @@ const resendCode = () => {
     current_page: currentPage.value,
   }
 
-  window.moffas.do_request(
+  globalRequest(
+    'taSecure_POST',
     'get_broadcasts',
     params,
     (data) => {
@@ -111,7 +113,8 @@ const submitForm = () => {
     otp: otp.value,
   }
 
-  window.moffas.do_request(
+  globalRequest(
+    'taSecure_POST',
     'get_broadcasts',
     params,
     (data) => {

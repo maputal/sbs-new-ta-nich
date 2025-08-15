@@ -14,27 +14,45 @@ import { createApp } from 'vue'
 
 loadFonts()
 
-
-// Create vue app
-const app = createApp(App)
-
-// Use plugins
-app.use(vuetify)
-app.use(createPinia())
-app.use(router)
-app.use(layoutsPlugin)
-
-// Check local storage to handle refreshes
-const store = useGlobalStore()
-if (window.localStorage) {
-  let localUserString = window.localStorage.getItem('user') || 'null'
-  let localUser = JSON.parse(localUserString)
-  if (localUser && store.user !== localUser) {
-    store.SET_USER(localUser)
-    store.SET_TOKEN(window.localStorage.getItem('token'))
-    store.SET_PAYLOAD_FIN(JSON.parse(window.localStorage.getItem('payload_fin')))
+// Load config before creating app
+async function loadConfig() {
+  try {
+    const base = import.meta.env.BASE_URL || '/'
+    const response = await fetch(`${base}config/config.json`)
+    const config = await response.json()
+    return config
+  } catch (error) {
+    console.error('Failed to load configuration:', error)
+    return {}
   }
 }
 
-// Mount vue app
-app.mount('#app')
+// Initialize app after config is loaded
+loadConfig().then(config => {
+  // Create Vue app
+  const app = createApp(App)
+
+  // Set config globally
+  app.config.globalProperties.$config = config
+
+  // Use plugins
+  app.use(vuetify)
+  app.use(createPinia())
+  app.use(router)
+  app.use(layoutsPlugin)
+
+  // Check local storage to handle refreshes
+  const store = useGlobalStore()
+  if (window.localStorage) {
+    let localUserString = window.localStorage.getItem('user') || 'null'
+    let localUser = JSON.parse(localUserString)
+    if (localUser && store.user !== localUser) {
+      store.SET_USER(localUser)
+      store.SET_TOKEN(window.localStorage.getItem('token'))
+      store.SET_PAYLOAD_FIN(JSON.parse(window.localStorage.getItem('payload_fin')))
+    }
+  }
+
+  // Mount app
+  app.mount('#app')
+})

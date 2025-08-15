@@ -1,5 +1,5 @@
-import { hmacSha256Base64, generateRandomString, aes256Encrypt, aes256Decrypt } from './ta_crypto';
-import { taSecure_Handshake } from './ta_handshake';
+import { aes256Decrypt, aes256Encrypt, generateRandomString, hmacSha256Base64 } from '@/plugins/ta_secure/ta_crypto';
+import { taSecure_Handshake } from '@/plugins/ta_secure/ta_handshake';
 
 
 export const taSecure_Login = async (backend_url, username,password) => {

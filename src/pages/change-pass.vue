@@ -1,6 +1,7 @@
 <script setup>
 import { requiredValidator } from '@/@core/utils/validators';
-import { useAppStore } from '@/store/app'
+import globalRequest from '@/plugins/globalRequest';
+import { useAppStore } from '@/store/app';
 
 const router = useRouter()
 
@@ -24,6 +25,13 @@ const passwordRequirements = [
   'At least one lowercase character',
   'At least one number, symbol, or whitespace character',
 ]
+
+const onDataError = (e) => {
+  console.log('masuk error di onDataError', e)
+  loading.value = false
+  appStore.hideLoader()
+  appStore.showError(e)
+}
 
 const resetForm = () => {
   isCurrentPasswordVisible.value = false
@@ -80,8 +88,8 @@ const submitForm = () => {
     np: newPassword.value,
     rnp: confirmPassword.value,
   }
-
-  window.moffas.do_request(
+  globalRequest(
+    'taSecure_POST',
     'get_broadcasts',
     params,
     (data) => {

@@ -1,8 +1,8 @@
 <script setup>
 import UploadableItem from '@/components/UploadableItem.vue';
+import { useAppStore } from '@/store/app';
 import { useFileProgressStore } from '@/store/useFileUploadStore';
 import { computed, ref, watch } from 'vue';
-import { useAppStore } from '@/store/app'
 
 const appStore = useAppStore()
 
@@ -11,14 +11,23 @@ const props = defineProps({
     type: String,
     default: ".xls,.xlsx,.csv",
   },
+  allowTextUpload: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const emit = defineEmits(["files-submitted"]);
 
-const uploadOptions = [
-  { title: 'Text', value: 'TEXT' },
-  { title: 'File', value: 'FILE' }
-]
+const uploadOptions = computed(() => {
+  const options = [
+    { title: 'File', value: 'FILE' }
+  ];
+  if (props.allowTextUpload) {
+    options.unshift({ title: 'Text', value: 'TEXT' });
+  }
+  return options;
+})
 
 const upload_method = ref(null)
 const textValue = ref('')
@@ -215,7 +224,7 @@ function onFileChange(e) {
           <VCol cols="12" md="9">
             <!-- Height + content swap -->
             <VExpandTransition>
-              <div v-if="upload_method === 'TEXT'" key="inp-text">
+              <div v-if="upload_method === 'TEXT' && allowTextUpload" key="inp-text">
                 <VTextarea 
                   id="textInput"
                   v-model="textValue"

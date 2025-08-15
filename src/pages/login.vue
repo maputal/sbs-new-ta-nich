@@ -1,11 +1,11 @@
 <script setup>
-import { useGlobalStore } from '@/store/useGlobalStore'
-import buildingBackground from '@images/telakses/BG_Login.png'
-import Logo from '@images/telakses/Teleakses_Solusindo_Logo_cropt.png'
+import globalRequest from '@/plugins/globalRequest';
+import { useGlobalStore } from '@/store/useGlobalStore';
+import buildingBackground from '@images/telakses/BG_Login.png';
+import Logo from '@images/telakses/Teleakses_Solusindo_Logo_cropt.png';
 import {
-  emailValidator,
-  requiredValidator,
-} from '@validators'
+  requiredValidator
+} from '@validators';
 
 
 const store = useGlobalStore()
@@ -51,11 +51,12 @@ const onSuccess = data => {
 
   let pload = {}
 
-  window.moffas.do_request(
+  globalRequest(
+    'window.moffas.do_request',
     'getProfile',
     pload,
     onLoadOwnInfo,
-    onDataError,
+    onDataError
   )
 }
 

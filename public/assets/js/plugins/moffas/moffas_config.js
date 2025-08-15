@@ -6,9 +6,9 @@ moffas.config = {}
 
 
 moffas.config.dev = {
-  url: 'https://latihan.servobot.ai/portal-be',
-  urldev: 'https://latihan.servobot.ai/portal-be',
-  url_backoffice_helper_api: 'https://latihan.servobot.ai/backoffice-helper-crm/',
+  url: 'https://servobot.tel-access.com/portal-be',
+  urldev: 'https://servobot.tel-access.com/portal-be',
+  url_backoffice_helper_api: 'https://servobot.tel-access.com/backoffice-helper-crm/',
   param_company_id: 1,
   dev: false,
   project_title: '',

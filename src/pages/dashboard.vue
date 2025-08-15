@@ -1,7 +1,10 @@
 <script setup>
-  import { useGlobalStore } from '@/store/useGlobalStore'
-  import icon from '@/assets/images/svg/gg_hello.svg'
-  import axios from '@axios'
+  import icon from '@/assets/images/svg/gg_hello.svg';
+import globalRequest from '@/plugins/globalRequest';
+import { useAppStore } from '@/store/app';
+import { useGlobalStore } from '@/store/useGlobalStore';
+
+const appStore = useAppStore()
 
   const store = useGlobalStore()
   const myUser = computed(() => ({
@@ -64,56 +67,13 @@
     )
   }
 
-  const LazyErrorDialogs = defineAsyncComponent(() => import('@/views/pages/dialogs/Error.vue'))
-  const isErrorVisible = ref(false)
-  const customErrorMessages = ref()
   const onDataError = (e) => {
-    isErrorVisible.value = true
-    customErrorMessages.value = e
+    console.log('masuk error di onDataError', e)
+    appStore.hideLoader()
+    appStore.showError(e)
   }
+
   const onLoadOwnInfo = (data) => {}
-
-  const urlBE = ref(window.moffas.config.url_backoffice_helper_api)
-  const companyID = ref(window.moffas.config.param_company_id)
-  const sessionID = ref(localStorage.getItem('moffas.token'))
-
-  const fetchDepartment = () => {
-    let params = {
-      company_id: companyID.value,
-      session_id: sessionID.value,
-      row_length: 100,
-      current_page: 1, 
-      search_filter: '',
-    }
-    // if (filter.value.group_name != '') {
-    //   params.group_name = filter.value.group_name
-    // }
-
-    axios.post(urlBE.value + 'retrieve_page_access', params)
-    .then(function (response) {
-      console.log('response department list=', response);
-      const responseData = response.data
-
-      console.log('response')
-      console.log(response)
-
-      if(response.data.error_code) {
-        onDataError(response.data)
-
-        return
-      }
-
-      tableData.value = responseData.data
-      totalPage.value = responseData.page_total
-      totalDepartment.value = responseData.recordsTotal 
-
-      showProgressCircular.value = false
-    })
-    .catch(function (error) {
-      console.log(error);
-      onDataError(error)
-    });
-  }
   
   onMounted(() => {
     let isEmbeddedSignup = store.payloadFin.embedded_signup
@@ -121,27 +81,19 @@
       toLoginWaba()
     } else {
       let pload = {}
-      window.moffas.do_request(
+      globalRequest(
+        'window.moffas.do_request',
         'getProfile',
         pload,
         onLoadOwnInfo,
-        onDataError,
+        onDataError
       )
     }
     todayDate.value = todayDateF()
-
-    // fetchDepartment()
   })
 </script>
 <template>
   <div>
-    <!-- erorr dialogs -->
-    <LazyErrorDialogs
-      v-if="isErrorVisible"
-      v-model:isDialogVisible="isErrorVisible" 
-      :custom-error-message="customErrorMessages"
-    >
-    </LazyErrorDialogs>
     <div>
       <VCard
         class="mb-6"

@@ -1,6 +1,7 @@
 <script setup>
-import { useNotificationOperations } from '@/plugins/fetchNotifications'
-import { useAppStore } from '@/store/app'
+import { useNotificationOperations } from '@/plugins/fetchNotifications';
+import globalRequest from '@/plugins/globalRequest';
+import { useAppStore } from '@/store/app';
 
 const appStore = useAppStore()
 const { getPackageExp } = useNotificationOperations()
@@ -17,40 +18,32 @@ const onDataError = (e) => {
 
 function handleFileSubmit(file) {
   console.log("File ready to upload:", file);
+  uploadData(file)
   // Here you can call your API to upload
 }
 
-// =============================================== group section
-const editAddGroupData = ref({
-  groupID: '',
-  groupName: '',
-  newPackageGroup: [],
-})
-
-
-const createGroup = () => {
-  console.log('Edit', editAddGroupData.value)
+const uploadData = (dataUpload) => {
 
   appStore.setPopup({
     title: 'Success!',
-    word: 'You’ve successfully added the group',
+    word: 'You’ve successfully uploaded the data',
     action: 'success',
     onSucc: () => {
-      resetGroupData()
       appStore.hideLoader()
     },
   })
 
   return
 
-  console.log('Code createGroup!')
+  console.log('Code uploadData!')
   appStore.showLoader()
 
   const params = {
     group_name: editAddGroupData.value.groupName,
   }
 
-  window.moffas.do_request(
+  globalRequest(
+    'taSecure_POST',
     'get_broadcasts',
     params,
     (data) => {

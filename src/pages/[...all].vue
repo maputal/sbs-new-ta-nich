@@ -1,5 +1,5 @@
 <script setup>
-import depLogo from '@images/telakses/Teleakses_Solusindo_Logo_cropt.png';
+import Logo from '@images/telakses/Teleakses_Solusindo_Logo_cropt.png';
 
 </script>
 
@@ -8,7 +8,7 @@ import depLogo from '@images/telakses/Teleakses_Solusindo_Logo_cropt.png';
     <!-- 👉 Image -->
     <div class="misc-avatar w-100 text-center">
       <VImg
-        :src="depLogo"
+        :src="Logo"
         alt="Coming Soon"
         :max-width="300"
         class="mx-auto mb-10"

@@ -29,23 +29,24 @@ router.beforeEach((to, from, next) => {
   console.log(to)
   console.log(from)
   // PROD
-  if (to.meta.requiresAuth && (!store.token || store.token === 'null')
-  ) {
-    console.log('MASOK SINI SA')
-    // return next({ name: 'login', query: { to: to.name !== 'index' ? to.fullPath : undefined }})
-    next({
-      path: '/login',
-      query: { redirect: to.fullPath },
-    })
-    return
-  } 
-  else {
-    next();
-    return;
-  }
-    // // DEV MODE, DEL/COMMENT WHEN PROD!!!
-    // next();
-    // return;
+  // if (to.meta.requiresAuth && (!store.token || store.token === 'null')
+  // ) {
+  //   console.log('MASOK SINI SA')
+  //   // return next({ name: 'login', query: { to: to.name !== 'index' ? to.fullPath : undefined }})
+  //   next({
+  //     path: '/login',
+  //     query: { redirect: to.fullPath },
+  //   })
+  //   return
+  // } 
+  // else {
+  //   next();
+  //   return;
+  // }
+
+  // // DEV MODE, DEL/COMMENT WHEN PROD!!!
+  next();
+  return;
 })
 
 export default router

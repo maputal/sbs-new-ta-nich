@@ -24,33 +24,27 @@ const errors = ref({
 const refVForm = ref()
 const nip = ref('')
 const password = ref('')
-const response = ref('')
+
+const userData = ref({})
+
 const token = ref('')
 const payloadFin = ref({})
-const userData = ref({})
-const LazyErrorDialogs = defineAsyncComponent(() => import('@/views/pages/dialogs/Error.vue'))
-const isErrorVisible = ref(false)
-const customErrorMessages = ref()
+
 const windowInnerHeight = ref(window.innerHeight)
 
-const onProceed = () => {
-  let pload = { fcm_token: 'dummy', deviceuuid: 'dummy' }
-  window.moffas.fin(
-    password.value,
-    pload,
-    onSuccess,
-    onUnauth,
-    onError,
-  )
+const resetCredential = () => {
+  nip.value = ''
+  password.value = ''
 }
 
-const onSuccess = data => {
-  console.log(data)
-  token.value = data.token
-  payloadFin.value = JSON.parse(data.payload)
+const onDataError = (e) => {
+  console.log('masuk error di onDataError', e)
+  resetCredential()
+  appStore.hideLoader()
+  appStore.showError(e)
+}
 
-  let pload = {}
-
+const getProfile = data => {
   globalRequest(
     'window.moffas.do_request',
     'getProfile',
@@ -58,13 +52,6 @@ const onSuccess = data => {
     onLoadOwnInfo,
     onDataError
   )
-}
-
-const onDataError = e => {
-  isErrorVisible.value = true
-  customErrorMessages.value = e
-  resetCredential()
-  console.log(e)
 }
 
 const onLoadOwnInfo = data => {
@@ -88,44 +75,36 @@ const onLoadOwnInfo = data => {
   // router.replace('/otp')
 }
 
-const onUnauth = () => {
-  isErrorVisible.value = true
-  customErrorMessages.value = 'Username atau Password salah'
-  resetCredential()
+globalRequest(
+  'taSecure_Login',
+  '', // no op needed for login
+  { username: nip.value, password: password.value },
+  (res) => {
+    // const result = JSON.parse(res);
+    console.log('response login=', res)
+    const result = res
 
-  // console.log('Un-Auth')
-}
+    if (result.success) {
+      console.log('Login successful')
+      window.sessionStorage.setItem('username',nip.value)
 
-const onDenied = () => {
-  isErrorVisible.value = true
-  customErrorMessages.value = 'User Denied'
-  resetCredential()
+      // getProfile()
 
-  // console.log('Denied')
-}
+      // Redirect to `to` query if exist or redirect to index route
+      console.log('route.query.redirect', route.query.redirect)
+      // router.push(route.query.redirect ? String(route.query.redirect) : '/')
+      router.replace(route.query.redirect ? String(route.query.redirect) : '/')
 
-const onError = e => {
-  isErrorVisible.value = true
-  customErrorMessages.value = 'Gangguan Koneksi. Silakan coba lagi'
-  resetCredential()
+      // router.replace('/otp')
+    }
 
-  // console.log(e)
-}
-
-const resetCredential = () => {
-  nip.value = ''
-  password.value = ''
-}
-
-const login = () => {
-  window.moffas.login_start(
-    nip.value,
-    onProceed,
-    onUnauth,
-    onDenied,
-    onError,
-  )
-}
+    resetCredential()
+  },
+  (err) => {
+    console.error('Login failed', err)
+    onDataError(err)
+  }
+)
 
 const onSubmit = () => {
   refVForm.value?.validate().then(({ valid: isValid }) => {
@@ -137,12 +116,6 @@ const onSubmit = () => {
 
 <template>
   <div>
-    <!-- erorr dialogs -->
-    <LazyErrorDialogs
-      v-if="isErrorVisible"
-      v-model:isDialogVisible="isErrorVisible" 
-      :custom-error-message="customErrorMessages"
-    />
     <!-- Title and Logo -->
     <div class="auth-logo d-flex align-start gap-x-3">
       <!-- <VNodeRenderer :nodes="themeConfig.app.logo" /> -->

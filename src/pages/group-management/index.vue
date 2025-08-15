@@ -172,7 +172,7 @@ const getGroupList = () => {
     search: searchGroup.value,
   }
 
-  // dummymoffasdogetGroupList | taSecure_POST
+  // dummymoffasdogetGroupList | globalRequest
   dummymoffasdogetGroupList(
     'taSecure_POST',
     'get_broadcasts',

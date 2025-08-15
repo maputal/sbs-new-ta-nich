@@ -1,6 +1,6 @@
 {
   "name": "sbs-ta",
-  "version": "V0.1.2.0",
+  "version": "V0.1.2.1",
   "private": true,
   "scripts": {
     "dev": "npm run build:icons && vite --host",

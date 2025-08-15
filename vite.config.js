@@ -45,7 +45,10 @@ export default defineConfig({
     visualizer(),
   ],
   base: './',
-  define: { 'process.env': {} },
+  define: { 
+    'process.env': {},
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version)
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

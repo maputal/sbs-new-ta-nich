@@ -1,5 +1,7 @@
 <script setup>
-  const webVersionFooter = ref(window.moffas.config.version_footer)
+  // const webVersionFooter = ref(window.moffas.config.version_footer)
+  console.log('App Version:', __APP_VERSION__)
+  const version = ref(__APP_VERSION__)
 </script>
 
 <template>
@@ -10,7 +12,8 @@
     </span>
     <!-- 👉 Footer: right content -->
     <span class="d-md-flex gap-x-4">
-      {{ webVersionFooter }}
+      <!-- {{ webVersionFooter }} -->
+      {{ version }}
     </span>
   </div>
 </template>

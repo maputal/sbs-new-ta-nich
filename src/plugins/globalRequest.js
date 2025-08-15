@@ -1,7 +1,8 @@
 // globalRequest.js
-import { taSecure_POST } from '@/plugins/ta_secure/ta_secure';
+import { taSecure_Login, taSecure_POST } from '@/plugins/ta_secure/ta_secure';
 
-const backend_url = 'https://your-backend.com/api'; // 🔁 Set your actual backend here
+const backend_url = window.$config?.backend_url || ''
+console.log('backend_url=', backend_url)
 
 // Main exported function
 export default function globalRequest(type='taSecure_POST', op, params, onSuccess, onError) {
@@ -25,6 +26,17 @@ export default function globalRequest(type='taSecure_POST', op, params, onSucces
         console.error(`[globalRequest] Error`, err);
         if (onError) onError(err);
       });
+  } else if (type === 'taSecure_Login') {
+    const { username, password } = params;
+    taSecure_Login(backend_url, username, password)
+      .then((res) => {
+        onSuccess(res);
+      })
+      .catch((err) => {
+        console.error(`[globalRequest] Error`, err);
+        if (onError) onError(err);
+      });
+
   } else if (type === 'window.moffas.do_request') {
     window.moffas.do_request(
       op,

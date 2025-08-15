@@ -5,10 +5,6 @@ const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
 const priv = userData?.priv
 
-let projectTitle= moffas.config.project_title || ''
-
-console.log('moffas.config.project_title=', moffas.config.project_title)
-
 sideBars.push({
   title: 'Dashboard',
   icon: { icon: 'mdi-view-dashboard-outline' },
@@ -17,36 +13,20 @@ sideBars.push({
 // if (Object.keys(priv).length === 0 || priv.hasOwnProperty('view_dashboard')) {
 // }
 
-if (Object.keys(priv).length === 0 || priv.hasOwnProperty('view_broadcast') && priv.hasOwnProperty('view_template')) {
-  sideBars.push({
-    title: 'Group',
-    icon: { icon: 'mdi-group' },
-    to: 'group-management',
-  })
-}
-
-if (Object.keys(priv).length === 0 || priv.hasOwnProperty('view_broadcast') && priv.hasOwnProperty('view_template')) {
-  sideBars.push({
-    title: 'Manual Activation',
-    icon: { icon: 'mdi-form-textbox' },
-    to: 'manual-activation',
-  })
-}
-
+sideBars.push({
+  title: 'Group',
+  icon: { icon: 'mdi-group' },
+  to: 'group-management',
+})
 // if (Object.keys(priv).length === 0 || priv.hasOwnProperty('view_broadcast') && priv.hasOwnProperty('view_template')) {
-//   console.log ("masuk view_broadcast")
-//   sideBars.push({
-//     title: 'Broadcast',
-//     icon: { icon: 'mdi-broadcast' },
-//     to: 'broadcast-list',
-//   })
 // }
-// if (Object.keys(priv).length === 0 || priv.hasOwnProperty('view_dashboard')) {
-//   sideBars.push({
-//     title: 'Package Subscription',
-//     icon: { icon: 'material-symbols:package' },
-//     to: 'package-subscription',
-//   })
+
+sideBars.push({
+  title: 'Manual Activation',
+  icon: { icon: 'mdi-form-textbox' },
+  to: 'manual-activation',
+})
+// if (Object.keys(priv).length === 0 || priv.hasOwnProperty('view_broadcast') && priv.hasOwnProperty('view_template')) {
 // }
 
 // -------------------- Customer Interaction
@@ -73,9 +53,9 @@ customerInteractionSidebar.children.push(
 //   );
 // }
 
-if (customerInteractionSidebar.children.length > 0) {
-  sideBars.push(customerInteractionSidebar);
-}
+// if (customerInteractionSidebar.children.length > 0) {
+//   sideBars.push(customerInteractionSidebar);
+// }
 
 // -------------------- Group Management
 const groupManagementSidebar = {
@@ -85,12 +65,10 @@ const groupManagementSidebar = {
 };
 
 if (Object.keys(priv).length === 0 || priv.hasOwnProperty('view_group') || priv.hasOwnProperty('view_broadcast')) {
-  console.log("masuk view_group");
   groupManagementSidebar.children.push({ title: 'View Group', to: 'group-management-view-all' });
 }
 
 if (Object.keys(priv).length === 0) {
-  console.log("masuk view_group");
   groupManagementSidebar.children.push({ title: 'Create Group', to: 'group-management-create' });
 }
 

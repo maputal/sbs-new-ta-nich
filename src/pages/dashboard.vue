@@ -1,6 +1,5 @@
 <script setup>
   import icon from '@/assets/images/svg/gg_hello.svg';
-import globalRequest from '@/plugins/globalRequest';
 import { useAppStore } from '@/store/app';
 import { useGlobalStore } from '@/store/useGlobalStore';
 
@@ -76,20 +75,20 @@ const appStore = useAppStore()
   const onLoadOwnInfo = (data) => {}
   
   onMounted(() => {
-    let isEmbeddedSignup = store.payloadFin.embedded_signup
-    if(!isEmbeddedSignup){
-      toLoginWaba()
-    } else {
-      let pload = {}
-      globalRequest(
-        'window.moffas.do_request',
-        'getProfile',
-        pload,
-        onLoadOwnInfo,
-        onDataError
-      )
-    }
-    todayDate.value = todayDateF()
+    // let isEmbeddedSignup = store.payloadFin.embedded_signup
+    // if(!isEmbeddedSignup){
+    //   toLoginWaba()
+    // } else {
+    //   let pload = {}
+    //   globalRequest(
+    //     'window.moffas.do_request',
+    //     'getProfile',
+    //     pload,
+    //     onLoadOwnInfo,
+    //     onDataError
+    //   )
+    // }
+    // todayDate.value = todayDateF()
   })
 </script>
 <template>

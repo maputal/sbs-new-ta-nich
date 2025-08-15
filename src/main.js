@@ -20,6 +20,7 @@ async function loadConfig() {
     const base = import.meta.env.BASE_URL || '/'
     const response = await fetch(`${base}config/config.json`)
     const config = await response.json()
+    
     return config
   } catch (error) {
     console.error('Failed to load configuration:', error)
@@ -32,8 +33,9 @@ loadConfig().then(config => {
   // Create Vue app
   const app = createApp(App)
 
+  console.log('config di main.js=', config)
   // Set config globally
-  app.config.globalProperties.$config = config
+  window.$config = config
 
   // Use plugins
   app.use(vuetify)

@@ -9,11 +9,6 @@ const { getPackageExp } = useNotificationOperations()
 const route = useRoute()
 const router = useRouter()
 
-const toHistoryIMEI = () => {
-  appStore.currentIMEI = detailSearchData.value.currentSearch
-  router.push('/search/imei/history-imei/' + detailSearchData.value.currentSearch)
-}
-
 // ===============================================  
 const onDataError = (e) => {
   console.log('masuk error di onDataError', e)
@@ -41,15 +36,10 @@ const chooseConfirmPopup = (data) => {
 function dummymoffasdofetchSeachData(type, op, params, onSuccess, onError) {
   let dummyData = {
     data: {
-      msisdn: '12345678',
-      imei: '865123045678901',
+      tac: '35203492',
       package_name: 'SuperData Combo',
-      package_code: 'SDC123',
-      status: 'ACTIVE',
-      tarif: 'Rp 0 (Including TAX)',
-      activated_tstamp: '1754829000'
     },
-    imei: '865123045678901',
+    tac: '35203492',
     activate_by: 'Admin1'
   }
 
@@ -83,7 +73,7 @@ const searchData = () => {
         return
       }
 
-      detailSearchData.value.currentSearch  = response.imei
+      detailSearchData.value.currentSearch  = response.tac
       detailSearchData.value.reactivateBy  = response.activate_by
       detailSearchData.value.result  = response.data
 
@@ -94,56 +84,6 @@ const searchData = () => {
       }
 
       appStore.hideLoader() 
-    },
-    onDataError
-  )
-}
-
-const deleteIMEI = () => {
-  appStore.setPopup({
-    title: 'Success!',
-    word: 'IMEI has been successfully deleted.',
-    action: 'success',
-    onSucc: () => {
-      resetData()
-      appStore.hideLoader()
-    },
-  })
-
-  return
-
-  console.log('Code deleteIMEI!')
-  appStore.showLoader()
-
-  const params = {
-    imei: detailSearchData.value.currentSearch,
-  }
-
-  globalRequest(
-    'taSecure_POST',
-    'get_broadcasts',
-    params,
-    (data) => {
-      const response = JSON.parse(data)
-
-      if (response.hasOwnProperty('trace_id')) {
-        loading.value = false
-        appStore.hideLoader()
-        appStore.showError(response)
-        return
-      }
-
-      appStore.hideLoader()      
-
-      appStore.setPopup({
-        title: 'Success!',
-        word: 'IMEI has been successfully deleted.',
-        action: 'success',
-        onSucc: () => {
-          resetData()
-          appStore.hideLoader()
-        },
-      })
     },
     onDataError
   )
@@ -178,24 +118,6 @@ const resetData = () => {
   detailSearchData.value.result = null
 }
 
-function getCardIcon(key) {
-  return {
-    cache: 'mdi-database-outline',
-    whitelist: 'mdi-list-box-outline',
-    status: 'mdi-information-outline',
-    ssp_history: 'mdi-history',
-  }[key] || ''; // fallback icon
-}
-
-function getCardText(key) {
-  return {
-    cache: 'MSISDN Cache',
-    whitelist: 'Whitelist',
-    status: 'Bundling Status',
-    ssp_history: 'SSP History',
-  }[key] || '';
-}
-
 function snakeToTitleCase(str) {
   if (!str) return ''
 
@@ -215,22 +137,7 @@ function snakeToTitleCase(str) {
 onMounted(() => {
   if(appStore.isMountedNavbarNotifications == false){
     getPackageExp()
-  }     
-
-  if(appStore.currentIMEI !== ''){
-    search.value = appStore.currentIMEI
-    searchData()
-  }
-})
-
-onBeforeRouteLeave ((to, from) => {
-  // if (localStorage.getItem('ticket_id')) {
-  //   localStorage.removeItem('ticket_id')       
-  // }
-
-  if(appStore.currentIMEI !== ''){
-    appStore.currentIMEI = ''
-  }
+  }    
 })
 </script>
 
@@ -238,7 +145,7 @@ onBeforeRouteLeave ((to, from) => {
   <section>
     <div>
       <h6 class="text-h5 font-weight-bold mb-4">
-        Search IMEI
+        Search TAC
       </h6>
       <!-- <p class="text-subtitle-1 mb-2 font-weight-medium">
         Secure Bundling System
@@ -250,17 +157,17 @@ onBeforeRouteLeave ((to, from) => {
         <VForm ref="refVForm" @submit.prevent="onSubmit">
           <VRow class="align-center">
             <VCol cols="12" md="2" class="d-flex align-center">
-              <VLabel for="searchIMEI" class="ma-0 text-black font-weight-black">Search IMEI</VLabel>
+              <VLabel for="searchTAC" class="ma-0 text-black font-weight-black">Search TAC ID</VLabel>
             </VCol>
 
             <VCol cols="12" md="5">
               <VTextField
-                id="searchIMEI"
+                id="searchTAC"
                 v-model="search"
-                label="IMEI"
+                label="TAC ID"
                 variant="outlined"
                 density="comfortable"
-                :rules="[(v) => !!v || 'IMEI is required']"
+                :rules="[(v) => !!v || 'TAC ID is required']"
                 class="w-100"
                 clearable
                 @click:clear="resetData"
@@ -275,7 +182,7 @@ onBeforeRouteLeave ((to, from) => {
         <div v-if="detailSearchData.result" class="pt-5">
           <VRow class="align-center">
             <VCol cols="12" md="2" class="d-flex align-center">
-              <VLabel class="ma-0 text-black font-weight-black">IMEI Detail</VLabel>
+              <VLabel class="ma-0 text-black font-weight-black">TAC Detail</VLabel>
             </VCol>
             <VCol cols="12" md="8">
               <VChip>                
@@ -311,25 +218,6 @@ onBeforeRouteLeave ((to, from) => {
           </VCol>
         </VRow>  
       </VCardText>
-      <VDivider v-if="detailSearchData.result" />
-      <VCardActions v-if="detailSearchData.result">
-        <VRow class="align-center justify-space-between pt-5">
-          <VCol cols="12" md="6">
-            <VBtn class="text-none px-3" variant="flat" color="info" size="small" prepend-icon="mdi-history" @click="toHistoryIMEI">History IMEI</VBtn>
-          </VCol>
-          <VCol cols="12" md="6">
-            <div class="d-flex justify-end">
-              <VBtn class="text-none px-3" variant="flat" color="primary" size="small" prepend-icon="mdi-trash-can"
-                @click.stop="() => {
-                  chooseConfirmPopup()
-                }"
-              >
-                Delete IMEI
-              </VBtn>
-            </div>
-          </VCol>
-        </VRow>
-      </VCardActions>
     </VCard>
   </section>
 </template>

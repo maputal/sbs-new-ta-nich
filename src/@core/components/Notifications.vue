@@ -1,6 +1,5 @@
 <script setup>
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
-import { avatarText } from '@core/utils/formatters'
 
 const props = defineProps({
   notifications: {
@@ -144,9 +143,9 @@ watch(isMenuOpen, val => {
           </PerfectScrollbar>
 
           <!-- 👉 Footer -->
-          <VCardText class="notification-section">
+          <VCardText class="notification-section align-content-end">
             <div
-              v-for="notification in props.notifications"
+              v-for="notification in props.notifications.filter(n => n.title === 'Expired')"
               :key="notification.title"
             >
               <VBtn

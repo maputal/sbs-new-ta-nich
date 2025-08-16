@@ -1,5 +1,5 @@
 <script setup>
-import { downloadFile } from '@/plugins/downloadFile'
+import { downloadFile } from '@/@core/utils/downloadFile'
 import { useGlobalStore } from '@/store/useGlobalStore'
 
 const store = useGlobalStore()

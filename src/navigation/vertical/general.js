@@ -57,24 +57,28 @@ customerInteractionSidebar.children.push(
 //   sideBars.push(customerInteractionSidebar);
 // }
 
-// -------------------- Group Management
-const groupManagementSidebar = {
-  title: 'Group Management',
-  icon: { icon: 'mdi-account-group-outline' },
+// -------------------- Search
+const searchSidebar = {
+  title: 'Search',
+  icon: { icon: 'mdi-search' },
   children: []
 };
 
-if (Object.keys(priv).length === 0 || priv.hasOwnProperty('view_group') || priv.hasOwnProperty('view_broadcast')) {
-  groupManagementSidebar.children.push({ title: 'View Group', to: 'group-management-view-all' });
-}
+searchSidebar.children.push({ title: 'Search by MSISDN', to: 'search-msisdn' });
+searchSidebar.children.push({ title: 'Search by IMEI', to: 'search-msisdn' });
+searchSidebar.children.push({ title: 'Search by TAC', to: 'search-msisdn' });
 
-if (Object.keys(priv).length === 0) {
-  groupManagementSidebar.children.push({ title: 'Create Group', to: 'group-management-create' });
-}
-
-// if (groupManagementSidebar.children.length > 0) {
-//   sideBars.push(groupManagementSidebar);
+// if (Object.keys(priv).length === 0 || priv.hasOwnProperty('view_group') || priv.hasOwnProperty('view_broadcast')) {
+//   searchSidebar.children.push({ title: 'View Group', to: 'group-management-view-all' });
 // }
+
+// if (Object.keys(priv).length === 0) {
+//   searchSidebar.children.push({ title: 'Create Group', to: 'group-management-create' });
+// }
+
+if (searchSidebar.children.length > 0) {
+  sideBars.push(searchSidebar);
+}
 
 // -------------------- User Management
 // const userManagementSidebar = {

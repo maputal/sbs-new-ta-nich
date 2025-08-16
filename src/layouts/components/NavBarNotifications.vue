@@ -1,7 +1,7 @@
 <script setup>
-import Notifications from '@core/components/Notifications.vue'
-import { useNotificationOperations } from '@/plugins/fetchNotifications'
+import { useNotificationOperations } from '@/@core/utils/fetchNotifications'
 import { useAppStore } from '@/store/app'
+import Notifications from '@core/components/Notifications.vue'
 
 const appStore = useAppStore()
 const { getPackageExp, updateIsReadPackageExp } = useNotificationOperations()

@@ -1,5 +1,5 @@
 <script setup>
-import { useNotificationOperations } from '@/plugins/fetchNotifications';
+import { useNotificationOperations } from '@/@core/utils/fetchNotifications';
 import globalRequest from '@/plugins/globalRequest';
 import { useAppStore } from '@/store/app';
 

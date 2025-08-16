@@ -1,7 +1,7 @@
 <script setup>
+import { useNotificationOperations } from '@/@core/utils/fetchNotifications';
 import CustomDialogGroup from '@/components/group-management/CustomDialogGroup.vue';
 import CustomDialogPackageGroup from '@/components/group-management/CustomDialogPackageGroup.vue';
-import { useNotificationOperations } from '@/plugins/fetchNotifications';
 import globalRequest from '@/plugins/globalRequest';
 import { useAppStore } from '@/store/app';
 
@@ -369,8 +369,6 @@ const deleteGroup = () => {
 // watch(getGroupList)
 
 // =============================================== package section
-const enableDelete = ref(true) // toggle checkbox column
-
 const tableHeader = ref(['Package Name'])
 const tableData = ref([])
 const totalPage = ref(1)
@@ -400,12 +398,6 @@ const showDialogPackage = ref(false)
 const titleDialogPackage = ref('')
 
 const packageList = ref([])
-
-const addPackageGroupData = ref({
-  groupID: '',
-  groupName: '',
-  newPackageGroup: [],
-})
 
 const chooseDialogPackage = () => {
   setGroupData(selectedGroup.value[0])
@@ -781,8 +773,8 @@ const filter = ref({
 })
 
 const confirmDialogProps = ref({
-  confirmationStyling: '',
-  messageTitle: '',
+  // confirmationStyling: '',
+  // messageTitle: '',
   op: '',
 })
 
@@ -1073,7 +1065,7 @@ onBeforeRouteLeave ((to, from) => {
                           v-model="checkedRows"
                         />
                       </td>
-                      <td class="">{{ row.package_name }}</td>
+                      <td class="pl-5">{{ row.package_name }}</td>
                     </tr>
                   </template>
                 </CustomTable>
@@ -1140,17 +1132,6 @@ onBeforeRouteLeave ((to, from) => {
 </template>
   
 <style lang="scss" scoped>
-// .chat-content-container {
-//   // background-color: rgba(var(--v-theme-on-surface), var(--v-hover-opacity));
-//   overflow-wrap: anywhere;
-
-//   .append-inner {
-//     display: flex;
-//     align-items: center;
-//     justify-content: end;
-//   }
-// }
-
 .chat-content-container {
   display: flex;
   flex-direction: column;
@@ -1174,36 +1155,9 @@ onBeforeRouteLeave ((to, from) => {
   height: 100%;
 }
 
-.group-list-wrapper {
-  flex: 1;
-  overflow-y: auto;
-}
-
-.h-100 {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.ps {
-  block-size: 400px;
-}
-
 .bg-hover:hover {
   background-color: rgba(68, 73, 74, 5%);
   // cursor: pointer;
-}
-
-.change-color-btn-text {
-  color: #32bcad;
-}
-
-.custom-dropdown {
-  inline-size: 600px;
-}
-
-.custom-height-select {
-  font-weight: 1000; /* Adjust font weight as needed */
 }
 </style>
 

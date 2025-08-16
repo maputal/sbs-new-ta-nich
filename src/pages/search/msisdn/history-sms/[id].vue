@@ -11,6 +11,7 @@ const route = useRoute()
 const router = useRouter()
 
 const goBack = () => {
+  appStore.currentMSISDN = route.params.id
   router.go(-1)
 }
 

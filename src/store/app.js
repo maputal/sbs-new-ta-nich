@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAppStore = defineStore('app', () => {
   const currentMSISDN = ref('')
+  const currentIMEI = ref('')
 
 
   // Loader state
@@ -150,6 +151,7 @@ export const useAppStore = defineStore('app', () => {
 
   return {
     currentMSISDN,
+    currentIMEI,
     
     // Loader
     showProgressCircular,

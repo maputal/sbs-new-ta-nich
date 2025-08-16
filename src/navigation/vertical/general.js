@@ -65,8 +65,8 @@ const searchSidebar = {
 };
 
 searchSidebar.children.push({ title: 'Search by MSISDN', to: 'search-msisdn' });
-searchSidebar.children.push({ title: 'Search by IMEI', to: 'search-msisdn' });
-searchSidebar.children.push({ title: 'Search by TAC', to: 'search-msisdn' });
+searchSidebar.children.push({ title: 'Search by IMEI', to: 'search-imei' });
+searchSidebar.children.push({ title: 'Search by TAC', to: 'search-imei' });
 
 // if (Object.keys(priv).length === 0 || priv.hasOwnProperty('view_group') || priv.hasOwnProperty('view_broadcast')) {
 //   searchSidebar.children.push({ title: 'View Group', to: 'group-management-view-all' });

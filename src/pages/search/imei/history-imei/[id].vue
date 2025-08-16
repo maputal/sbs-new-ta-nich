@@ -11,7 +11,7 @@ const route = useRoute()
 const router = useRouter()
 
 const goBack = () => {
-  appStore.currentMSISDN = route.params.id
+  appStore.currentIMEI = route.params.id
   router.go(-1)
 }
 
@@ -21,7 +21,7 @@ const onDataError = (e) => {
   appStore.showError(e)
 }
 // ===============================================  
-const tableHeader = ref(['No','MSISDN', 'IMEI', 'Package Name', 'Status', 'Timestamp', 'Note'])
+const tableHeader = ref(['No','MSISDN', 'IMEI', 'Package Name', 'Status', 'Timestamp'])
 const tableData = ref([])
 const totalPage = ref(1)
 const totalRow = ref(0)
@@ -124,7 +124,6 @@ const downloadAsDoc = (type) => {
     row.package_name,
     row.status,
     toTimeDMYHMS(row.timestamp),
-    row.note,
   ]);
 
 
@@ -159,7 +158,7 @@ onMounted(() => {
   <section>
     <div>
       <h6 class="text-h5 font-weight-bold mb-4">
-        Search MSISDN
+        Search IMEI
       </h6>
       <!-- <p class="text-subtitle-1 mb-2 font-weight-medium">
         Secure Bundling System
@@ -173,7 +172,7 @@ onMounted(() => {
             <VBtn variant="tonal" color="#4F4F4F" icon="mdi-arrow-left" @click="goBack" />
           </VCol>
           <VCol cols="12" md="2" class="d-flex justify-end px-0">
-            <VLabel class="ma-0 text-black font-weight-black">History MSISDN</VLabel>
+            <VLabel class="ma-0 text-black font-weight-black">History IMEI</VLabel>
           </VCol>
         </VRow>
       </VCardTitle>
@@ -230,7 +229,6 @@ onMounted(() => {
                 <td class="pl-5">{{ row.package_name }}</td>
                 <td class="text-center pl-5">{{ row.status }}</td>
                 <td class="text-center pl-5">{{ toTimeDMYHMS(row.timestamp) }}</td>
-                <td class="pl-5">{{ row.note }}</td>
               </tr>
             </template>
           </CustomTable>

@@ -267,7 +267,7 @@ const doClearMSISDNCache = () => {
 
   return
 
-  console.log('Code doSSPReActivation!')
+  console.log('Code doClearMSISDNCache!')
   appStore.showLoader()
 
   const params = {
@@ -376,6 +376,16 @@ onMounted(() => {
     searchData()
   }
 })
+
+onBeforeRouteLeave ((to, from) => {
+  // if (localStorage.getItem('ticket_id')) {
+  //   localStorage.removeItem('ticket_id')       
+  // }
+
+  if(appStore.currentMSISDN !== ''){
+    appStore.currentMSISDN = ''
+  }
+})
 </script>
 
 <template>
@@ -416,24 +426,26 @@ onMounted(() => {
             </VCol>
           </VRow>
         </VForm>
-        <div v-if="detailSearchData.result" class="d-flex justify-space-between pt-5">
+        <div v-if="detailSearchData.result" class="pt-5">
           <VRow class="align-center">
-            <VCol cols="12" md="4" class="d-flex align-center">
+            <VCol cols="12" md="2" class="d-flex align-center">
               <VLabel class="ma-0 text-black font-weight-black">MSISDN Detail</VLabel>
             </VCol>
-            <VCol cols="12" md="2" class="px-0">
+            <VCol cols="12" md="8">
               <VChip>                
                 <span class="text-primary font-weight-medium">{{ detailSearchData.currentSearch || '' }}</span>
               </VChip>
             </VCol>
-          </VRow>
-          <VRow class="align-center justify-end">
-            <div class=" text-subtitle-1">
-              Reactivate By:
-            </div>
-            <div class="text-black font-weight-bold text-subtitle-2 pl-2">
-              {{ detailSearchData.reactivateBy || '' }}
-            </div>
+            <VCol cols="12" md="2">
+              <div class="d-flex align-center justify-end">
+                <div class=" text-subtitle-1">
+                  Reactivate By:
+                </div>
+                <div class="text-black font-weight-bold text-subtitle-2 pl-2">
+                  {{ detailSearchData.reactivateBy || '' }}
+                </div>
+              </div>
+            </VCol>
           </VRow>
         </div>
       </VCardTitle>
@@ -472,12 +484,12 @@ onMounted(() => {
       <VCardActions v-if="detailSearchData.result">
         <VRow class="align-center pt-5">
           <VCol cols="12" md="4">
-            <VBtn class="px-3" variant="flat" color="info" size="small" prepend-icon="mdi-history" @click="toHistoryMsisdn">History MSISDN</VBtn>
-            <VBtn class="px-3" variant="flat" color="info" size="small" prepend-icon="mdi-file-word" @click="toHistorySMS">History SMS Wording</VBtn>
+            <VBtn class="text-none px-3" variant="flat" color="info" size="small" prepend-icon="mdi-history" @click="toHistoryMsisdn">History MSISDN</VBtn>
+            <VBtn class="text-none px-3" variant="flat" color="info" size="small" prepend-icon="mdi-file-word" @click="toHistorySMS">History SMS Wording</VBtn>
           </VCol>
           <VCol cols="12" md="4">
-            <VBtn class="px-3" variant="flat" color="info" size="small" prepend-icon="mdi-refresh" @click="toUpdateImei">Update IMEI</VBtn>
-            <VBtn class="px-3" variant="flat" color="info" size="small" prepend-icon="mdi-form-textbox"
+            <VBtn class="text-none px-3" variant="flat" color="info" size="small" prepend-icon="mdi-refresh" @click="toUpdateImei">Update IMEI</VBtn>
+            <VBtn class="text-none px-3" variant="flat" color="info" size="small" prepend-icon="mdi-form-textbox"
               @click.stop="() => {
                 confirmDialogProps.op = 'manual activation'
                 chooseConfirmPopup()
@@ -487,7 +499,7 @@ onMounted(() => {
             </VBtn>
           </VCol>
           <VCol cols="12" md="2">
-            <VBtn class="px-3" variant="flat" color="info" size="small" prepend-icon="mdi-cloud-refresh"
+            <VBtn class="text-none px-3" variant="flat" color="info" size="small" prepend-icon="mdi-cloud-refresh"
               @click.stop="() => {
                 confirmDialogProps.op = 're-activation'
                 chooseConfirmPopup()
@@ -497,7 +509,7 @@ onMounted(() => {
             </VBtn>
           </VCol>
           <VCol cols="12" md="2">
-            <VBtn class="px-3" variant="flat" color="info" size="small" prepend-icon="mdi-trash-can"
+            <VBtn class="text-none px-3" variant="flat" color="info" size="small" prepend-icon="mdi-trash-can"
               @click.stop="() => {
                 confirmDialogProps.op = 'clear cache'
                 chooseConfirmPopup()

@@ -73,8 +73,61 @@ customerInteractionSidebar.children.push(
 //   );
 // }
 
+// -------------------- Package Sidebar
+const packageSidebar = {
+  title: "Package",
+  icon: { icon: "material-symbols:package" },
+  children: [],
+}
+
+packageSidebar.children.push({
+  title: "Create Package",
+  to: "package-create",
+})
+
+packageSidebar.children.push({
+  title: "List Package",
+  to: "package-list",
+})
+
+if ((Object.keys(priv).length === 0 || priv.hasOwnProperty("view_dashboard")) && packageSidebar.children.length > 0) {
+  sideBars.push(packageSidebar);
+}
+
 if (customerInteractionSidebar.children.length > 0) {
   sideBars.push(customerInteractionSidebar);
+}
+
+
+// -------- Settings Sidebar
+const settingsSidebar = {
+  title: 'Settings',
+  icon: { icon: "mdi-cog" },
+  children: [],
+}
+
+settingsSidebar.children.push({
+  title: 'Retry Settings',
+  to: 'settings-retry',
+})
+
+settingsSidebar.children.push({
+  title: 'Alert Settings',
+  to: 'settings-alert',
+})
+
+settingsSidebar.children.push({
+  title: 'Upload Data HLR',
+  to: 'settings-hlr-upload',
+})
+
+settingsSidebar.children.push({
+  title: 'Wording Editor',
+  to: 'settings-wording-editor',
+})
+
+if (settingsSidebar.children.length > 0) {
+  sideBars.push(settingsSidebar)
 }
 
 // -------------------- Group Management

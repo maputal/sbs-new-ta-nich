@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed } from "vue"
 
 // Props
 const props = defineProps({
@@ -14,22 +14,22 @@ const props = defineProps({
   mode: {
     type: String,
     default: "create", // 'create' or 'edit'
-    validator: (value) => ["create", "edit"].includes(value),
+    validator: value => ["create", "edit"].includes(value),
   },
-});
+})
 
 // Emits
-const emit = defineEmits(["update:modelValue", "submit", "reset"]);
+const emit = defineEmits(["update:modelValue", "submit", "reset"])
 
 // Local form data
-const formData = ref({ ...props.modelValue });
+const formData = ref({ ...props.modelValue })
 
 // Form validation
-const isFormValid = ref(false);
+const isFormValid = ref(false)
 
 // Validation rules
-const requiredRules = [(v) => !!v || "This field is required"];
-const numberRules = [(v) => /^\d+$/.test(v) || "Must be a valid number"];
+const requiredRules = [v => !!v || "This field is required"]
+const numberRules = [v => /^\d+$/.test(v) || "Must be a valid number"]
 
 // Options
 const applicableAreas = ref([
@@ -37,56 +37,56 @@ const applicableAreas = ref([
   { title: "MC-MSISDN-JKT", value: "MC-MSISDN-JKT" },
   { title: "MC-MSISDN-BEMO", value: "MC-MSISDN-BEMO" },
   { title: "MC-GTASAPI", value: "MC-GTASAPI" },
-]);
+])
 
 const priorityValues = ref([
   { title: "High", value: "high" },
   { title: "Medium", value: "Medium" },
   { title: "Low", value: "low" },
-]);
+])
 
 const bundlingTypes = ref([
   { title: "Discount", value: "DISCOUNT" },
   { title: "Bundle", value: "BUNDLE" },
   { title: "Free Trial", value: "FREE_TRIAL" },
-]);
+])
 
 // Computed
 const submitButtonText = computed(() => {
-  return props.mode === "edit" ? "Update Package" : "Create New Package";
-});
+  return props.mode === "edit" ? "Update Package" : "Create New Package"
+})
 
 const cardTitle = computed(() => {
-  return props.mode === "edit" ? "Edit Package" : "New Package";
-});
+  return props.mode === "edit" ? "Edit Package" : "New Package"
+})
 
 // Watchers
 watch(
   () => props.modelValue,
-  (newValue) => {
-    formData.value = { ...newValue };
+  newValue => {
+    formData.value = { ...newValue }
   },
-  { deep: true }
-);
+  { deep: true },
+)
 
 watch(
   formData,
-  (newValue) => {
-    emit("update:modelValue", { ...newValue });
+  newValue => {
+    emit("update:modelValue", { ...newValue })
   },
-  { deep: true }
-);
+  { deep: true },
+)
 
 // Methods
 const handleSubmit = () => {
   if (validateForm()) {
-    emit("submit", { ...formData.value });
+    emit("submit", { ...formData.value })
   }
-};
+}
 
 const handleReset = () => {
-  emit("reset");
-};
+  emit("reset")
+}
 
 const validateForm = () => {
   return (
@@ -94,15 +94,21 @@ const validateForm = () => {
     formData.value.packageCode &&
     formData.value.packageLimit &&
     formData.value.packageDuration
-  );
-};
+  )
+}
 </script>
 
 <template>
-  <VForm v-model="isFormValid" @submit.prevent="handleSubmit">
+  <VForm
+    v-model="isFormValid"
+    @submit.prevent="handleSubmit"
+  >
     <VRow class="mb-4">
       <!-- Package Name -->
-      <VCol cols="12" md="12">
+      <VCol
+        cols="12"
+        md="12"
+      >
         <VTextField
           v-model="formData.packageName"
           label="Package Name"
@@ -114,7 +120,10 @@ const validateForm = () => {
 
     <VRow>
       <!-- Package Code -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VTextField
           v-model="formData.packageCode"
           label="Package Code"
@@ -124,7 +133,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- Package Quota -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VTextField
           v-model="formData.packageLimit"
           label="Package Quota"
@@ -134,7 +146,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- Duration -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VTextField
           v-model="formData.packageDuration"
           label="Duration"
@@ -144,7 +159,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- Priority -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VSelect
           v-model="formData.priority"
           label="Priority"
@@ -155,7 +173,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- Tariff -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VTextField
           v-model="formData.packageTariff"
           label="Package Tariff"
@@ -165,7 +186,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- Applicable Area -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VSelect
           v-model="formData.applicableArea"
           label="Applicable Area"
@@ -176,7 +200,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- Bundling Type -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VSelect
           v-model="formData.bundlingType"
           label="Bundling Type"
@@ -187,25 +214,44 @@ const validateForm = () => {
       </VCol>
 
       <!-- Monogami -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <div>
-          <label class="text-body-2 font-weight-medium mb-2 d-block"
-            >Monogami</label
-          >
+          <label class="text-body-2 font-weight-medium mb-2 d-block">Monogami</label>
         </div>
-        <VRadioGroup v-model="formData.monogami" inline>
-          <VRadio label="Multi-SMS" value="Multi-SMS" />
-          <VRadio label="Single-SMS" value="Single-SMS" />
+        <VRadioGroup
+          v-model="formData.monogami"
+          inline
+        >
+          <VRadio
+            label="Multi-SMS"
+            value="Multi-SMS"
+          />
+          <VRadio
+            label="Single-SMS"
+            value="Single-SMS"
+          />
         </VRadioGroup>
       </VCol>
 
       <!-- Offer Section -->
-      <VCol cols="12" md="6">
-        <VCheckbox v-model="formData.offer" label="Offer" />
+      <VCol
+        cols="12"
+        md="6"
+      >
+        <VCheckbox
+          v-model="formData.offer"
+          label="Offer"
+        />
       </VCol>
 
       <!-- Expiry Date -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VTextField
           v-model="formData.expiry"
           label="Expiry Date"
@@ -215,7 +261,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- Offer Message -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VTextField
           v-model="formData.offerMessage"
           label="Offer Message"
@@ -224,7 +273,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- SMS Warning -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VTextField
           v-model="formData.smsWarning"
           label="SMS Warning"
@@ -233,7 +285,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- Rejection Message -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VTextField
           v-model="formData.rejectionMessage"
           label="Rejection Message"
@@ -242,7 +297,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- SMS Terminate -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VTextField
           v-model="formData.smsTerminate"
           label="SMS Terminate"
@@ -251,7 +309,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- SMS Keyword -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VTextField
           v-model="formData.smsKeyword"
           label="SMS Keyword"
@@ -260,7 +321,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- SMS Reactivation -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VTextField
           v-model="formData.smsReactivation"
           label="SMS Reactivation"
@@ -269,7 +333,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- Wording Editor -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VCheckbox
           v-model="formData.wordingEditor"
           label="Wording Editor"
@@ -277,7 +344,10 @@ const validateForm = () => {
       </VCol>
 
       <!-- Custom Termination Wait Time -->
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <VTextField
           v-model="formData.customTerminationWaitTime"
           label="Custom Termination Wait Time"
@@ -334,8 +404,15 @@ const validateForm = () => {
 
     <!-- Action Buttons -->
     <VRow class="mt-4">
-      <VCol cols="12" class="d-flex justify-end gap-4">
-        <VBtn variant="outlined" color="secondary" @click="handleReset">
+      <VCol
+        cols="12"
+        class="d-flex justify-end gap-4"
+      >
+        <VBtn
+          variant="outlined"
+          color="secondary"
+          @click="handleReset"
+        >
           Reset
         </VBtn>
         <VBtn

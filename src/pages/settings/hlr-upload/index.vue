@@ -6,7 +6,7 @@ const pageTitle = ref("Upload Data HLR")
 // Form data
 const uploadData = reactive({
   files: [],
-  selectedFiles: []
+  selectedFiles: [],
 })
 
 // UI state
@@ -26,22 +26,25 @@ const hasFiles = computed(() => uploadData.files.length > 0)
 const isFormValid = computed(() => hasFiles.value)
 
 // File handling methods
-const handleFileSelect = (event) => {
+const handleFileSelect = event => {
   const files = Array.from(event.target.files)
+
   addFiles(files)
 }
 
-const handleFileDrop = (event) => {
+const handleFileDrop = event => {
   event.preventDefault()
+
   const files = Array.from(event.dataTransfer.files)
+
   addFiles(files)
 }
 
-const addFiles = (files) => {
+const addFiles = files => {
   files.forEach(file => {
     // Check if file is already added
     const exists = uploadData.files.some(existingFile => 
-      existingFile.name === file.name && existingFile.size === file.size
+      existingFile.name === file.name && existingFile.size === file.size,
     )
     
     if (!exists) {
@@ -51,14 +54,15 @@ const addFiles = (files) => {
         name: file.name,
         size: file.size,
         progress: 0,
-        status: 'pending' // pending, uploading, success, error
+        status: 'pending', // pending, uploading, success, error
       }
+
       uploadData.files.push(fileObj)
     }
   })
 }
 
-const removeFile = (fileId) => {
+const removeFile = fileId => {
   uploadData.files = uploadData.files.filter(f => f.id !== fileId)
 }
 
@@ -69,20 +73,21 @@ const clearAllFiles = () => {
   }
 }
 
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (bytes === 0) return '0 Bytes'
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
+  
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 // Drag and drop handlers
-const onDragOver = (event) => {
+const onDragOver = event => {
   event.preventDefault()
 }
 
-const onDragLeave = (event) => {
+const onDragLeave = event => {
   event.preventDefault()
 }
 
@@ -106,7 +111,7 @@ const uploadFiles = () => {
   isLoading.value = true
   uploadProgress.value = 0
   
-  const onSuccess = (response) => {
+  const onSuccess = response => {
     isLoading.value = false
     uploadProgress.value = 100
     isSuccessToastVisible.value = true
@@ -119,7 +124,7 @@ const uploadFiles = () => {
     })
   }
 
-  const onError = (error) => {
+  const onError = error => {
     isLoading.value = false
     errorMessage.value = error.message || "Failed to upload files"
     isErrorToastVisible.value = true
@@ -131,6 +136,7 @@ const uploadFiles = () => {
   }
 
   const formData = new FormData()
+
   uploadData.files.forEach((fileObj, index) => {
     formData.append(`files[${index}]`, fileObj.file)
     fileObj.status = 'uploading'
@@ -172,7 +178,7 @@ const closeErrorToast = () => {
 }
 
 // Auto close toasts after 5 seconds
-watch(isSuccessToastVisible, (newVal) => {
+watch(isSuccessToastVisible, newVal => {
   if (newVal) {
     setTimeout(() => {
       isSuccessToastVisible.value = false
@@ -180,7 +186,7 @@ watch(isSuccessToastVisible, (newVal) => {
   }
 })
 
-watch(isErrorToastVisible, (newVal) => {
+watch(isErrorToastVisible, newVal => {
   if (newVal) {
     setTimeout(() => {
       isErrorToastVisible.value = false
@@ -193,12 +199,19 @@ watch(isErrorToastVisible, (newVal) => {
   <div class="hlr-upload">
     <!-- Toast Notifications -->
     <!-- Confirmation Toast -->
-    <Transition name="toast-slide" appear>
+    <Transition
+      name="toast-slide"
+      appear
+    >
       <div
         v-if="isConfirmToastVisible"
         class="toast-container confirmation-toast"
       >
-        <VCard class="toast-card" elevation="8" rounded="lg">
+        <VCard
+          class="toast-card"
+          elevation="8"
+          rounded="lg"
+        >
           <VCardText class="pa-4">
             <div class="d-flex align-center">
               <VIcon
@@ -239,9 +252,19 @@ watch(isErrorToastVisible, (newVal) => {
     </Transition>
 
     <!-- Success Toast -->
-    <Transition name="toast-slide" appear>
-      <div v-if="isSuccessToastVisible" class="toast-container success-toast">
-        <VCard class="toast-card" elevation="8" rounded="lg">
+    <Transition
+      name="toast-slide"
+      appear
+    >
+      <div
+        v-if="isSuccessToastVisible"
+        class="toast-container success-toast"
+      >
+        <VCard
+          class="toast-card"
+          elevation="8"
+          rounded="lg"
+        >
           <VCardText class="pa-4">
             <div class="d-flex align-center">
               <VIcon
@@ -272,9 +295,19 @@ watch(isErrorToastVisible, (newVal) => {
     </Transition>
 
     <!-- Error Toast -->
-    <Transition name="toast-slide" appear>
-      <div v-if="isErrorToastVisible" class="toast-container error-toast">
-        <VCard class="toast-card" elevation="8" rounded="lg">
+    <Transition
+      name="toast-slide"
+      appear
+    >
+      <div
+        v-if="isErrorToastVisible"
+        class="toast-container error-toast"
+      >
+        <VCard
+          class="toast-card"
+          elevation="8"
+          rounded="lg"
+        >
           <VCardText class="pa-4">
             <div class="d-flex align-center">
               <VIcon
@@ -362,9 +395,14 @@ watch(isErrorToastVisible, (newVal) => {
             </div>
 
             <!-- File List -->
-            <div v-if="hasFiles" class="mb-4">
+            <div
+              v-if="hasFiles"
+              class="mb-4"
+            >
               <div class="d-flex align-center justify-space-between mb-3">
-                <div class="text-h6">Selected Files</div>
+                <div class="text-h6">
+                  Selected Files
+                </div>
                 <VBtn
                   color="error"
                   variant="text"
@@ -384,11 +422,11 @@ watch(isErrorToastVisible, (newVal) => {
                   <div class="d-flex align-center">
                     <VIcon
                       :icon="fileObj.status === 'success' ? 'mdi-check-circle' : 
-                             fileObj.status === 'error' ? 'mdi-alert-circle' :
-                             fileObj.status === 'uploading' ? 'mdi-loading mdi-spin' : 'mdi-file-document'"
+                        fileObj.status === 'error' ? 'mdi-alert-circle' :
+                        fileObj.status === 'uploading' ? 'mdi-loading mdi-spin' : 'mdi-file-document'"
                       :color="fileObj.status === 'success' ? 'success' : 
-                              fileObj.status === 'error' ? 'error' :
-                              fileObj.status === 'uploading' ? 'primary' : 'default'"
+                        fileObj.status === 'error' ? 'error' :
+                        fileObj.status === 'uploading' ? 'primary' : 'default'"
                       size="20"
                       class="me-3"
                     />
@@ -410,7 +448,10 @@ watch(isErrorToastVisible, (newVal) => {
                   </div>
 
                   <!-- Progress Bar for uploading files -->
-                  <div v-if="fileObj.status === 'uploading'" class="mt-2">
+                  <div
+                    v-if="fileObj.status === 'uploading'"
+                    class="mt-2"
+                  >
                     <VProgressLinear
                       :model-value="fileObj.progress || uploadProgress"
                       color="primary"
@@ -422,7 +463,10 @@ watch(isErrorToastVisible, (newVal) => {
             </div>
 
             <!-- Upload Progress -->
-            <div v-if="isLoading" class="mb-4">
+            <div
+              v-if="isLoading"
+              class="mb-4"
+            >
               <div class="d-flex align-center mb-2">
                 <VIcon
                   icon="mdi-upload"
@@ -449,7 +493,10 @@ watch(isErrorToastVisible, (newVal) => {
                 :loading="isLoading"
                 @click="showConfirmToast"
               >
-                <VIcon icon="mdi-upload" class="me-2" />
+                <VIcon
+                  icon="mdi-upload"
+                  class="me-2"
+                />
                 Submit
               </VBtn>
             </div>

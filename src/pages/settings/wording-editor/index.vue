@@ -1,7 +1,7 @@
 <script setup>
-import { ref, reactive, watch, onMounted } from "vue";
+import { ref, reactive, watch, onMounted } from "vue"
 
-const pageTitle = ref("Wording Editor");
+const pageTitle = ref("Wording Editor")
 
 // Form data
 const wordingData = reactive({
@@ -10,96 +10,96 @@ const wordingData = reactive({
   pairedNotification: "",
   fraudNotification: "",
   specialFraudImeiNotification: "",
-});
+})
 
 // UI state
-const isConfirmToastVisible = ref(false);
-const isSuccessToastVisible = ref(false);
-const isErrorToastVisible = ref(false);
-const isLoading = ref(false);
-const errorMessage = ref("");
-const successMessage = ref("Wording settings saved successfully");
+const isConfirmToastVisible = ref(false)
+const isSuccessToastVisible = ref(false)
+const isErrorToastVisible = ref(false)
+const isLoading = ref(false)
+const errorMessage = ref("")
+const successMessage = ref("Wording settings saved successfully")
 
 // Form validation
-const isFormValid = ref(true); // Always valid since no required fields
+const isFormValid = ref(true) // Always valid since no required fields
 
 // Load current settings on component mount
 const loadSettings = () => {
-  isLoading.value = true;
+  isLoading.value = true
 
-  const onSuccess = (response) => {
+  const onSuccess = response => {
     if (response.data) {
       wordingData.manualActivateNotification =
-        response.data.manual_activate_notification || "";
+        response.data.manual_activate_notification || ""
       wordingData.failedActivationNotification =
-        response.data.failed_activation_notification || "";
-      wordingData.pairedNotification = response.data.paired_notification || "";
-      wordingData.fraudNotification = response.data.fraud_notification || "";
+        response.data.failed_activation_notification || ""
+      wordingData.pairedNotification = response.data.paired_notification || ""
+      wordingData.fraudNotification = response.data.fraud_notification || ""
       wordingData.specialFraudImeiNotification =
-        response.data.special_fraud_imei_notification || "";
+        response.data.special_fraud_imei_notification || ""
     }
-    isLoading.value = false;
-  };
+    isLoading.value = false
+  }
 
-  const onError = (error) => {
-    console.error("Error loading wording settings:", error);
-    errorMessage.value = error.message || "Failed to load wording settings";
-    isErrorToastVisible.value = true;
-    isLoading.value = false;
-  };
+  const onError = error => {
+    console.error("Error loading wording settings:", error)
+    errorMessage.value = error.message || "Failed to load wording settings"
+    isErrorToastVisible.value = true
+    isLoading.value = false
+  }
 
   // Replace with actual MOFFAS API call
   if (window.moffas) {
-    window.moffas.do_request("get_wording_settings", {}, onSuccess, onError);
+    window.moffas.do_request("get_wording_settings", {}, onSuccess, onError)
   } else {
     // Mock data for development
     setTimeout(() => {
       wordingData.manualActivateNotification =
-        "Lorem ipsum dolor sit amet, consectetur. Felis egestas amet enim risus egestas in orci egestas turpis. Eu vulputate hac amet sit sit. Pharetra commodo ipsum tristique dictum nunc. Faucibus orci ultrices felis tortor vestibulum.";
+        "Lorem ipsum dolor sit amet, consectetur. Felis egestas amet enim risus egestas in orci egestas turpis. Eu vulputate hac amet sit sit. Pharetra commodo ipsum tristique dictum nunc. Faucibus orci ultrices felis tortor vestibulum."
       wordingData.failedActivationNotification =
-        "Lorem ipsum dolor sit amet, consectetur. Felis egestas amet enim risus egestas in orci egestas turpis. Eu vulputate hac amet sit sit. Pharetra commodo ipsum tristique dictum nunc. Faucibus orci ultrices felis tortor vestibulum.";
+        "Lorem ipsum dolor sit amet, consectetur. Felis egestas amet enim risus egestas in orci egestas turpis. Eu vulputate hac amet sit sit. Pharetra commodo ipsum tristique dictum nunc. Faucibus orci ultrices felis tortor vestibulum."
       wordingData.pairedNotification =
-        "Lorem ipsum dolor sit amet, consectetur. Felis egestas amet enim risus egestas in orci egestas turpis. Eu vulputate hac amet sit sit. Pharetra commodo ipsum tristique dictum nunc. Faucibus orci ultrices felis tortor vestibulum.";
+        "Lorem ipsum dolor sit amet, consectetur. Felis egestas amet enim risus egestas in orci egestas turpis. Eu vulputate hac amet sit sit. Pharetra commodo ipsum tristique dictum nunc. Faucibus orci ultrices felis tortor vestibulum."
       wordingData.fraudNotification =
-        "Lorem ipsum dolor sit amet, consectetur. Felis egestas amet enim risus egestas in orci egestas turpis. Eu vulputate hac amet sit sit. Pharetra commodo ipsum tristique dictum nunc. Faucibus orci ultrices felis tortor vestibulum.";
+        "Lorem ipsum dolor sit amet, consectetur. Felis egestas amet enim risus egestas in orci egestas turpis. Eu vulputate hac amet sit sit. Pharetra commodo ipsum tristique dictum nunc. Faucibus orci ultrices felis tortor vestibulum."
       wordingData.specialFraudImeiNotification =
-        "Lorem ipsum dolor sit amet, consectetur. Felis egestas amet enim risus egestas in orci egestas turpis. Eu vulputate hac amet sit sit. Pharetra commodo ipsum tristique dictum nunc. Faucibus orci ultrices felis tortor vestibulum.";
-      isLoading.value = false;
-    }, 1000);
+        "Lorem ipsum dolor sit amet, consectetur. Felis egestas amet enim risus egestas in orci egestas turpis. Eu vulputate hac amet sit sit. Pharetra commodo ipsum tristique dictum nunc. Faucibus orci ultrices felis tortor vestibulum."
+      isLoading.value = false
+    }, 1000)
   }
-};
+}
 
 // Show confirmation toast
 const showConfirmToast = () => {
-  isConfirmToastVisible.value = true;
-};
+  isConfirmToastVisible.value = true
+}
 
 // Confirm saving changes
 const confirmSave = () => {
-  isConfirmToastVisible.value = false;
-  saveSettings();
-};
+  isConfirmToastVisible.value = false
+  saveSettings()
+}
 
 // Cancel saving changes
 const cancelSave = () => {
-  isConfirmToastVisible.value = false;
-};
+  isConfirmToastVisible.value = false
+}
 
 // Save settings
 const saveSettings = () => {
-  isLoading.value = true;
+  isLoading.value = true
 
-  const onSuccess = (response) => {
-    isLoading.value = false;
-    isSuccessToastVisible.value = true;
-    successMessage.value = "Wording settings saved successfully";
-  };
+  const onSuccess = response => {
+    isLoading.value = false
+    isSuccessToastVisible.value = true
+    successMessage.value = "Wording settings saved successfully"
+  }
 
-  const onError = (error) => {
-    isLoading.value = false;
-    errorMessage.value = error.message || "Failed to save wording settings";
-    isErrorToastVisible.value = true;
-  };
+  const onError = error => {
+    isLoading.value = false
+    errorMessage.value = error.message || "Failed to save wording settings"
+    isErrorToastVisible.value = true
+  }
 
   const params = {
     manual_activate_notification: wordingData.manualActivateNotification,
@@ -107,7 +107,7 @@ const saveSettings = () => {
     paired_notification: wordingData.pairedNotification,
     fraud_notification: wordingData.fraudNotification,
     special_fraud_imei_notification: wordingData.specialFraudImeiNotification,
-  };
+  }
 
   // Replace with actual MOFFAS API call
   if (window.moffas) {
@@ -115,59 +115,66 @@ const saveSettings = () => {
       "save_wording_settings",
       params,
       onSuccess,
-      onError
-    );
+      onError,
+    )
   } else {
     // Mock success for development
     setTimeout(() => {
-      isLoading.value = false;
-      isSuccessToastVisible.value = true;
-    }, 1500);
+      isLoading.value = false
+      isSuccessToastVisible.value = true
+    }, 1500)
   }
-};
+}
 
 // Close toasts
 const closeSuccessToast = () => {
-  isSuccessToastVisible.value = false;
-};
+  isSuccessToastVisible.value = false
+}
 
 const closeErrorToast = () => {
-  isErrorToastVisible.value = false;
-};
+  isErrorToastVisible.value = false
+}
 
 // Auto close toasts after 5 seconds
-watch(isSuccessToastVisible, (newVal) => {
+watch(isSuccessToastVisible, newVal => {
   if (newVal) {
     setTimeout(() => {
-      isSuccessToastVisible.value = false;
-    }, 5000);
+      isSuccessToastVisible.value = false
+    }, 5000)
   }
-});
+})
 
-watch(isErrorToastVisible, (newVal) => {
+watch(isErrorToastVisible, newVal => {
   if (newVal) {
     setTimeout(() => {
-      isErrorToastVisible.value = false;
-    }, 5000);
+      isErrorToastVisible.value = false
+    }, 5000)
   }
-});
+})
 
 // Load settings on component mount
 onMounted(() => {
-  loadSettings();
-});
+  loadSettings()
+})
 </script>
 
 <template>
   <div class="wording-editor">
     <!-- Toast Notifications -->
     <!-- Confirmation Toast -->
-    <Transition name="toast-slide" appear>
+    <Transition
+      name="toast-slide"
+      appear
+    >
       <div
         v-if="isConfirmToastVisible"
         class="toast-container confirmation-toast"
       >
-        <VCard class="toast-card" elevation="8" rounded="lg">
+        <VCard
+          class="toast-card"
+          elevation="8"
+          rounded="lg"
+        >
           <VCardText class="pa-4">
             <div class="d-flex align-center">
               <VIcon
@@ -193,7 +200,11 @@ onMounted(() => {
                 >
                   Cancel
                 </VBtn>
-                <VBtn size="small" color="error" @click="confirmSave">
+                <VBtn
+                  size="small"
+                  color="error"
+                  @click="confirmSave"
+                >
                   OK
                 </VBtn>
               </div>
@@ -204,9 +215,19 @@ onMounted(() => {
     </Transition>
 
     <!-- Success Toast -->
-    <Transition name="toast-slide" appear>
-      <div v-if="isSuccessToastVisible" class="toast-container success-toast">
-        <VCard class="toast-card" elevation="8" rounded="lg">
+    <Transition
+      name="toast-slide"
+      appear
+    >
+      <div
+        v-if="isSuccessToastVisible"
+        class="toast-container success-toast"
+      >
+        <VCard
+          class="toast-card"
+          elevation="8"
+          rounded="lg"
+        >
           <VCardText class="pa-4">
             <div class="d-flex align-center">
               <VIcon
@@ -223,7 +244,11 @@ onMounted(() => {
                   {{ successMessage }}
                 </div>
               </div>
-              <VBtn size="small" color="success" @click="closeSuccessToast">
+              <VBtn
+                size="small"
+                color="success"
+                @click="closeSuccessToast"
+              >
                 OK
               </VBtn>
             </div>
@@ -233,9 +258,19 @@ onMounted(() => {
     </Transition>
 
     <!-- Error Toast -->
-    <Transition name="toast-slide" appear>
-      <div v-if="isErrorToastVisible" class="toast-container error-toast">
-        <VCard class="toast-card" elevation="8" rounded="lg">
+    <Transition
+      name="toast-slide"
+      appear
+    >
+      <div
+        v-if="isErrorToastVisible"
+        class="toast-container error-toast"
+      >
+        <VCard
+          class="toast-card"
+          elevation="8"
+          rounded="lg"
+        >
           <VCardText class="pa-4">
             <div class="d-flex align-center">
               <VIcon
@@ -245,12 +280,18 @@ onMounted(() => {
                 class="me-3"
               />
               <div class="flex-grow-1">
-                <div class="text-h6 font-weight-bold text-error">Error!</div>
+                <div class="text-h6 font-weight-bold text-error">
+                  Error!
+                </div>
                 <div class="text-body-2 text-medium-emphasis">
                   {{ errorMessage }}
                 </div>
               </div>
-              <VBtn size="small" color="error" @click="closeErrorToast">
+              <VBtn
+                size="small"
+                color="error"
+                @click="closeErrorToast"
+              >
                 OK
               </VBtn>
             </div>
@@ -275,9 +316,18 @@ onMounted(() => {
 
     <!-- Loading State -->
     <VRow v-if="isLoading && !wordingData.manualActivateNotification">
-      <VCol cols="12" class="text-center">
-        <VProgressCircular indeterminate color="primary" size="48" />
-        <div class="mt-3">Loading wording settings...</div>
+      <VCol
+        cols="12"
+        class="text-center"
+      >
+        <VProgressCircular
+          indeterminate
+          color="primary"
+          size="48"
+        />
+        <div class="mt-3">
+          Loading wording settings...
+        </div>
       </VCol>
     </VRow>
 
@@ -288,11 +338,12 @@ onMounted(() => {
           <VForm v-model="isFormValid">
             <VRow>
               <!-- Manual Activate Notification -->
-              <VCol cols="12" class="pb-6">
+              <VCol
+                cols="12"
+                class="pb-6"
+              >
                 <div class="mb-2">
-                  <span class="text-body-2 text-high-emphasis"
-                    >Manual Activate Notification</span
-                  >
+                  <span class="text-body-2 text-high-emphasis">Manual Activate Notification</span>
                 </div>
                 <div class="mb-2">
                   <span class="text-caption text-error">Text</span>
@@ -307,11 +358,12 @@ onMounted(() => {
               </VCol>
 
               <!-- Failed Activation Notification -->
-              <VCol cols="12" class="pb-6">
+              <VCol
+                cols="12"
+                class="pb-6"
+              >
                 <div class="mb-2">
-                  <span class="text-body-2 text-high-emphasis"
-                    >Failed Activation Notification</span
-                  >
+                  <span class="text-body-2 text-high-emphasis">Failed Activation Notification</span>
                 </div>
                 <div class="mb-2">
                   <span class="text-caption text-error">Text</span>
@@ -326,11 +378,12 @@ onMounted(() => {
               </VCol>
 
               <!-- Paired Notification -->
-              <VCol cols="12" class="pb-6">
+              <VCol
+                cols="12"
+                class="pb-6"
+              >
                 <div class="mb-2">
-                  <span class="text-body-2 text-high-emphasis"
-                    >Paired Notification</span
-                  >
+                  <span class="text-body-2 text-high-emphasis">Paired Notification</span>
                 </div>
                 <div class="mb-2">
                   <span class="text-caption text-error">Text</span>
@@ -345,11 +398,12 @@ onMounted(() => {
               </VCol>
 
               <!-- Fraud Notification -->
-              <VCol cols="12" class="pb-6">
+              <VCol
+                cols="12"
+                class="pb-6"
+              >
                 <div class="mb-2">
-                  <span class="text-body-2 text-high-emphasis"
-                    >Fraud Notification</span
-                  >
+                  <span class="text-body-2 text-high-emphasis">Fraud Notification</span>
                 </div>
                 <div class="mb-2">
                   <span class="text-caption text-error">Text</span>
@@ -364,11 +418,12 @@ onMounted(() => {
               </VCol>
 
               <!-- Special Fraud IMEI Notification -->
-              <VCol cols="12" class="pb-6">
+              <VCol
+                cols="12"
+                class="pb-6"
+              >
                 <div class="mb-2">
-                  <span class="text-body-2 text-high-emphasis"
-                    >Special Fraud IMEI Notification</span
-                  >
+                  <span class="text-body-2 text-high-emphasis">Special Fraud IMEI Notification</span>
                 </div>
                 <div class="mb-2">
                   <span class="text-caption text-error">Text</span>

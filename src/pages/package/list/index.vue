@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue"
+import { computed, onMounted, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 
 // Router
@@ -76,6 +76,17 @@ const itemsPerPageOptions = ref([
 const isLoading = ref(false)
 const isSearching = ref(false)
 const hasSearched = ref(false)
+
+// Toast states
+const isSuccessToastVisible = ref(false)
+const isErrorToastVisible = ref(false)
+const isConfirmToastVisible = ref(false)
+
+// Messages
+const errorMessage = ref("")
+const successMessage = ref("")
+const confirmMessage = ref("")
+const itemToDelete = ref(null)
 
 // Package data
 const packages = ref([
@@ -280,8 +291,13 @@ const searchPackages = async () => {
     // Reset to first page when searching
     currentPage.value = 1
     hasSearched.value = true
+    
+    successMessage.value = `Found ${filteredPackages.value.length} packages`
+    isSuccessToastVisible.value = true
   } catch (error) {
     console.error("Search failed:", error)
+    errorMessage.value = error.message || "Search failed. Please try again."
+    isErrorToastVisible.value = true
   } finally {
     isSearching.value = false
   }
@@ -309,9 +325,64 @@ const editPackage = item => {
 }
 
 const deletePackage = item => {
-  // TODO: delete functionality
-  console.log("Delete package:", item)
+  itemToDelete.value = item
+  confirmMessage.value = `Are you sure you want to delete package "${item.packageName}"?`
+  isConfirmToastVisible.value = true
 }
+
+const confirmDelete = async () => {
+  try {
+    isConfirmToastVisible.value = false
+    
+    // TODO: Replace with actual delete API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    // Remove from local data (in real app, this would be handled by API response)
+    const index = packages.value.findIndex(pkg => pkg.id === itemToDelete.value.id)
+    if (index > -1) {
+      packages.value.splice(index, 1)
+    }
+    
+    successMessage.value = `Package "${itemToDelete.value.packageName}" deleted successfully`
+    isSuccessToastVisible.value = true
+    itemToDelete.value = null
+  } catch (error) {
+    console.error("Delete failed:", error)
+    errorMessage.value = error.message || "Failed to delete package. Please try again."
+    isErrorToastVisible.value = true
+  }
+}
+
+const cancelDelete = () => {
+  isConfirmToastVisible.value = false
+  itemToDelete.value = null
+}
+
+// Close toasts
+const closeSuccessToast = () => {
+  isSuccessToastVisible.value = false
+}
+
+const closeErrorToast = () => {
+  isErrorToastVisible.value = false
+}
+
+// Auto close toasts after 5 seconds
+watch(isSuccessToastVisible, newVal => {
+  if (newVal) {
+    setTimeout(() => {
+      isSuccessToastVisible.value = false
+    }, 5000)
+  }
+})
+
+watch(isErrorToastVisible, newVal => {
+  if (newVal) {
+    setTimeout(() => {
+      isErrorToastVisible.value = false
+    }, 5000)
+  }
+})
 
 // Format date helper
 const formatDate = dateString => {
@@ -334,6 +405,150 @@ onMounted(() => {
 
 <template>
   <div class="list-package-page">
+    <!-- Toast Notifications -->
+    <!-- Confirmation Toast -->
+    <Transition
+      name="toast-slide"
+      appear
+    >
+      <div
+        v-if="isConfirmToastVisible"
+        class="toast-container confirmation-toast"
+      >
+        <VCard
+          class="toast-card"
+          elevation="8"
+          rounded="lg"
+        >
+          <VCardText class="pa-4">
+            <div class="d-flex align-center">
+              <VIcon
+                icon="mdi-alert-circle"
+                color="warning"
+                size="24"
+                class="me-3"
+              />
+              <div class="flex-grow-1">
+                <div class="text-h6 font-weight-bold text-warning">
+                  Confirm Delete
+                </div>
+                <div class="text-body-2 text-medium-emphasis">
+                  {{ confirmMessage }}
+                </div>
+              </div>
+              <div class="d-flex gap-2 ms-4">
+                <VBtn
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  @click="cancelDelete"
+                >
+                  Cancel
+                </VBtn>
+                <VBtn
+                  size="small"
+                  color="error"
+                  @click="confirmDelete"
+                >
+                  Delete
+                </VBtn>
+              </div>
+            </div>
+          </VCardText>
+        </VCard>
+      </div>
+    </Transition>
+
+    <!-- Success Toast -->
+    <Transition
+      name="toast-slide"
+      appear
+    >
+      <div
+        v-if="isSuccessToastVisible"
+        class="toast-container success-toast"
+      >
+        <VCard
+          class="toast-card"
+          elevation="8"
+          rounded="lg"
+        >
+          <VCardText class="pa-4">
+            <div class="d-flex align-center">
+              <VIcon
+                icon="mdi-check-circle"
+                color="success"
+                size="24"
+                class="me-3"
+              />
+              <div class="flex-grow-1">
+                <div class="text-h6 font-weight-bold text-success">
+                  Success!
+                </div>
+                <div class="text-body-2 text-medium-emphasis">
+                  {{ successMessage }}
+                </div>
+              </div>
+              <VBtn
+                size="small"
+                color="success"
+                variant="flat"
+                class="ms-4"
+                @click="closeSuccessToast"
+              >
+                OK
+              </VBtn>
+            </div>
+          </VCardText>
+        </VCard>
+      </div>
+    </Transition>
+
+    <!-- Error Toast -->
+    <Transition
+      name="toast-slide"
+      appear
+    >
+      <div
+        v-if="isErrorToastVisible"
+        class="toast-container error-toast"
+      >
+        <VCard
+          class="toast-card"
+          elevation="8"
+          rounded="lg"
+        >
+          <VCardText class="pa-4">
+            <div class="d-flex align-center">
+              <VIcon
+                icon="mdi-alert-circle"
+                color="error"
+                size="24"
+                class="me-3"
+              />
+              <div class="flex-grow-1">
+                <div class="text-h6 font-weight-bold text-error">
+                  Error!
+                </div>
+                <div class="text-body-2 text-medium-emphasis">
+                  {{ errorMessage }}
+                </div>
+              </div>
+              <VBtn
+                size="small"
+                color="error"
+                variant="flat"
+                class="ms-4"
+                @click="closeErrorToast"
+              >
+                OK
+              </VBtn>
+            </div>
+          </VCardText>
+        </VCard>
+      </div>
+    </Transition>
+
     <!-- Page Header -->
     <VRow class="mb-4">
       <VCol cols="12">
@@ -851,6 +1066,59 @@ onMounted(() => {
 <style scoped>
 .list-package-page {
   padding: 24px;
+  position: relative;
+}
+
+/* Toast Container Positioning */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  min-width: 400px;
+  max-width: 600px;
+}
+
+/* Toast Card Styling */
+.toast-card {
+  border: 2px solid;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: white;
+}
+
+.confirmation-toast .toast-card {
+  border-color: #ff9800;
+}
+
+.success-toast .toast-card {
+  border-color: #4caf50;
+}
+
+.error-toast .toast-card {
+  border-color: #f44336;
+}
+
+/* Toast Slide Animation */
+.toast-slide-enter-active,
+.toast-slide-leave-active {
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.toast-slide-enter-from {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-100px);
+}
+
+.toast-slide-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-100px);
+}
+
+.toast-slide-enter-to,
+.toast-slide-leave-from {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .text-no-wrap {
@@ -878,5 +1146,31 @@ onMounted(() => {
 
 .bg-grey-lighten-4 {
   background-color: #f0f0f0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .toast-container {
+    min-width: 320px;
+    max-width: calc(100vw - 40px);
+    left: 20px;
+    right: 20px;
+    transform: none;
+  }
+
+  .toast-slide-enter-from,
+  .toast-slide-leave-to {
+    transform: translateY(-100px);
+  }
+
+  .toast-slide-enter-to,
+  .toast-slide-leave-from {
+    transform: translateY(0);
+  }
+}
+
+/* Additional styling for better visual hierarchy */
+.gap-2 > * + * {
+  margin-left: 8px;
 }
 </style>

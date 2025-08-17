@@ -1,109 +1,109 @@
 <script setup>
-import { ref, reactive, onMounted, watch } from "vue";
+import { ref, reactive, onMounted, watch } from "vue"
 
-const pageTitle = ref("Alert Settings");
+const pageTitle = ref("Alert Settings")
 
 // Form data
 const alertSettings = reactive({
   firstAlertTime: "",
   secondAlertTime: "",
   msisdn: "",
-});
+})
 
 // UI state
-const isConfirmToastVisible = ref(false);
-const isSuccessToastVisible = ref(false);
-const isErrorToastVisible = ref(false);
-const isLoading = ref(false);
-const errorMessage = ref("");
-const successMessage = ref("Alert Settings Saved Successfully");
+const isConfirmToastVisible = ref(false)
+const isSuccessToastVisible = ref(false)
+const isErrorToastVisible = ref(false)
+const isLoading = ref(false)
+const errorMessage = ref("")
+const successMessage = ref("Alert Settings Saved Successfully")
 
 // Form validation
-const isFormValid = ref(false);
+const isFormValid = ref(false)
 
 const firstAlertTimeRules = [
-  (v) => !!v || "First alert time is required",
-  (v) => (!isNaN(v) && parseInt(v) > 0) || "Must be a positive number",
-];
+  v => !!v || "First alert time is required",
+  v => (!isNaN(v) && parseInt(v) > 0) || "Must be a positive number",
+]
 
 const secondAlertTimeRules = [
-  (v) => !!v || "Second alert time is required",
-  (v) => (!isNaN(v) && parseInt(v) > 0) || "Must be a positive number",
-];
+  v => !!v || "Second alert time is required",
+  v => (!isNaN(v) && parseInt(v) > 0) || "Must be a positive number",
+]
 
 const msisdnRules = [
-  (v) => !!v || "MSISDN is required",
-  (v) => v.length > 0 || "MSISDN cannot be empty",
-];
+  v => !!v || "MSISDN is required",
+  v => v.length > 0 || "MSISDN cannot be empty",
+]
 
 // Load current settings on component mount
 const loadSettings = () => {
-  isLoading.value = true;
+  isLoading.value = true
 
-  const onSuccess = (response) => {
+  const onSuccess = response => {
     if (response.data) {
       alertSettings.firstAlertTime =
-        response.data.first_alert_time?.toString() || "";
+        response.data.first_alert_time?.toString() || ""
       alertSettings.secondAlertTime =
-        response.data.second_alert_time?.toString() || "";
-      alertSettings.msisdn = response.data.msisdn || "";
+        response.data.second_alert_time?.toString() || ""
+      alertSettings.msisdn = response.data.msisdn || ""
     }
-    isLoading.value = false;
+    isLoading.value = false
   }
 
-  const onError = (error) => {
-    console.error("Error loading alert settings:", error);
-    errorMessage.value = error.message || "Failed to load alert settings";
-    isErrorToastVisible.value = true;
-    isLoading.value = false;
+  const onError = error => {
+    console.error("Error loading alert settings:", error)
+    errorMessage.value = error.message || "Failed to load alert settings"
+    isErrorToastVisible.value = true
+    isLoading.value = false
   }
 
   // Replace with actual MOFFAS API call
   if (window.moffas) {
-    window.moffas.do_request("get_alert_settings", {}, onSuccess, onError);
+    window.moffas.do_request("get_alert_settings", {}, onSuccess, onError)
   } else {
     // Mock data for development
     setTimeout(() => {
-      alertSettings.firstAlertTime = "7";
-      alertSettings.secondAlertTime = "14";
-      alertSettings.msisdn = "628123456789\n628987654321\n628112233445";
-      isLoading.value = false;
-    }, 1000);
+      alertSettings.firstAlertTime = "7"
+      alertSettings.secondAlertTime = "14"
+      alertSettings.msisdn = "628123456789\n628987654321\n628112233445"
+      isLoading.value = false
+    }, 1000)
   }
 }
 
 // Show confirmation toast
 const showConfirmToast = () => {
   if (isFormValid.value) {
-    isConfirmToastVisible.value = true;
+    isConfirmToastVisible.value = true
   }
 }
 
 // Confirm saving changes
 const confirmSave = () => {
-  isConfirmToastVisible.value = false;
-  saveSettings();
+  isConfirmToastVisible.value = false
+  saveSettings()
 }
 
 // Cancel saving changes
 const cancelSave = () => {
-  isConfirmToastVisible.value = false;
+  isConfirmToastVisible.value = false
 }
 
 // Save settings
 const saveSettings = () => {
-  isLoading.value = true;
+  isLoading.value = true
 
-  const onSuccess = (response) => {
-    isLoading.value = false;
-    isSuccessToastVisible.value = true;
-    successMessage.value = "Alert Settings Saved Successfully";
+  const onSuccess = response => {
+    isLoading.value = false
+    isSuccessToastVisible.value = true
+    successMessage.value = "Alert Settings Saved Successfully"
   }
 
-  const onError = (error) => {
-    isLoading.value = false;
-    errorMessage.value = error.message || "Failed to save alert settings";
-    isErrorToastVisible.value = true;
+  const onError = error => {
+    isLoading.value = false
+    errorMessage.value = error.message || "Failed to save alert settings"
+    isErrorToastVisible.value = true
   }
 
   const params = {
@@ -114,58 +114,65 @@ const saveSettings = () => {
 
   // Replace with actual MOFFAS API call
   if (window.moffas) {
-    window.moffas.do_request("save_alert_settings", params, onSuccess, onError);
+    window.moffas.do_request("save_alert_settings", params, onSuccess, onError)
   } else {
     // Mock success for development
     setTimeout(() => {
-      isLoading.value = false;
-      isSuccessToastVisible.value = true;
-    }, 1500);
+      isLoading.value = false
+      isSuccessToastVisible.value = true
+    }, 1500)
   }
 }
 
 // Close toasts
 const closeSuccessToast = () => {
-  isSuccessToastVisible.value = false;
+  isSuccessToastVisible.value = false
 }
 
 const closeErrorToast = () => {
-  isErrorToastVisible.value = false;
+  isErrorToastVisible.value = false
 }
 
 // Auto close toasts after 5 seconds
-watch(isSuccessToastVisible, (newVal) => {
+watch(isSuccessToastVisible, newVal => {
   if (newVal) {
     setTimeout(() => {
-      isSuccessToastVisible.value = false;
-    }, 5000);
+      isSuccessToastVisible.value = false
+    }, 5000)
   }
-});
+})
 
-watch(isErrorToastVisible, (newVal) => {
+watch(isErrorToastVisible, newVal => {
   if (newVal) {
     setTimeout(() => {
-      isErrorToastVisible.value = false;
-    }, 5000);
+      isErrorToastVisible.value = false
+    }, 5000)
   }
-});
+})
 
 // Load settings on component mount
 onMounted(() => {
-  loadSettings();
-});
+  loadSettings()
+})
 </script>
 
 <template>
   <div class="alert-settings">
     <!-- Toast Notifications -->
     <!-- Confirmation Toast -->
-    <Transition name="toast-slide" appear>
+    <Transition
+      name="toast-slide"
+      appear
+    >
       <div
         v-if="isConfirmToastVisible"
         class="toast-container confirmation-toast"
       >
-        <VCard class="toast-card" elevation="8" rounded="lg">
+        <VCard
+          class="toast-card"
+          elevation="8"
+          rounded="lg"
+        >
           <VCardText class="pa-4">
             <div class="d-flex align-center">
               <VIcon
@@ -191,7 +198,11 @@ onMounted(() => {
                 >
                   Cancel
                 </VBtn>
-                <VBtn size="small" color="error" @click="confirmSave">
+                <VBtn
+                  size="small"
+                  color="error"
+                  @click="confirmSave"
+                >
                   OK
                 </VBtn>
               </div>
@@ -202,9 +213,19 @@ onMounted(() => {
     </Transition>
 
     <!-- Success Toast -->
-    <Transition name="toast-slide" appear>
-      <div v-if="isSuccessToastVisible" class="toast-container success-toast">
-        <VCard class="toast-card" elevation="8" rounded="lg">
+    <Transition
+      name="toast-slide"
+      appear
+    >
+      <div
+        v-if="isSuccessToastVisible"
+        class="toast-container success-toast"
+      >
+        <VCard
+          class="toast-card"
+          elevation="8"
+          rounded="lg"
+        >
           <VCardText class="pa-4">
             <div class="d-flex align-center">
               <VIcon
@@ -237,9 +258,19 @@ onMounted(() => {
     </Transition>
 
     <!-- Error Toast -->
-    <Transition name="toast-slide" appear>
-      <div v-if="isErrorToastVisible" class="toast-container error-toast">
-        <VCard class="toast-card" elevation="8" rounded="lg">
+    <Transition
+      name="toast-slide"
+      appear
+    >
+      <div
+        v-if="isErrorToastVisible"
+        class="toast-container error-toast"
+      >
+        <VCard
+          class="toast-card"
+          elevation="8"
+          rounded="lg"
+        >
           <VCardText class="pa-4">
             <div class="d-flex align-center">
               <VIcon
@@ -249,7 +280,9 @@ onMounted(() => {
                 class="me-3"
               />
               <div class="flex-grow-1">
-                <div class="text-h6 font-weight-bold text-error">Error!</div>
+                <div class="text-h6 font-weight-bold text-error">
+                  Error!
+                </div>
                 <div class="text-body-2 text-medium-emphasis">
                   {{ errorMessage }}
                 </div>
@@ -285,9 +318,18 @@ onMounted(() => {
 
     <!-- Loading State -->
     <VRow v-if="isLoading && !alertSettings.firstAlertTime">
-      <VCol cols="12" class="text-center">
-        <VProgressCircular indeterminate color="primary" size="48" />
-        <div class="mt-3">Loading alert settings...</div>
+      <VCol
+        cols="12"
+        class="text-center"
+      >
+        <VProgressCircular
+          indeterminate
+          color="primary"
+          size="48"
+        />
+        <div class="mt-3">
+          Loading alert settings...
+        </div>
       </VCol>
     </VRow>
 
@@ -298,11 +340,12 @@ onMounted(() => {
           <VForm v-model="isFormValid">
             <VRow>
               <!-- First Alert Time Field -->
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <div class="mb-2">
-                  <span class="text-body-2 text-high-emphasis"
-                    >First Alert Time</span
-                  >
+                  <span class="text-body-2 text-high-emphasis">First Alert Time</span>
                   <span class="text-error ms-1">*</span>
                 </div>
                 <VTextField
@@ -317,7 +360,10 @@ onMounted(() => {
               </VCol>
 
               <!-- Second Alert Time Field -->
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <div class="mb-2">
                   <span class="text-body-2 text-high-emphasis">Second Alert Time</span>
                   <span class="text-error ms-1">*</span>

@@ -2,8 +2,10 @@
 import { emailValidator, requiredValidator } from '@/@core/utils/validators'
 import CustomConfirmDialog from '@/components/CustomConfirmDialog.vue'
 import CustomNotifDialog from '@/components/CustomNotifDialog.vue'
+import { useAppStore } from '@/store/app'
 import { useGlobalStore } from '@/store/useGlobalStore'
 import axios from '@axios'
+import { useRouter } from 'vue-router'
 
 const store = useGlobalStore()
 
@@ -14,7 +16,6 @@ const myUser = computed(() => ({
   company_name: store.user?.company_name,
 }))
 
-const route = useRoute()
 const router = useRouter()
 
 const toLoginWaba = () => {
@@ -72,14 +73,15 @@ const urlBE = ref(window.moffas.config.url_backoffice_helper_api)
 const companyID = ref(window.moffas.config.param_company_id)
 const sessionID = ref(localStorage.getItem('moffas.token'))
 
-const formKeyNames = ref(['NIP', 'Name', 'Email', 'Phone Number', 'Password', 'Role'])
-const formRequired = ref(['Name', 'Email', 'Phone Number', 'Password', 'Role'])
+const formKeyNames = ref([['NIP', 'Name', 'Password'], ['Division','Role', 'Status']])
+const formRequired = ref(['NIP', 'Name', 'Password', 'Division', 'Role','Status'])
 const LazyErrorDialogs = defineAsyncComponent(() => import('@/views/pages/dialogs/Error.vue'))
 const refVForm = ref()
 const isPasswordVisible = ref(false)
 const confirmationDialog = ref(false)
 const successDialog = ref(false)
-const role = ref([])
+const role = ref([{"name":"Admin","id":1},{"name":"Customer Service","id":2},{"name":"Developer","id":3}]) //{name, id}
+const statuses = ref(['Active', 'Inactive'])
 const isErrorVisible = ref(false)
 const customErrorMessages = ref('')
 
@@ -105,17 +107,17 @@ const getFirstRoleName = () => {
 const formSubmit = ref({
   nip: '',
   name: '',
-  email: '',
-  phone_number: '',
   password: '',
+  division: '',
   role: null,
+  status: null
   // role: getFirstRoleName(),
 })
 
 const getRoleNames = () => {
   let arr = []
   role.value.forEach((items, index) => {
-    arr[index] = items.role_name
+    arr[index] = items.name
   })
   
   return arr
@@ -127,8 +129,8 @@ const resetForm = () => {
   formSubmit.value.email = null
   formSubmit.value.phone_number = null
   formSubmit.value.password = null
-  formSubmit.value.role = getFirstRoleName()
-  formSubmit.value.role_id = -1
+  formSubmit.value.role = -1
+  //router.push("/user-management/view-all")
 }
 
 const onDataError = e => {  
@@ -137,7 +139,9 @@ const onDataError = e => {
 }
 
 const createUser = () => {
-  let params = {
+  console.log('createUser')
+
+let params = {
     company_id: companyID.value,
     session_id: sessionID.value,
     op_crud: 1,
@@ -146,55 +150,30 @@ const createUser = () => {
     data: {
       nip: formSubmit.value.nip,
       name: formSubmit.value.name,
-      email: formSubmit.value.email,
-      phone_number: formSubmit.value.phone_number,
       password: formSubmit.value.password,
-      role_id: formSubmit.value.role, 
+      division: formSubmit.value.division,
+      role: formSubmit.value.role,
+      status: formSubmit.value.status
     }
   }
 
-  axios.post(urlBE.value + 'do_management_user_crud', params)
-  .then(function (response) {
-    console.log('response updateUser=', response)
-    const responseData = response.data
+  //   window.moffas.do_request(
+  //     'user_create',
+  //     params, 
+  //     onCreateUser,
+  //     onDataError,
+  //   )
 
-    console.log('responseData', responseData)
+  // Ceritanya berhasil
+  successPopup("New user has been successfully saved")
+  // kalau gagal
+  // errorPopup("Apalah alasan nya")
 
-    if(response.data.error_code) {
-      onDataError(response.data)
+  // For now asumsi field clear, jadi user bisa lanjut nambah kalau mau
+  resetForm()
 
-      return
-    }
-
-    successDialog.value = true
-
-    // showProgressCircular.value = false
-  })
-  .catch(function (error) {
-    console.log(error)
-    onDataError(error.response)
-  })
+  console.log(params.data)
 }
-
-// const createUser = () => {
-//   console.log('createUser')
-
-//   const params = {
-//     nip: formSubmit.value.nip,
-//     name: formSubmit.value.name,
-//     email: formSubmit.value.email,
-//     phone_number: formSubmit.value.phone_number,
-//     password: formSubmit.value.password,
-//     role_id: role.value.filter(r => r.name == formSubmit.value.role)[0].id,
-//   }
-
-//   window.moffas.do_request(
-//     'user_create',
-//     params, 
-//     onCreateUser,
-//     onDataError,
-//   )
-// }
 
 // const onCreateUser = data => {
 //   const response = JSON.parse(data)
@@ -293,6 +272,41 @@ onMounted(() => {
   todayDate.value = todayDateF()
   getRoles()
 })
+
+const appStore = useAppStore()
+
+function confirmAdditionPopup(){
+    appStore.setPopup({
+        title: 'Confirm Add New User',
+        word: 'Are you sure you want to add this new user to the system?',
+        action: 'warn',
+        onSucc: () => {
+          confirmYes()
+        },
+      })
+}
+
+function errorPopup(error_message){
+    appStore.setPopup({
+      title: 'Error',
+      word: error_message || 'Undefined failure!',
+      action: 'error',
+      onSucc: () => {
+        //
+      },
+    })
+}
+
+function successPopup(success_message){
+  appStore.setPopup({
+      title: 'Success!',
+      word: success_message || '',
+      action: 'success',
+      onSucc: () => {
+        showDialogGroup.value = false
+      },
+    })
+}
 </script>
 
 <template>
@@ -327,50 +341,72 @@ onMounted(() => {
     </div>
     <div>
       <VCard>
+      <VCardText class="d-flex align-center" style="justify-content: space-between;">
+        <v-btn icon="mdi-arrow-left" to="/user-management/view-all" class="back"/>
+        <h2 style="margin: 0;">
+          Add New User
+        </h2>
+      </VCardText>
+        <hr></hr>
+        <VSpacer/>
         <VCardText class="pt-10">
           <VForm
             ref="refVForm"
             @submit.prevent="onSubmit"
           >
+            <span class="d-flex">
+            <VCol
+            v-for="(group, gindex) in formKeyNames"
+            :key="gindex"
+            class="align-center" 
+            >
             <VRow
-              v-for="(name, index) in formKeyNames"
+              v-for="(name, index) in group"
               :key="index"
               class="align-center"
             >
               <VCol
-                cols="12"
-                md="2"
+              cols="12"
+              md="12"
               >
-                <span
-                  class="ma-4 text-black font-weight-black"
-                  :class="{required: formRequired.includes(name)}"
-                >{{ name }}</span>
-              </VCol>
-              <VCol
-                cols="12"
-                md="5"
-              >
-                <VTextField
-                  v-if="name != 'Role'"
-                  v-model="formSubmit[name.toLowerCase().replace(' ', '_')]"
-                  focused
-                  :type="name == 'Password' ? (isPasswordVisible ? 'text' : 'password'): null"
-                  :rules="formRequired.includes(name) ? (name == 'Email' ? [requiredValidator, emailValidator] : [requiredValidator]) : []"
-                  :append-inner-icon="name == 'Password' ? (isPasswordVisible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'): null"
-                  @click:append-inner="name == 'Password' ? (isPasswordVisible = !isPasswordVisible): null"
-                />
-                <VSelect
-                  v-else-if="name == 'Role'"
-                  v-model="formSubmit['role']"
-                  :items="role"
-                  item-value="id"
-                  item-title="role_name"
-                  :rules="formRequired.includes(name) ? ([requiredValidator]) : []"
-                  focused
-                  style="max-width: 40%;"
-                />
+              <VTextField
+                v-if="name != 'Role' && name != 'Status'"
+                v-model="formSubmit[name.toLowerCase().replace(' ', '_')]"
+                :type="name == 'Password' ? (isPasswordVisible ? 'text' : 'password'): null"
+                :rules="formRequired.includes(name) ? (name == 'Email' ? [requiredValidator, emailValidator] : [requiredValidator]) : []"
+                :append-inner-icon="name == 'Password' ? (isPasswordVisible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'): null"
+                @click:append-inner="name == 'Password' ? (isPasswordVisible = !isPasswordVisible): null"
+                variant="outlined"
+                :label="name"
+                class="w-100"
+                :placeholder="name"
+              />
+              <VSelect
+                v-else-if="name == 'Role'"
+                v-model="formSubmit['role']"
+                :items="role"
+                item-value="id"
+                item-title="name"
+                :rules="formRequired.includes(name) ? ([requiredValidator]) : []"
+                variant="outlined"
+                :label="name"
+                class="w-100"
+              />
+              <VSelect
+                v-else-if="name == 'Status'"
+                v-model="formSubmit['status']"
+                :items="statuses"
+                item-value="id"
+                item-title="status_name"
+                :rules="formRequired.includes(name) ? ([requiredValidator]) : []"
+                variant="outlined"
+                :label="name"
+                class="w-100"
+              />
               </VCol>
             </VRow>
+            </VCol>
+            </span>
             <VSheet class="d-flex align-center pa-6 justify-end">
               <VBtn
                 v-if="priv.hasOwnProperty('create_user') || Object.keys(priv).length === 0"
@@ -379,24 +415,10 @@ onMounted(() => {
                 rounded="xl"
                 variant="flat"
                 width="125px"
+                @click="confirmAdditionPopup"
               >
                 Submit
               </VBtn>
-              <CustomConfirmDialog
-                v-model:is-dialog-visible="confirmationDialog"
-                rounded="lg"
-                confirmation-styling="2"
-                message-title="Are you sure you want to submit this?"
-                @yes="confirmYes"
-              />
-              <CustomNotifDialog
-                v-model:is-dialog-visible="successDialog"
-                rounded="lg"
-                subject="submit"
-                @ok="() => {
-                  resetForm()
-                }"
-              />
             </VSheet>
           </VForm>
         </VCardText>
@@ -410,4 +432,14 @@ onMounted(() => {
   color: red;
   content: "*";
 }
+
+.back {
+  background-color: rgb(var(--v-theme-surface-variant), .82) !important;
+  color: #fff;
+  &:hover {
+    background-color: rgba(var(--v-theme-on-surface), calc(.82 - .14));
+  }
+  :deep(.v-icon) { color: inherit; }
+}
+
 </style>

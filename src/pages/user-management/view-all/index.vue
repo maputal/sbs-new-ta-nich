@@ -1,17 +1,15 @@
 <script setup>
-import CustomConfirmDialog from '@/components/CustomConfirmDialog.vue'
-import CustomFilter from '@/components/CustomFilter.vue'
-import CustomNotifDialog from '@/components/CustomNotifDialog.vue'
-// import CustomDetailDialog from '@/components/user-management/CustomDetailDialog.vue'
-// import CustomEditDialog from '@/components/user-management/CustomEditDialog.vue'
-// import CustomTable from '@/components/user-management/CustomTable.vue'
+import CustomTable from '@/components/user-management/CustomTable.vue'
 import { useGlobalStore } from '@/store/useGlobalStore'
-// import { useUserManagementStore } from '@/store/useUserManagementStore'
+//import { useUserManagementStore } from '@/store/useUserManagementStore'
 import axios from '@axios'
+import {fetchMembersDummy} from '@/pages/user-management/member_dummy.js'
+import { useAppStore } from '@/store/app'
+import { useUserManagementStore } from '@/store/useUserManagementStore'
+import { toRaw } from 'vue'
 
 const store = useGlobalStore()
 
-const route = useRoute()
 const router = useRouter()
 
 const toLoginWaba = () => {
@@ -65,9 +63,8 @@ const todayDateF = () => {
   )
 }
 
-// const userManagementListStore = useUserManagementStore()
+//const userManagementListStore = useUserManagementStore()
 
-const LazyErrorDialogs = defineAsyncComponent(() => import('@/views/pages/dialogs/Error.vue'))
 const isErrorVisible = ref(false)
 const customErrorMessages = ref('')
 
@@ -77,23 +74,21 @@ const urlBE = ref(window.moffas.config.url_backoffice_helper_api)
 const companyID = ref(window.moffas.config.param_company_id)
 const sessionID = ref(localStorage.getItem('moffas.token'))
 
-const tableHeader = ref(['No', 'NIP', 'Name', 'Email', 'Phone Number', 'Role', 'Status', 'Action'])
-const dataHeader = ref(['nip', 'name', 'email', 'phone_number', 'role_name'])
-const editTableHeader = ref(['NIP', 'Name', 'Email', 'Phone Number', 'Role'])
-const editDataHeader = ref(['nip', 'name', 'email', 'phone_number', 'role_name'])
+const tableHeader = ref(['No', 'Login', 'Name', 'NIP', 'Division', 'Privilege', 'Status', 'Action'])
+const dataHeader = ref(['login', 'name', 'nip', 'division','role'])
+const editTableHeader = ref(['NIP', 'Name', 'Division', 'User Roles', 'Status']) // User roles adalah Privilege
+const editDataHeader = ref(['nip', 'name', 'division', 'privilege', 'status'])
 
 const tableData = ref([])
 const totalPage = ref(1)
-const totalUser = ref(0)
+const totalUser = ref(3)
 
 const rowPerPage = ref(10)
 const currentPage = ref(1)
 const selectedRows = ref([])
 
-const detailDialog = ref(false)
+
 const editDialog = ref(false)
-const confirmDialog = ref(false)
-const successDialog = ref(false)
 
 const role = ref([])
 
@@ -125,65 +120,9 @@ const editTableData = ref({
   status: -1,
 })
 
-const detailDialogProps = ref({
-  headerNames: editTableHeader.value,
-  dataNames: editDataHeader.value,
-  row: {},
-})
-
-const editDialogProps = ref({
-  editProps: [
-    {
-      headerName: 'NIP',
-      dataName: 'nip',
-      inputType: 'text-field',
-    },
-    {
-      headerName: 'Name',
-      dataName: 'name',
-      inputType: 'text-field',
-    },
-    {
-      headerName: 'Email',
-      dataName: 'email',
-      inputType: 'text-field',
-    },
-    {
-      headerName: 'Change Password',
-      dataName: 'password',
-      inputType: 'text-field',
-    },
-    {
-      headerName: 'Phone Number',
-      dataName: 'phone_number',
-      inputType: 'text-field',
-    },
-    {
-      headerName: 'Role',
-      dataName: 'role_name',
-      inputType: 'select',
-      items: [],
-    },
-  ],
-  formRequired: ['Name', 'Email', 'Role'],
-  row: {},
-})
-
-const confirmDialogProps = ref({
-  confirmationStyling: '',
-  messageTitle: '',
-  messageSubtitle: ['', ''],
-  op: '',
-  id: -1,
-})
-
-const successDialogProps = ref({
-  subject: '',
-})
-
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
-const priv = userData.priv
+const priv = userData?.priv || []
 
 console.log("---------- hasil priv=", priv)
 
@@ -295,16 +234,12 @@ const isActive = n => {
   }
 }
 
+const userStore = useUserManagementStore()
+
 const setEditData = r => {
-  editTableData.value.id = r.user_id
-  editTableData.value.nip = r.nip
-  editTableData.value.name = r.name
-  editTableData.value.email = r.email
-  editTableData.value.password = ''
-  editTableData.value.phone_number = r.phone_number
-  editTableData.value.role_name = r.role_name
-  editTableData.value.role_id = r.role_id
-  editTableData.value.status = r.status
+  console.log("SETTING")
+  userStore.setUser(toRaw(r))
+  router.push("/user-management/edit-user")
 }
 
 
@@ -324,7 +259,7 @@ const fetchUsers = () => {
     search_filter: filter.value.name || '',  
   }
 
-  axios.post(urlBE.value + 'retrieve_management_users', params)
+  fetchMembersDummy(params)
   .then(function (response) {
     console.log('response user list=', response)
     const responseData = response.data
@@ -347,6 +282,8 @@ const fetchUsers = () => {
     console.log(error)
     onDataError(error.response)
   })
+  // axios.post(urlBE.value + 'retrieve_management_users', params)
+  
 }
 
 // const fetchUsers = () => {
@@ -569,15 +506,65 @@ onMounted(() => {
   // fetchUsers()
   getRoles()
 })
+
+const appStore = useAppStore()
+
+function testFunc() {
+  appStore.setPopup({
+      title: 'Error',
+      word: 'Generic failure',
+      action: 'error',
+      onSucc: () => {
+        showDialogGroup.value = false
+      },
+    })
+}
+
+function confirmDeletionPopup(id, username){
+    appStore.setPopup({
+        title: 'Confirm Delete User',
+        word: 'Are you sure you want to delete this user? ' + (username ? `(${username})` : ''),
+        action: 'warn',
+        onSucc: () => {
+          // delete id
+          // Try delete
+          successPopup("User had been deleted")
+
+        },
+      })
+}
+
+function errorPopup(error_message){
+    appStore.setPopup({
+      title: 'Error',
+      word: error_message || 'Undefined failure!',
+      action: 'error',
+      onSucc: () => {
+        //
+      },
+    })
+}
+
+function successPopup(success_message){
+  appStore.setPopup({
+      title: 'Success!',
+      word: success_message || '',
+      action: 'success',
+      onSucc: () => {
+        showDialogGroup.value = false
+      },
+    })
+}
+
 </script>
 
 <template>
   <section>
-    <LazyErrorDialogs
-      v-if="isErrorVisible"
+    <!-- <LazyErrorDialogs
+      :v-if="isErrorVisible"
       v-model:isDialogVisible="isErrorVisible" 
       :custom-error-message="customErrorMessages"
-    />
+    /> -->
     <div>
       <h6 class="text-2xl font-weight-bold mb-2">
         User Management
@@ -601,50 +588,17 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <VCard
-      class="pa-5 mb-6"
-    >
-      <CustomFilter
-        @filter="() => {
-          filter.nip = tempFilter.nip
-          filter.name = tempFilter.name
-        }"
-      >
-        <VRow class="align-center">
-          <span class="text-black font-weight-bold mx-4">NIP</span>
-          <VCol
-            cols="12"
-            md="3"
-          >
-            <VTextField
-              v-model="tempFilter.nip"
-              focused
-              @keydown.enter.prevent 
-              @keyup.enter="() => {
-                filter.nip = tempFilter.nip
-                filter.name = tempFilter.name
-              }"
-            />
-          </VCol>
-          <span class="text-black font-weight-bold mx-4">Name</span>
-          <VCol
-            cols="12"
-            md="3"
-          >
-            <VTextField
-              v-model="tempFilter.name"
-              focused
-              @keydown.enter.prevent 
-              @keyup.enter="() => {
-                filter.nip = tempFilter.nip
-                filter.name = tempFilter.name
-              }"
-            />
-          </VCol>
-        </VRow>
-      </CustomFilter>
-    </VCard>
     <VCard>
+      <VCardText class="d-flex" style="justify-content: space-between;">
+        <v-btn to="/user-management/create-user" prepend-icon="mdi-account-plus" class="text-capitalize font-weight-bolder">
+          Add new user
+        </v-btn>
+        <h2 style="line-height: 2rem;" class="mr-4">
+          List User
+        </h2>
+      </VCardText>
+      <hr></hr>
+      <VSpacer/>
       <VCardText class="d-flex flex-row align-center text-black font-weight-bold row2">
         <span class="me-3">Show</span>
         <div>
@@ -677,16 +631,16 @@ onMounted(() => {
             <td
               v-for="(data, index1) in dataHeader"
               :key="index1"
-              class="pl-7 text-center"
+              class="text-center"
             >
               <span class="text-black">
                 {{ row[data] }}
               </span>
             </td>
-            <td class="pl-8">
+            <td class="text-center">
               <span class="justify-center">
                 <span 
-                  v-if="row['status']"
+                  v-if="row['status'] != null && row['status'] != undefined"
                   class="w-90"
                   :class="{'status-field-boxing-color-active': row['status'] == 1, 'status-field-boxing-color-inactive': row['status'] == 0}"
                 >
@@ -694,31 +648,26 @@ onMounted(() => {
                 </span>
               </span>
             </td>
-            <td class="d-flex justify-center align-center text-xenter">
+            <td class="d-flex justify-center align-center text-center">
               <VBtn
-                class="text-none text-white ma-2"
-                density="compact"
+                class="text-none text-white ma-2 flex-grow-1"
                 size="small"
-                color="#32BCAD"
+                color="#ed1c2480"
                 :disabled="disabledButton"
-                @click="() => {
-                  detailDialogProps.row = row
-                  detailDialog = true
-                }"
+                @click="() => {confirmDeletionPopup(index, row.name)}"
+                prepend-icon="mdi-trash-can"
               >
-                Detail
+                Delete
               </VBtn>
               <VBtn
-                class="text-none ma-2"
-                density="compact"
+                class="text-none text-white ma-2 flex-grow-1"
                 size="small"
-                variant="outlined"
+                color="#C6168D80"
                 :disabled="disabledButton"
                 @click="() => {
                   setEditData(row)
-                  editDialogProps.row = row
-                  editDialog = true
                 }"
+                prepend-icon="mdi-square-edit-outline"
               >
                 Edit
               </VBtn>
@@ -742,90 +691,6 @@ onMounted(() => {
         />
       </VCardText>
     </VCard>
-    <!-- <CustomDetailDialog
-      v-model:is-dialog-visible="detailDialog"
-      rounded="lg"
-      width="30%"
-      title="Detail User Management"
-      :header-names="detailDialogProps.headerNames"
-      :data-names="detailDialogProps.dataNames"
-      :row="detailDialogProps.row"
-      @activate="() => {
-        confirmDialogProps.confirmationStyling = '1'
-        confirmDialogProps.messageTitle = 'You are about to activated account'
-        confirmDialogProps.messageSubtitle = ['Are you sure you want to activated account?', 'This account cannot be undone']
-        confirmDialogProps.op = 'activate'
-        confirmDialogProps.id = detailDialogProps.row['id']
-        successDialogProps.subject = 'actived account'
-        confirmDialog = true
-      }"
-      @deactivate="() => {
-        confirmDialogProps.confirmationStyling = '1'
-        confirmDialogProps.messageTitle = 'You are about to deactivated account'
-        confirmDialogProps.messageSubtitle = ['Are you sure you want to deactivated account?', 'This account cannot be undone']
-        confirmDialogProps.op = 'deactivate'
-        confirmDialogProps.id = detailDialogProps.row['id']
-        successDialogProps.subject = 'deactived account'
-        confirmDialog = true
-      }"
-    />
-    <CustomEditDialog
-      v-model:is-dialog-visible="editDialog"
-      rounded="lg"
-      width="40%"
-      title="Edit User Management"
-      :edit-props="editDialogProps.editProps"
-      :user-data="editTableData"
-      :list-of-role="role"
-      :form-required="editDialogProps.formRequired"
-      :row="editDialogProps.row"
-      @delete="() => {
-        confirmDialogProps.confirmationStyling = '1'
-        confirmDialogProps.messageTitle = 'You are about to delete user'
-        confirmDialogProps.messageSubtitle = ['Are you sure you want to delete this user?', 'This user cannot be undone']
-        confirmDialogProps.op = 'delete'
-        confirmDialogProps.id = editTableData.id
-        successDialogProps.subject = 'delete'
-        confirmDialog = true
-      }"
-      @save="data => {
-        editTableData.nip = data.nip
-        editTableData.name = data.name
-        editTableData.email = data.email
-        editTableData.password = data.password
-        editTableData.phone_number = data.phone_number
-        editTableData.role_id = data.role_id
-        editTableData.status = data.status
-        confirmDialogProps.confirmationStyling = '2'
-        confirmDialogProps.messageTitle = 'Are you sure you want to submit this?'
-        confirmDialogProps.messageSubtitle = ['', '']
-        confirmDialogProps.op = 'update'
-        confirmDialogProps.id = editDialogProps.row['id']
-        successDialogProps.subject = 'submit'
-        confirmDialog = true
-      }"
-    /> -->
-    <CustomConfirmDialog
-      v-model:is-dialog-visible="confirmDialog"
-      rounded="lg"
-      width="auto"
-      :confirmation-styling="confirmDialogProps.confirmationStyling"
-      :message-title="confirmDialogProps.messageTitle"
-      :message-subtitle="confirmDialogProps.messageSubtitle"
-      @yes="chooseOP"
-    />
-    <CustomNotifDialog
-      v-model:is-dialog-visible="successDialog"
-      rounded="lg"
-      width="auto"
-      :subject="successDialogProps.subject"
-      @ok="() => {
-        detailDialog = false
-        editDialog = false
-        resetDialogProps()
-        fetchUsers()
-      }"
-    />
   </section>
 </template>
   
@@ -836,8 +701,8 @@ onMounted(() => {
     justify-content: center;
     padding: 0.2rem;
     border-radius: 5px;
-    background-color: #ed2324;
-    color: white;
+    color: #ed2324;
+    //color: white;
     font-size: 0.7rem;
   }
 
@@ -847,8 +712,8 @@ onMounted(() => {
     justify-content: center;
     padding: 0.2rem;
     border-radius: 5px;
-    background-color: #1977F3;
-    color: white;
+    color: #27ae60;
+    //color: white;
     font-size: 0.7rem;
   }
 
@@ -870,7 +735,7 @@ onMounted(() => {
   }
   </style>
   
-  <route lang="yaml">
+  <!-- <route lang="yaml">
     meta:
       requiresAuth: true
-  </route>
+  </route> -->

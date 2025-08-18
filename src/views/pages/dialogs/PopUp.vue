@@ -46,7 +46,8 @@ onMounted(() => {
   >
     <VCard min-width="500px">
       <VCardText class="d-flex align-center pb-3">
-        <VIcon v-if="popup.action !== 'success'" color="warning" icon="mdi-alert-circle" size="x-large" class="mr-2"></VIcon>
+        <VIcon v-if="popup.action === 'error'" icon="mdi-close-circle" color="error" size="x-large" class="mr-2"/>
+        <VIcon v-else-if="popup.action !== 'success'" color="warning" icon="mdi-alert-circle" size="x-large" class="mr-2"></VIcon>
         <VIcon v-else color="success" icon="mdi-check-circle" size="x-large" class="mr-2"></VIcon>
 
         <div>
@@ -62,7 +63,7 @@ onMounted(() => {
 
       <VCardActions class="align-center gap-2 justify-end">
         <VBtn size="small" variant="elevated" @click="confirmPopup">{{ popup.buttonLabelsYes || 'OK' }}</VBtn>
-        <VBtn v-if="popup.action !== 'success'" size="small" variant="outlined" @click="closePopup">{{ popup.buttonLabelsNo || 'Cancel' }}</VBtn>
+        <VBtn v-if="popup.action !== 'success' && popup.action !== 'error'" size="small" variant="outlined" @click="closePopup">{{ popup.buttonLabelsNo || 'Cancel' }}</VBtn>
       </VCardActions>
     </VCard>
   </VOverlay>

@@ -297,8 +297,7 @@ function successPopup(success_message) {
                         Add New User
                     </h2>
                 </VCardText>
-                <hr>
-                </hr>
+                <hr/>
                 <VSpacer />
                 <VCardText class="pt-10">
                     <VForm ref="refVForm" @submit.prevent="onSubmit">

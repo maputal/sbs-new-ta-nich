@@ -1,7 +1,5 @@
 <script setup>
 import { emailValidator, requiredValidator } from '@/@core/utils/validators'
-import CustomConfirmDialog from '@/components/CustomConfirmDialog.vue'
-import CustomNotifDialog from '@/components/CustomNotifDialog.vue'
 import { useAppStore } from '@/store/app'
 import { useGlobalStore } from '@/store/useGlobalStore'
 import axios from '@axios'
@@ -347,7 +345,7 @@ function successPopup(success_message){
           Add New User
         </h2>
       </VCardText>
-        <hr></hr>
+        <hr/>
         <VSpacer/>
         <VCardText class="pt-10">
           <VForm

@@ -2,10 +2,10 @@
 import CustomTable from '@/components/user-management/CustomTable.vue'
 import { useGlobalStore } from '@/store/useGlobalStore'
 //import { useUserManagementStore } from '@/store/useUserManagementStore'
-import axios from '@axios'
-import {fetchMembersDummy} from '@/pages/user-management/member_dummy.js'
+import { fetchMembersDummy } from '@/pages/user-management/member_dummy.js'
 import { useAppStore } from '@/store/app'
 import { useUserManagementStore } from '@/store/useUserManagementStore'
+import axios from '@axios'
 import { toRaw } from 'vue'
 
 const store = useGlobalStore()
@@ -597,7 +597,7 @@ function successPopup(success_message){
           List User
         </h2>
       </VCardText>
-      <hr></hr>
+      <hr/>
       <VSpacer/>
       <VCardText class="d-flex flex-row align-center text-black font-weight-bold row2">
         <span class="me-3">Show</span>

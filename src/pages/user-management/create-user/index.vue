@@ -78,7 +78,7 @@ const refVForm = ref()
 const isPasswordVisible = ref(false)
 const confirmationDialog = ref(false)
 const successDialog = ref(false)
-const role = ref([{"name":"Admin","id":1},{"name":"Customer Service","id":2},{"name":"Developer","id":3}]) //{name, id}
+const role = ref([{ "name":"Admin","id":1 },{ "name":"Customer Service","id":2 },{ "name":"Developer","id":3 }]) //{name, id}
 const statuses = ref(['Active', 'Inactive'])
 const isErrorVisible = ref(false)
 const customErrorMessages = ref('')
@@ -108,7 +108,8 @@ const formSubmit = ref({
   password: '',
   division: '',
   role: null,
-  status: null
+  status: null,
+
   // role: getFirstRoleName(),
 })
 
@@ -128,6 +129,7 @@ const resetForm = () => {
   formSubmit.value.phone_number = null
   formSubmit.value.password = null
   formSubmit.value.role = -1
+
   //router.push("/user-management/view-all")
 }
 
@@ -139,7 +141,7 @@ const onDataError = e => {
 const createUser = () => {
   console.log('createUser')
 
-let params = {
+  let params = {
     company_id: companyID.value,
     session_id: sessionID.value,
     op_crud: 1,
@@ -151,8 +153,8 @@ let params = {
       password: formSubmit.value.password,
       division: formSubmit.value.division,
       role: formSubmit.value.role,
-      status: formSubmit.value.status
-    }
+      status: formSubmit.value.status,
+    },
   }
 
   //   window.moffas.do_request(
@@ -164,6 +166,7 @@ let params = {
 
   // Ceritanya berhasil
   successPopup("New user has been successfully saved")
+
   // kalau gagal
   // errorPopup("Apalah alasan nya")
 
@@ -203,30 +206,31 @@ const onSubmit = () => {
 const getRoles = () => {
   let params = {
     company_id: companyID.value,
-    session_id: sessionID.value   
+    session_id: sessionID.value,   
   }
 
   axios.post(urlBE.value + 'retrieve_management_user_roles', params)
-  .then(function (response) {
-    console.log('response getRoles=', response)
-    const responseData = response.data
+    .then(function (response) {
+      console.log('response getRoles=', response)
 
-    console.log('responseData', responseData)
+      const responseData = response.data
 
-    if(response.data.error_code) {
-      onDataError(response.data)
+      console.log('responseData', responseData)
 
-      return
-    }
+      if(response.data.error_code) {
+        onDataError(response.data)
 
-    role.value = responseData.data
+        return
+      }
+
+      role.value = responseData.data
 
     // showProgressCircular.value = false
-  })
-  .catch(function (error) {
-    console.log(error)
-    onDataError(error.response)
-  })
+    })
+    .catch(function (error) {
+      console.log(error)
+      onDataError(error.response)
+    })
 }
 
 // const getRoles = () => {
@@ -274,36 +278,36 @@ onMounted(() => {
 const appStore = useAppStore()
 
 function confirmAdditionPopup(){
-    appStore.setPopup({
-        title: 'Confirm Add New User',
-        word: 'Are you sure you want to add this new user to the system?',
-        action: 'warn',
-        onSucc: () => {
-          confirmYes()
-        },
-      })
+  appStore.setPopup({
+    title: 'Confirm Add New User',
+    word: 'Are you sure you want to add this new user to the system?',
+    action: 'warn',
+    onSucc: () => {
+      confirmYes()
+    },
+  })
 }
 
 function errorPopup(error_message){
-    appStore.setPopup({
-      title: 'Error',
-      word: error_message || 'Undefined failure!',
-      action: 'error',
-      onSucc: () => {
-        //
-      },
-    })
+  appStore.setPopup({
+    title: 'Error',
+    word: error_message || 'Undefined failure!',
+    action: 'error',
+    onSucc: () => {
+      //
+    },
+  })
 }
 
 function successPopup(success_message){
   appStore.setPopup({
-      title: 'Success!',
-      word: success_message || '',
-      action: 'success',
-      onSucc: () => {
-        showDialogGroup.value = false
-      },
-    })
+    title: 'Success!',
+    word: success_message || '',
+    action: 'success',
+    onSucc: () => {
+      showDialogGroup.value = false
+    },
+  })
 }
 </script>
 
@@ -339,71 +343,78 @@ function successPopup(success_message){
     </div>
     <div>
       <VCard>
-      <VCardText class="d-flex align-center" style="justify-content: space-between;">
-        <v-btn icon="mdi-arrow-left" to="/user-management/view-all" class="back"/>
-        <h2 style="margin: 0;">
-          Add New User
-        </h2>
-      </VCardText>
-        <hr/>
-        <VSpacer/>
+        <VCardText
+          class="d-flex align-center"
+          style="justify-content: space-between;"
+        >
+          <VBtn
+            icon="mdi-arrow-left"
+            to="/user-management/view-all"
+            class="back"
+          />
+          <h2 style="margin: 0;">
+            Add New User
+          </h2>
+        </VCardText>
+        <hr>
+        <VSpacer />
         <VCardText class="pt-10">
           <VForm
             ref="refVForm"
             @submit.prevent="onSubmit"
           >
             <span class="d-flex">
-            <VCol
-            v-for="(group, gindex) in formKeyNames"
-            :key="gindex"
-            class="align-center" 
-            >
-            <VRow
-              v-for="(name, index) in group"
-              :key="index"
-              class="align-center"
-            >
               <VCol
-              cols="12"
-              md="12"
+                v-for="(group, gindex) in formKeyNames"
+                :key="gindex"
+                class="align-center" 
               >
-              <VTextField
-                v-if="name != 'Role' && name != 'Status'"
-                v-model="formSubmit[name.toLowerCase().replace(' ', '_')]"
-                :type="name == 'Password' ? (isPasswordVisible ? 'text' : 'password'): null"
-                :rules="formRequired.includes(name) ? (name == 'Email' ? [requiredValidator, emailValidator] : [requiredValidator]) : []"
-                :append-inner-icon="name == 'Password' ? (isPasswordVisible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'): null"
-                @click:append-inner="name == 'Password' ? (isPasswordVisible = !isPasswordVisible): null"
-                variant="outlined"
-                :label="name"
-                class="w-100"
-                :placeholder="name"
-              />
-              <VSelect
-                v-else-if="name == 'Role'"
-                v-model="formSubmit['role']"
-                :items="role"
-                item-value="id"
-                item-title="name"
-                :rules="formRequired.includes(name) ? ([requiredValidator]) : []"
-                variant="outlined"
-                :label="name"
-                class="w-100"
-              />
-              <VSelect
-                v-else-if="name == 'Status'"
-                v-model="formSubmit['status']"
-                :items="statuses"
-                item-value="id"
-                item-title="status_name"
-                :rules="formRequired.includes(name) ? ([requiredValidator]) : []"
-                variant="outlined"
-                :label="name"
-                class="w-100"
-              />
+                <VRow
+                  v-for="(name, index) in group"
+                  :key="index"
+                  class="align-center"
+                >
+                  <VCol
+                    cols="12"
+                    md="12"
+                  >
+                    <VTextField
+                      v-if="name != 'Role' && name != 'Status'"
+                      v-model="formSubmit[name.toLowerCase().replace(' ', '_')]"
+                      :type="name == 'Password' ? (isPasswordVisible ? 'text' : 'password'): null"
+                      :rules="formRequired.includes(name) ? (name == 'Email' ? [requiredValidator, emailValidator] : [requiredValidator]) : []"
+                      :append-inner-icon="name == 'Password' ? (isPasswordVisible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'): null"
+                      variant="outlined"
+                      :label="name"
+                      class="w-100"
+                      :placeholder="name"
+                      @click:append-inner="name == 'Password' ? (isPasswordVisible = !isPasswordVisible): null"
+                    />
+                    <VSelect
+                      v-else-if="name == 'Role'"
+                      v-model="formSubmit['role']"
+                      :items="role"
+                      item-value="id"
+                      item-title="name"
+                      :rules="formRequired.includes(name) ? ([requiredValidator]) : []"
+                      variant="outlined"
+                      :label="name"
+                      class="w-100"
+                    />
+                    <VSelect
+                      v-else-if="name == 'Status'"
+                      v-model="formSubmit['status']"
+                      :items="statuses"
+                      item-value="id"
+                      item-title="status_name"
+                      :rules="formRequired.includes(name) ? ([requiredValidator]) : []"
+                      variant="outlined"
+                      :label="name"
+                      class="w-100"
+                    />
+                  </VCol>
+                </VRow>
               </VCol>
-            </VRow>
-            </VCol>
             </span>
             <VSheet class="d-flex align-center pa-6 justify-end">
               <VBtn
@@ -432,12 +443,12 @@ function successPopup(success_message){
 }
 
 .back {
-  background-color: rgb(var(--v-theme-surface-variant), .82) !important;
+  background-color: rgb(var(--v-theme-surface-variant), 0.82) !important;
   color: #fff;
+
   &:hover {
-    background-color: rgba(var(--v-theme-on-surface), calc(.82 - .14));
+    background-color: rgba(var(--v-theme-on-surface), calc(0.82 - 0.14));
   }
   :deep(.v-icon) { color: inherit; }
 }
-
 </style>

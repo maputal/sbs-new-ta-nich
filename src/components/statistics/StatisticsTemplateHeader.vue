@@ -79,112 +79,116 @@ function onShow() {
 </script>
 
 <template>
-  <VCard class="px-8 py-16">
-    <!-- Date Row -->
-    <VRow class="mb-2">
-      <VCol
-        cols="3"
-        class="d-flex align-center"
-      >
-        <VLabel class="ma-0 text-black font-weight-black">
-          Date
-        </VLabel>
-      </VCol>
-      <VCol
-        cols="9"
-        class="d-flex gap-8"
-      >
-        <AppDateTimePicker
-          v-model="startDate"
-          :config="dateConfig"
-          label="Start date"
-          variant="outlined"
-          density="comfortable"
-          hide-details="auto"
-          color="primary"
-          clearable
-          :rules="[v => !!v || 'Required']"
-          @click:clear="startDate = ''"
-        />
-        <AppDateTimePicker
-          v-model="endDate"
-          :config="dateConfig"
-          label="End date"
-          variant="outlined"
-          density="comfortable"
-          hide-details="auto"
-          color="primary"
-          clearable
-          :rules="[v => !!v || 'Required']"
-          @click:clear="endDate = ''"
-        />
-      </VCol>
-    </VRow>
+  <VCard>
+    <div class="px-8 py-16">
+      <!-- Date Row -->
+      <VRow class="mb-2">
+        <VCol
+          cols="3"
+          class="d-flex align-center"
+        >
+          <VLabel class="ma-0 text-black font-weight-black">
+            Date
+          </VLabel>
+        </VCol>
+        <VCol
+          cols="9"
+          class="d-flex gap-8"
+        >
+          <AppDateTimePicker
+            v-model="startDate"
+            :config="dateConfig"
+            label="Start date"
+            variant="outlined"
+            density="comfortable"
+            hide-details="auto"
+            color="primary"
+            clearable
+            :rules="[v => !!v || 'Required']"
+            @click:clear="startDate = ''"
+          />
+          <AppDateTimePicker
+            v-model="endDate"
+            :config="dateConfig"
+            label="End date"
+            variant="outlined"
+            density="comfortable"
+            hide-details="auto"
+            color="primary"
+            clearable
+            :rules="[v => !!v || 'Required']"
+            @click:clear="endDate = ''"
+          />
+        </VCol>
+      </VRow>
 
-    <!-- Package Row (render only if non-empty list) -->
-    <VRow
-      v-if="packageItems.length"
-      class="mb-2"
-    >
-      <VCol
-        cols="3"
-        class="d-flex align-center"
+      <!-- Package Row (render only if non-empty list) -->
+      <VRow
+        v-if="packageItems.length"
+        class="mb-2"
       >
-        <VLabel class="ma-0 text-black font-weight-black">
-          Package
-        </VLabel>
-      </VCol>
-      <VCol cols="9">
-        <VSelect
-          v-model="pkg"
-          :items="packageItems"
-          item-title="title"
-          item-value="value"
-          label="Select package"
-          variant="outlined"
-          density="comfortable"
-          hide-details="auto"
-          clearable
-        />
-      </VCol>
-    </VRow>
+        <VCol
+          cols="3"
+          class="d-flex align-center"
+        >
+          <VLabel class="ma-0 text-black font-weight-black">
+            Package
+          </VLabel>
+        </VCol>
+        <VCol cols="9">
+          <VSelect
+            v-model="pkg"
+            :items="packageItems"
+            item-title="title"
+            item-value="value"
+            label="Select package"
+            variant="outlined"
+            density="comfortable"
+            hide-details="auto"
+            clearable
+          />
+        </VCol>
+      </VRow>
 
-    <!-- Group Row (render only if non-empty list) -->
-    <VRow
-      v-if="groupItems.length"
-      class="mb-2"
-    >
-      <VCol
-        cols="3"
-        class="d-flex align-center"
+      <!-- Group Row (render only if non-empty list) -->
+      <VRow
+        v-if="groupItems.length"
+        class="mb-2"
       >
-        <VLabel class="ma-0 text-black font-weight-black">
-          Group
-        </VLabel>
-      </VCol>
-      <VCol cols="9">
-        <VSelect
-          v-model="grp"
-          :items="groupItems"
-          item-title="title"
-          item-value="value"
-          label="Select group"
-          variant="outlined"
-          density="comfortable"
-          hide-details="auto"
-          clearable
-        />
-      </VCol>
-    </VRow>
+        <VCol
+          cols="3"
+          class="d-flex align-center"
+        >
+          <VLabel class="ma-0 text-black font-weight-black">
+            Group
+          </VLabel>
+        </VCol>
+        <VCol cols="9">
+          <VSelect
+            v-model="grp"
+            :items="groupItems"
+            item-title="title"
+            item-value="value"
+            label="Select group"
+            variant="outlined"
+            density="comfortable"
+            hide-details="auto"
+            clearable
+          />
+        </VCol>
+      </VRow>
 
-    <!-- Actions -->
-    <VRow>
-      <VCol cols="3" />
-      <VCol cols="9">
-        <VBtn @click="onShow">
-          Show
-        </VBtn>
-      </VCol>
-    </VRow>
+      <!-- Actions -->
+      <VRow>
+        <VCol cols="3" />
+        <VCol cols="9">
+          <VBtn @click="onShow">
+            Show
+          </VBtn>
+        </VCol>
+      </VRow>
+    </div>
+
+    <slot />
   </VCard>
 </template>

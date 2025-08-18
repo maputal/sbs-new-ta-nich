@@ -1,10 +1,8 @@
 <script setup>
-import UploadableItem from '@/components/UploadableItem.vue';
-import { useAppStore } from '@/store/app';
-import { useFileProgressStore } from '@/store/useFileUploadStore';
-import { computed, ref, watch } from 'vue';
-
-const appStore = useAppStore()
+import UploadableItem from '@/components/UploadableItem.vue'
+import { useAppStore } from '@/store/app'
+import { useFileProgressStore } from '@/store/useFileUploadStore'
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
   acceptedFormats: {
@@ -17,16 +15,20 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(["files-submitted"]);
+const emit = defineEmits(["files-submitted"])
+
+const appStore = useAppStore()
 
 const uploadOptions = computed(() => {
   const options = [
-    { title: 'File', value: 'FILE' }
-  ];
+    { title: 'File', value: 'FILE' },
+  ]
+
   if (props.allowTextUpload) {
-    options.unshift({ title: 'Text', value: 'TEXT' });
+    options.unshift({ title: 'Text', value: 'TEXT' })
   }
-  return options;
+  
+  return options
 })
 
 const upload_method = ref(null)
@@ -35,12 +37,13 @@ const fileValue = ref([]) // using <VFileInput multiple />, so an array
 const uploadedFiles = ref([]) // for sending to BE
 const form = ref(null)
 
-const isDragging = ref(false);
-const fileInput = ref(null);
+const isDragging = ref(false)
+const fileInput = ref(null)
 
-const textRules = [(v) => (!!v && v.trim().length > 0) || 'Text is required']
+const textRules = [v => (!!v && v.trim().length > 0) || 'Text is required']
+
 // IMPORTANT: [] is truthy; make sure we check length for multiple
-const fileRules = [(v) => (Array.isArray(v) ? v.length > 0 : !!v) || 'File is required']
+const fileRules = [v => (Array.isArray(v) ? v.length > 0 : !!v) || 'File is required']
 
 watch(upload_method, () => {
   textValue.value = ''
@@ -84,8 +87,6 @@ const onSubmit = async () => {
         dataSubmit = uploadedFiles.value
       }
     
-      emit("files-submitted", dataSubmit)
-    
       //reset after successful submission
       upload_method.value = null
       textValue.value = ''
@@ -96,35 +97,38 @@ const onSubmit = async () => {
   })
 }
 
-const fileStore = useFileProgressStore();
+const fileStore = useFileProgressStore()
 
-const fileKey = (file) => `${file.name}-${file.size}-${file.lastModified}`
+const fileKey = file => `${file.name}-${file.size}-${file.lastModified}`
 
 function onRemove(id) {
   // remove from the UI list
   fileValue.value = fileValue.value.filter(f => fileKey(f) !== id)
+
   // remove from Pinia map
   fileStore.removeFile(id) // this action exists in your store. :contentReference[oaicite:0]{index=0}
 }
 
 function convertToBase64(file) {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (err) => reject(err);
-  });
+    const reader = new FileReader()
+
+    reader.readAsDataURL(file)
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = err => reject(err)
+  })
 }
 
 function simulateUpload(fileData, key) {
   const interval = setInterval(() => {
     if (fileData.progress >= 100) {
-      clearInterval(interval);
-      return;
+      clearInterval(interval)
+      
+      return
     }
-    fileData.progress += 10;
-    fileStore.setProgress(key, fileData.progress); // keep in sync with Pinia
-  }, 150);
+    fileData.progress += 10
+    fileStore.setProgress(key, fileData.progress) // keep in sync with Pinia
+  }, 150)
 }
 
 // function uploadAndSync(files) {
@@ -132,53 +136,72 @@ function simulateUpload(fileData, key) {
 // }
 
 function uploadAndSync(files) {
-  uploadedFiles.value = []; // Reset list
+  uploadedFiles.value = [] // Reset list
 
   Array.from(files).forEach(file => {
     convertToBase64(file)
-      .then((base64) => {
-        const key = fileKey(file);
-        const pureBase64 = base64.split(',')[1];
+      .then(base64 => {
+        const key = fileKey(file)
+        const pureBase64 = base64.split(',')[1]
 
         const fileData = {
           name: file.name,
           progress: 0,
           base64: pureBase64,
-        };
+        }
 
-        uploadedFiles.value.push(fileData);
-        simulateUpload(fileData, key);
+        uploadedFiles.value.push(fileData)
+        simulateUpload(fileData, key)
       })
-      .catch((err) => {
-        console.error('Base64 conversion failed:', err);
-      });
-  });
+      .catch(err => {
+        console.error('Base64 conversion failed:', err)
+      })
+  })
 }
 
 function onDrop(e) {
-  isDragging.value = false;
-  const files = Array.from(e.dataTransfer.files);
+  isDragging.value = false
+
+  const files = Array.from(e.dataTransfer.files)
+
   fileValue.value = files
-  uploadAndSync(files);
+  uploadAndSync(files)
 }
 
 function onFileChange(e) {
-  const files = Array.from(e.target.files);
+  const files = Array.from(e.target.files)
+
   fileValue.value = files
-  uploadAndSync(files);
+  uploadAndSync(files)
 }
 </script>
+
 <template>
   <section>
-    <VForm ref="form" @submit.prevent="onSubmit">
+    <VForm
+      ref="form"
+      @submit.prevent="onSubmit"
+    >
       <div class="pa-6 mb-8">
         <!-- Upload type selector -->
         <VRow class="align-center">
-          <VCol cols="12" md="3" class="d-flex align-center">
-            <VLabel for="uploadMethod" class="ma-0 text-black font-weight-black">Upload type</VLabel>
+          <VCol
+            cols="12"
+            md="3"
+            class="d-flex align-center"
+          >
+            <VLabel
+              for="uploadMethod"
+              class="ma-0 text-black font-weight-black"
+            >
+              Upload type
+            </VLabel>
           </VCol>
 
-          <VCol cols="12" md="9">
+          <VCol
+            cols="12"
+            md="9"
+          >
             <VSelect
               id="uploadMethod"
               v-model="upload_method"
@@ -194,37 +217,61 @@ function onFileChange(e) {
           </VCol>
         </VRow>
 
-        <VDivider :thickness="20" class="border-opacity-0" />
+        <VDivider
+          :thickness="20"
+          class="border-opacity-0"
+        />
 
         <!-- Single row that stays mounted -->
         <VRow class="align-start">
           <!-- LEFT: label column (swap label text only) -->
-          <VCol cols="12" md="3" class="align-self-start">
-            <Transition name="fade-slide" mode="out-in">
-              <VLabel v-if="upload_method === 'TEXT'"
+          <VCol
+            cols="12"
+            md="3"
+            class="align-self-start"
+          >
+            <Transition
+              name="fade-slide"
+              mode="out-in"
+            >
+              <VLabel
+                v-if="upload_method === 'TEXT'"
                 key="lbl-text"
                 for="textInput"
-                class="ma-0 text-black font-weight-black">
+                class="ma-0 text-black font-weight-black"
+              >
                 Upload Manual Entry
               </VLabel>
 
-              <VLabel v-else-if="upload_method === 'FILE'"
+              <VLabel
+                v-else-if="upload_method === 'FILE'"
                 key="lbl-file"
                 for="fileInput"
-                class="ma-0 text-black font-weight-black">
+                class="ma-0 text-black font-weight-black"
+              >
                 Upload File MSISDN
               </VLabel>
 
               <!-- Optional: placeholder when nothing selected -->
-              <span v-else key="lbl-none" class="text-medium-emphasis">Select an upload option</span>
+              <span
+                v-else
+                key="lbl-none"
+                class="text-medium-emphasis"
+              >Select an upload option</span>
             </Transition>
           </VCol>
 
           <!-- RIGHT: input column (swap input only) -->
-          <VCol cols="12" md="9">
+          <VCol
+            cols="12"
+            md="9"
+          >
             <!-- Height + content swap -->
             <VExpandTransition>
-              <div v-if="upload_method === 'TEXT' && allowTextUpload" key="inp-text">
+              <div
+                v-if="upload_method === 'TEXT' && allowTextUpload"
+                key="inp-text"
+              >
                 <VTextarea 
                   id="textInput"
                   v-model="textValue"
@@ -240,20 +287,27 @@ function onFileChange(e) {
             </VExpandTransition>
 
             <VExpandTransition>
-              <div v-if="upload_method === 'FILE'" key="inp-file">
+              <div
+                v-if="upload_method === 'FILE'"
+                key="inp-file"
+              >
                 <VSheet
                   class="pa-6 text-center border-dashed-custom"
                   color="transparent"
                   rounded
                   outlined
+                  :class="{ dragover: isDragging }"
                   @dragover.prevent="isDragging = true"
                   @dragleave.prevent="isDragging = false"
                   @drop.prevent="onDrop"
-                  :class="{ dragover: isDragging }"
                 >
-                  <VIcon size="36">mdi-file-upload-outline</VIcon>
+                  <VIcon size="36">
+                    mdi-file-upload-outline
+                  </VIcon>
                   <div class="d-flex align-center justify-center">
-                    <div class="text-black mt-2">Drag & Drop or</div>
+                    <div class="text-black mt-2">
+                      Drag & Drop or
+                    </div>
                     <VBtn
                       color="primary"
                       variant="text"
@@ -263,15 +317,17 @@ function onFileChange(e) {
                       Choose File
                     </VBtn>
                     
-                    <div class="text-black mt-2">to upload</div>
+                    <div class="text-black mt-2">
+                      to upload
+                    </div>
                   </div>
                   <input
                     ref="fileInput"
                     type="file"
                     hidden
-                    @change="onFileChange"
                     :accept="acceptedFormats"
-                  />
+                    @change="onFileChange"
+                  >
                   <small class="d-block text-grey">
                     Supported files: {{ acceptedFormats }}
                   </small>
@@ -280,8 +336,8 @@ function onFileChange(e) {
                 <VList class="mt-2">
                   <UploadableItem
                     v-for="file in fileValue"
-                    :key="fileKey(file)"
                     :id="fileKey(file)"
+                    :key="fileKey(file)"
                     :file="file"
                     :name="file.name"
                     :progress="fileStore.getProgress(fileKey(file))"
@@ -292,8 +348,18 @@ function onFileChange(e) {
             </VExpandTransition>
 
             <!-- Actions (always present; no v-if) -->
-            <div class="d-flex justify-start gap-3 mt-6" v-if="showSubmit" >
-              <VBtn variant="flat" color="primary" type="submit" :disabled="!canSubmit">Submit</VBtn>
+            <div
+              v-if="showSubmit"
+              class="d-flex justify-start gap-3 mt-6"
+            >
+              <VBtn
+                variant="flat"
+                color="primary"
+                type="submit"
+                :disabled="!canSubmit"
+              >
+                Submit
+              </VBtn>
             </div>
           </VCol>
         </VRow>
@@ -329,4 +395,3 @@ function onFileChange(e) {
   top: 0;
 } */
 </style>
-

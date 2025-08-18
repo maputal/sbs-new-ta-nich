@@ -2,7 +2,9 @@
 import { taSecure_Login, taSecure_POST } from '@/plugins/ta_secure/ta_secure';
 
 const backend_url = window.$config?.backend_url || ''
+const backend_url_login = window.$config?.backend_url_login || ''
 console.log('backend_url=', backend_url)
+console.log('backend_url_login=', backend_url_login)
 
 // Main exported function
 export default function globalRequest(type='taSecure_POST', op, params, onSuccess, onError) {
@@ -28,7 +30,7 @@ export default function globalRequest(type='taSecure_POST', op, params, onSucces
       });
   } else if (type === 'taSecure_Login') {
     const { username, password } = params;
-    taSecure_Login(backend_url, username, password)
+    taSecure_Login(backend_url_login, username, password)
       .then((res) => {
         onSuccess(res);
       })

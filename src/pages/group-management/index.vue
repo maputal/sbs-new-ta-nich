@@ -12,40 +12,6 @@ const route = useRoute()
 const router = useRouter()
 
 // =============================================== meta data  
-const toTimeHM = unixTimestamp => {
-  let today = new Date(unixTimestamp * 1000)
-  let hours = today.getHours()
-  let minutes = today.getMinutes()
-  
-  return (
-    hours.toString().padStart(2, '0') + 
-    ':' + 
-    minutes.toString().padStart(2, '0')
-  )
-}
-
-const toTimeDMYHM = unixTimestamp => {
-  let today = new Date(unixTimestamp * 1000)
-  let dd = today.getDate()
-  let year = today.getFullYear()
-  let month = today.getMonth() + 1
-  let hours = today.getHours()
-  let minutes = today.getMinutes()
-  let date =
-      dd < 10 ? '0' + dd : dd
-  
-  return (
-    date +
-    '/' +
-    month +
-    '/' +
-    year+
-    ' ' +
-    hours + 
-    ':' + 
-    minutes.toString().padStart(2, '0')
-  )
-}
 
 const compareTimeStamp = epochMillis => {
   const dateFromEpoch = new Date(epochMillis * 1000)
@@ -169,7 +135,7 @@ const getGroupList = () => {
   const params = {
     row_length: rowLength.value,
     page_number: page.value,
-    search: searchGroup.value,
+    search: searchGroup.value || '',
   }
 
   // dummymoffasdogetGroupList | globalRequest
@@ -402,6 +368,9 @@ const packageList = ref([])
 const chooseDialogPackage = () => {
   setGroupData(selectedGroup.value[0])
   getAllPackage()
+
+  // localStorage.setItem('current_group', JSON.stringify(selectedGroup.value[0]))
+  // router.push('/group-management/add-package-group/' + selectedGroup.value[0].group_id)
 }
 
 function dummymoffasdogetPackageGroup(type, op, params, onSuccess, onError) {
@@ -558,7 +527,7 @@ const deletePackageGroup = () => {
   const params = {
     group_id: editAddGroupData.value.groupID,
     group_name: editAddGroupData.value.groupName,
-    package: editAddGroupData.value.newPackageGroup,
+    package: checkedRows.value,
   }
 
   globalRequest(
@@ -582,8 +551,7 @@ const deletePackageGroup = () => {
         word: 'You’ve successfully added this package to the group',
         action: 'success',
         onSucc: () => {
-          showDialogPackage.value = false
-          resetGroupData()
+          checkedRows.value = []
           getPackageGroup()
           appStore.hideLoader()
         },
@@ -764,7 +732,7 @@ const isLeftSidebarOpen = ref(true)
 
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
-const priv = userData.priv
+const priv = userData?.priv
 
 console.log("---------- hasil priv=", priv)
 
@@ -852,8 +820,10 @@ onUnmounted (() => {
 })
 
 onBeforeRouteLeave ((to, from) => {
-  if (localStorage.getItem('ticket_id')) {
-    localStorage.removeItem('ticket_id')       
+  if(to.name != 'group-management-add-package-group-id'){
+    if (localStorage.getItem('current_group')) {
+      localStorage.removeItem('current_group')       
+    }
   }
 })
 </script>

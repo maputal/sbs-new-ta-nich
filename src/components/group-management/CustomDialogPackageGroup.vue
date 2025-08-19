@@ -30,10 +30,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  priv: {
-    type: Object,
-    required: true,
-  },
+  // priv: {
+  //   type: Object,
+  //   required: true,
+  // },
 })
 
 const emits = defineEmits(['update:isDialogVisible', 'update:modelValue','save', 'create'])
@@ -193,7 +193,7 @@ async function fetchItems(query, page) {
 
               <v-autocomplete
                 v-model="groupData.newPackageGroup"
-                :items="items"
+                :items="props.packageList"
                 item-title="package_name"
                 item-value="package_id"
                 label="Choose Package"

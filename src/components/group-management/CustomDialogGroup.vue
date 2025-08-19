@@ -29,7 +29,6 @@ const props = defineProps({
   },
   priv: {
     type: Object,
-    required: true,
   },
 })
 

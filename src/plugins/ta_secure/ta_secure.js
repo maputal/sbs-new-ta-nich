@@ -127,37 +127,48 @@ export const taSecure_POST = async (backend_url, op,param) => {
             body: JSON.stringify({ data:post_data  }),
         });
 
-        if (!response.ok) {
-            throw new Error(`Server error: ${response.status} ${response.statusText}`);
-        }
         const responseData = await response.json();
-        const encryptedResponse = responseData.data;
+        console.log("responseData: ",responseData)
+        let res = {}
 
-        if (!encryptedResponse) {
-                new Error('Respons server tidak valid, tidak ada data.');
-        }
-        // split encryptedResponse pakai ':'
-        const encryptedParts = encryptedResponse.split(":");
+        if (response.ok) {
+            // throw new Error(`Server error: ${response.status} ${response.statusText}`);        
+            const encryptedResponse = responseData.data;
 
-        if (encryptedParts.length !== 2) {
-            throw new Error('Respons server tidak valid, format data tidak valid.');
-        }
-        const iv_hex = encryptedParts[0];
-        const encryptedData_b64 = encryptedParts[1];
+            if (!encryptedResponse) {
+                    new Error('Respons server tidak valid, tidak ada data.');
+            }
+            // split encryptedResponse pakai ':'
+            const encryptedParts = encryptedResponse.split(":");
+
+            if (encryptedParts.length !== 2) {
+                throw new Error('Respons server tidak valid, format data tidak valid.');
+            }
+            const iv_hex = encryptedParts[0];
+            const encryptedData_b64 = encryptedParts[1];
 
 
-        const decryptedResponse_json = aes256Decrypt(iv_hex, encryptedData_b64, encKey);
-        console.log('Decrypted Response:', decryptedResponse_json);
-        const decryptedResponse = JSON.parse(decryptedResponse_json);
+            const decryptedResponse_json = aes256Decrypt(iv_hex, encryptedData_b64, encKey);
+            console.log('Decrypted Response:', decryptedResponse_json);
+            const decryptedResponse = JSON.parse(decryptedResponse_json);
 
-        const res =  {
-            success: true,
-            data:decryptedResponse,
+            res =  {
+                success: true,
+                data:decryptedResponse,
+            }
+        } else {
+            res =  {
+                success: false,
+                error_message: responseData.error_message,
+                error_code: responseData.error_code,
+                trace_id: responseData.trace_id,
+            }
         }
         console.log("res: ",res)
         return res
     } catch (err) {
-        console.error("Gagal Login: ", err);
+        console.error("Gagal POST: ", err);
+        console.log("Gagal POST2: ", err);
         return { success: false, error: err.message };
     }
 }

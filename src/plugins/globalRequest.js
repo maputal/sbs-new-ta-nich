@@ -13,19 +13,29 @@ export default function globalRequest(type='taSecure_POST', op, params, onSucces
   if (type === 'taSecure_POST') {
     taSecure_POST(backend_url, op, params)
       .then((res) => {
-        onSuccess(JSON.stringify(res.data));
+        console.log('[globalRequest] taSecure_POST response', res)
+        if(res && res.data){
+          onSuccess(JSON.stringify(res.data));
+        } else {
+          onSuccess(JSON.stringify(res))
+        }
       })
       .catch((err) => {
-        console.error(`[globalRequest] Error`, err);
+        console.error(`[globalRequest] taSecure_POST Error`, err);
         if (onError) onError(err);
       });
   } else if (type === 'taSecure_GET') {
     taSecure_GET(backend_url, op, params)
       .then((res) => {
-        onSuccess(JSON.stringify(res.data));
+        console.log('[globalRequest] taSecure_GET response', res)
+        if(res && res.data){
+          onSuccess(JSON.stringify(res.data));
+        } else {
+          onSuccess(JSON.stringify(res))
+        }
       })
       .catch((err) => {
-        console.error(`[globalRequest] Error`, err);
+        console.error(`[globalRequest] taSecure_GET Error`, err);
         if (onError) onError(err);
       });
   } else if (type === 'taSecure_Login') {

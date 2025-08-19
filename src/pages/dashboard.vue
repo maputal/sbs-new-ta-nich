@@ -28,28 +28,31 @@ import { useGlobalStore } from '@/store/useGlobalStore'
 
   const onLoadOwnInfo = (data) => {}
 
-  const getProfile = () => {
-    console.log('Code getProfile!')
+  const getUserInfo = () => {
+    console.log('Code getUserInfo!')
 
     appStore.showLoader()
 
-    const params = {
-      // row_length: rowPerPagePackage.value,
-      // page_number: currentPagePackage.value,
-      // group_id: selectedGroup.value[0],
-    }
+    // const params = {
+    //   // row_length: rowPerPagePackage.value,
+    //   // page_number: currentPagePackage.value,
+    //   // group_id: selectedGroup.value[0],
+    // }
+
+    const params = 'HALO MANIEZZ'
 
     globalRequest(
       'taSecure_POST',
-      'get_broadcasts',
+      'get_user_info',
       params,
       (data) => {
-        console.log('getProfile response1', data)
+        console.log('getUserInfo response1', data)
         
         const response = JSON.parse(data)
-        console.log('getProfile response2', response)
+        console.log('getUserInfo response2', response)
 
-        if (response.hasOwnProperty('trace_id')) {
+        if (response?.success == false) {
+          console.log('masuk error')
           appStore.hideLoader()
           appStore.showError(response)
           return
@@ -65,13 +68,13 @@ import { useGlobalStore } from '@/store/useGlobalStore'
     let pload = {}
     // globalRequest(
     //   'window.moffas.do_request',
-    //   'getProfile',
+    //   'getUserInfo',
     //   pload,
     //   onLoadOwnInfo,
     //   onDataError
     // )
 
-    // getProfile()
+    getUserInfo()
   })
 </script>
 <template>

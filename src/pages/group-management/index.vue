@@ -574,96 +574,96 @@ function dummymoffasdogetAllPackage(tyep, op, params, onSuccess, onError) {
       {"package_id": 8, "package_name": "Paket Dummy 8", "msisdn": "6289123456008"},
       {"package_id": 9, "package_name": "Paket Dummy 9", "msisdn": "6289123456009"},
       {"package_id": 10, "package_name": "Paket Dummy 10", "msisdn": "6289123456010"},
-      {"package_id": 11, "package_name": "Paket Dummy 11", "msisdn": "6289123456011"},
-      {"package_id": 12, "package_name": "Paket Dummy 12", "msisdn": "6289123456012"},
-      {"package_id": 13, "package_name": "Paket Dummy 13", "msisdn": "6289123456013"},
-      {"package_id": 14, "package_name": "Paket Dummy 14", "msisdn": "6289123456014"},
-      {"package_id": 15, "package_name": "Paket Dummy 15", "msisdn": "6289123456015"},
-      {"package_id": 16, "package_name": "Paket Dummy 16", "msisdn": "6289123456016"},
-      {"package_id": 17, "package_name": "Paket Dummy 17", "msisdn": "6289123456017"},
-      {"package_id": 18, "package_name": "Paket Dummy 18", "msisdn": "6289123456018"},
-      {"package_id": 19, "package_name": "Paket Dummy 19", "msisdn": "6289123456019"},
-      {"package_id": 20, "package_name": "Paket Dummy 20", "msisdn": "6289123456020"},
-      {"package_id": 21, "package_name": "Paket Dummy 21", "msisdn": "6289123456021"},
-      {"package_id": 22, "package_name": "Paket Dummy 22", "msisdn": "6289123456022"},
-      {"package_id": 23, "package_name": "Paket Dummy 23", "msisdn": "6289123456023"},
-      {"package_id": 24, "package_name": "Paket Dummy 24", "msisdn": "6289123456024"},
-      {"package_id": 25, "package_name": "Paket Dummy 25", "msisdn": "6289123456025"},
-      {"package_id": 26, "package_name": "Paket Dummy 26", "msisdn": "6289123456026"},
-      {"package_id": 27, "package_name": "Paket Dummy 27", "msisdn": "6289123456027"},
-      {"package_id": 28, "package_name": "Paket Dummy 28", "msisdn": "6289123456028"},
-      {"package_id": 29, "package_name": "Paket Dummy 29", "msisdn": "6289123456029"},
-      {"package_id": 30, "package_name": "Paket Dummy 30", "msisdn": "6289123456030"},
-      {"package_id": 31, "package_name": "Paket Dummy 31", "msisdn": "6289123456031"},
-      {"package_id": 32, "package_name": "Paket Dummy 32", "msisdn": "6289123456032"},
-      {"package_id": 33, "package_name": "Paket Dummy 33", "msisdn": "6289123456033"},
-      {"package_id": 34, "package_name": "Paket Dummy 34", "msisdn": "6289123456034"},
-      {"package_id": 35, "package_name": "Paket Dummy 35", "msisdn": "6289123456035"},
-      {"package_id": 36, "package_name": "Paket Dummy 36", "msisdn": "6289123456036"},
-      {"package_id": 37, "package_name": "Paket Dummy 37", "msisdn": "6289123456037"},
-      {"package_id": 38, "package_name": "Paket Dummy 38", "msisdn": "6289123456038"},
-      {"package_id": 39, "package_name": "Paket Dummy 39", "msisdn": "6289123456039"},
-      {"package_id": 40, "package_name": "Paket Dummy 40", "msisdn": "6289123456040"},
-      {"package_id": 41, "package_name": "Paket Dummy 41", "msisdn": "6289123456041"},
-      {"package_id": 42, "package_name": "Paket Dummy 42", "msisdn": "6289123456042"},
-      {"package_id": 43, "package_name": "Paket Dummy 43", "msisdn": "6289123456043"},
-      {"package_id": 44, "package_name": "Paket Dummy 44", "msisdn": "6289123456044"},
-      {"package_id": 45, "package_name": "Paket Dummy 45", "msisdn": "6289123456045"},
-      {"package_id": 46, "package_name": "Paket Dummy 46", "msisdn": "6289123456046"},
-      {"package_id": 47, "package_name": "Paket Dummy 47", "msisdn": "6289123456047"},
-      {"package_id": 48, "package_name": "Paket Dummy 48", "msisdn": "6289123456048"},
-      {"package_id": 49, "package_name": "Paket Dummy 49", "msisdn": "6289123456049"},
-      {"package_id": 50, "package_name": "Paket Dummy 50", "msisdn": "6289123456050"},
-      {"package_id": 51, "package_name": "Paket Dummy 51", "msisdn": "6289123456051"},
-      {"package_id": 52, "package_name": "Paket Dummy 52", "msisdn": "6289123456052"},
-      {"package_id": 53, "package_name": "Paket Dummy 53", "msisdn": "6289123456053"},
-      {"package_id": 54, "package_name": "Paket Dummy 54", "msisdn": "6289123456054"},
-      {"package_id": 55, "package_name": "Paket Dummy 55", "msisdn": "6289123456055"},
-      {"package_id": 56, "package_name": "Paket Dummy 56", "msisdn": "6289123456056"},
-      {"package_id": 57, "package_name": "Paket Dummy 57", "msisdn": "6289123456057"},
-      {"package_id": 58, "package_name": "Paket Dummy 58", "msisdn": "6289123456058"},
-      {"package_id": 59, "package_name": "Paket Dummy 59", "msisdn": "6289123456059"},
-      {"package_id": 60, "package_name": "Paket Dummy 60", "msisdn": "6289123456060"},
-      {"package_id": 61, "package_name": "Paket Dummy 61", "msisdn": "6289123456061"},
-      {"package_id": 62, "package_name": "Paket Dummy 62", "msisdn": "6289123456062"},
-      {"package_id": 63, "package_name": "Paket Dummy 63", "msisdn": "6289123456063"},
-      {"package_id": 64, "package_name": "Paket Dummy 64", "msisdn": "6289123456064"},
-      {"package_id": 65, "package_name": "Paket Dummy 65", "msisdn": "6289123456065"},
-      {"package_id": 66, "package_name": "Paket Dummy 66", "msisdn": "6289123456066"},
-      {"package_id": 67, "package_name": "Paket Dummy 67", "msisdn": "6289123456067"},
-      {"package_id": 68, "package_name": "Paket Dummy 68", "msisdn": "6289123456068"},
-      {"package_id": 69, "package_name": "Paket Dummy 69", "msisdn": "6289123456069"},
-      {"package_id": 70, "package_name": "Paket Dummy 70", "msisdn": "6289123456070"},
-      {"package_id": 71, "package_name": "Paket Dummy 71", "msisdn": "6289123456071"},
-      {"package_id": 72, "package_name": "Paket Dummy 72", "msisdn": "6289123456072"},
-      {"package_id": 73, "package_name": "Paket Dummy 73", "msisdn": "6289123456073"},
-      {"package_id": 74, "package_name": "Paket Dummy 74", "msisdn": "6289123456074"},
-      {"package_id": 75, "package_name": "Paket Dummy 75", "msisdn": "6289123456075"},
-      {"package_id": 76, "package_name": "Paket Dummy 76", "msisdn": "6289123456076"},
-      {"package_id": 77, "package_name": "Paket Dummy 77", "msisdn": "6289123456077"},
-      {"package_id": 78, "package_name": "Paket Dummy 78", "msisdn": "6289123456078"},
-      {"package_id": 79, "package_name": "Paket Dummy 79", "msisdn": "6289123456079"},
-      {"package_id": 80, "package_name": "Paket Dummy 80", "msisdn": "6289123456080"},
-      {"package_id": 81, "package_name": "Paket Dummy 81", "msisdn": "6289123456081"},
-      {"package_id": 82, "package_name": "Paket Dummy 82", "msisdn": "6289123456082"},
-      {"package_id": 83, "package_name": "Paket Dummy 83", "msisdn": "6289123456083"},
-      {"package_id": 84, "package_name": "Paket Dummy 84", "msisdn": "6289123456084"},
-      {"package_id": 85, "package_name": "Paket Dummy 85", "msisdn": "6289123456085"},
-      {"package_id": 86, "package_name": "Paket Dummy 86", "msisdn": "6289123456086"},
-      {"package_id": 87, "package_name": "Paket Dummy 87", "msisdn": "6289123456087"},
-      {"package_id": 88, "package_name": "Paket Dummy 88", "msisdn": "6289123456088"},
-      {"package_id": 89, "package_name": "Paket Dummy 89", "msisdn": "6289123456089"},
-      {"package_id": 90, "package_name": "Paket Dummy 90", "msisdn": "6289123456090"},
-      {"package_id": 91, "package_name": "Paket Dummy 91", "msisdn": "6289123456091"},
-      {"package_id": 92, "package_name": "Paket Dummy 92", "msisdn": "6289123456092"},
-      {"package_id": 93, "package_name": "Paket Dummy 93", "msisdn": "6289123456093"},
-      {"package_id": 94, "package_name": "Paket Dummy 94", "msisdn": "6289123456094"},
-      {"package_id": 95, "package_name": "Paket Dummy 95", "msisdn": "6289123456095"},
-      {"package_id": 96, "package_name": "Paket Dummy 96", "msisdn": "6289123456096"},
-      {"package_id": 97, "package_name": "Paket Dummy 97", "msisdn": "6289123456097"},
-      {"package_id": 98, "package_name": "Paket Dummy 98", "msisdn": "6289123456098"},
-      {"package_id": 99, "package_name": "Paket Dummy 99", "msisdn": "6289123456099"},
-      {"package_id": 100, "package_name": "Paket Dummy 100", "msisdn": "6289123456100"}
+      // {"package_id": 11, "package_name": "Paket Dummy 11", "msisdn": "6289123456011"},
+      // {"package_id": 12, "package_name": "Paket Dummy 12", "msisdn": "6289123456012"},
+      // {"package_id": 13, "package_name": "Paket Dummy 13", "msisdn": "6289123456013"},
+      // {"package_id": 14, "package_name": "Paket Dummy 14", "msisdn": "6289123456014"},
+      // {"package_id": 15, "package_name": "Paket Dummy 15", "msisdn": "6289123456015"},
+      // {"package_id": 16, "package_name": "Paket Dummy 16", "msisdn": "6289123456016"},
+      // {"package_id": 17, "package_name": "Paket Dummy 17", "msisdn": "6289123456017"},
+      // {"package_id": 18, "package_name": "Paket Dummy 18", "msisdn": "6289123456018"},
+      // {"package_id": 19, "package_name": "Paket Dummy 19", "msisdn": "6289123456019"},
+      // {"package_id": 20, "package_name": "Paket Dummy 20", "msisdn": "6289123456020"},
+      // {"package_id": 21, "package_name": "Paket Dummy 21", "msisdn": "6289123456021"},
+      // {"package_id": 22, "package_name": "Paket Dummy 22", "msisdn": "6289123456022"},
+      // {"package_id": 23, "package_name": "Paket Dummy 23", "msisdn": "6289123456023"},
+      // {"package_id": 24, "package_name": "Paket Dummy 24", "msisdn": "6289123456024"},
+      // {"package_id": 25, "package_name": "Paket Dummy 25", "msisdn": "6289123456025"},
+      // {"package_id": 26, "package_name": "Paket Dummy 26", "msisdn": "6289123456026"},
+      // {"package_id": 27, "package_name": "Paket Dummy 27", "msisdn": "6289123456027"},
+      // {"package_id": 28, "package_name": "Paket Dummy 28", "msisdn": "6289123456028"},
+      // {"package_id": 29, "package_name": "Paket Dummy 29", "msisdn": "6289123456029"},
+      // {"package_id": 30, "package_name": "Paket Dummy 30", "msisdn": "6289123456030"},
+      // {"package_id": 31, "package_name": "Paket Dummy 31", "msisdn": "6289123456031"},
+      // {"package_id": 32, "package_name": "Paket Dummy 32", "msisdn": "6289123456032"},
+      // {"package_id": 33, "package_name": "Paket Dummy 33", "msisdn": "6289123456033"},
+      // {"package_id": 34, "package_name": "Paket Dummy 34", "msisdn": "6289123456034"},
+      // {"package_id": 35, "package_name": "Paket Dummy 35", "msisdn": "6289123456035"},
+      // {"package_id": 36, "package_name": "Paket Dummy 36", "msisdn": "6289123456036"},
+      // {"package_id": 37, "package_name": "Paket Dummy 37", "msisdn": "6289123456037"},
+      // {"package_id": 38, "package_name": "Paket Dummy 38", "msisdn": "6289123456038"},
+      // {"package_id": 39, "package_name": "Paket Dummy 39", "msisdn": "6289123456039"},
+      // {"package_id": 40, "package_name": "Paket Dummy 40", "msisdn": "6289123456040"},
+      // {"package_id": 41, "package_name": "Paket Dummy 41", "msisdn": "6289123456041"},
+      // {"package_id": 42, "package_name": "Paket Dummy 42", "msisdn": "6289123456042"},
+      // {"package_id": 43, "package_name": "Paket Dummy 43", "msisdn": "6289123456043"},
+      // {"package_id": 44, "package_name": "Paket Dummy 44", "msisdn": "6289123456044"},
+      // {"package_id": 45, "package_name": "Paket Dummy 45", "msisdn": "6289123456045"},
+      // {"package_id": 46, "package_name": "Paket Dummy 46", "msisdn": "6289123456046"},
+      // {"package_id": 47, "package_name": "Paket Dummy 47", "msisdn": "6289123456047"},
+      // {"package_id": 48, "package_name": "Paket Dummy 48", "msisdn": "6289123456048"},
+      // {"package_id": 49, "package_name": "Paket Dummy 49", "msisdn": "6289123456049"},
+      // {"package_id": 50, "package_name": "Paket Dummy 50", "msisdn": "6289123456050"},
+      // {"package_id": 51, "package_name": "Paket Dummy 51", "msisdn": "6289123456051"},
+      // {"package_id": 52, "package_name": "Paket Dummy 52", "msisdn": "6289123456052"},
+      // {"package_id": 53, "package_name": "Paket Dummy 53", "msisdn": "6289123456053"},
+      // {"package_id": 54, "package_name": "Paket Dummy 54", "msisdn": "6289123456054"},
+      // {"package_id": 55, "package_name": "Paket Dummy 55", "msisdn": "6289123456055"},
+      // {"package_id": 56, "package_name": "Paket Dummy 56", "msisdn": "6289123456056"},
+      // {"package_id": 57, "package_name": "Paket Dummy 57", "msisdn": "6289123456057"},
+      // {"package_id": 58, "package_name": "Paket Dummy 58", "msisdn": "6289123456058"},
+      // {"package_id": 59, "package_name": "Paket Dummy 59", "msisdn": "6289123456059"},
+      // {"package_id": 60, "package_name": "Paket Dummy 60", "msisdn": "6289123456060"},
+      // {"package_id": 61, "package_name": "Paket Dummy 61", "msisdn": "6289123456061"},
+      // {"package_id": 62, "package_name": "Paket Dummy 62", "msisdn": "6289123456062"},
+      // {"package_id": 63, "package_name": "Paket Dummy 63", "msisdn": "6289123456063"},
+      // {"package_id": 64, "package_name": "Paket Dummy 64", "msisdn": "6289123456064"},
+      // {"package_id": 65, "package_name": "Paket Dummy 65", "msisdn": "6289123456065"},
+      // {"package_id": 66, "package_name": "Paket Dummy 66", "msisdn": "6289123456066"},
+      // {"package_id": 67, "package_name": "Paket Dummy 67", "msisdn": "6289123456067"},
+      // {"package_id": 68, "package_name": "Paket Dummy 68", "msisdn": "6289123456068"},
+      // {"package_id": 69, "package_name": "Paket Dummy 69", "msisdn": "6289123456069"},
+      // {"package_id": 70, "package_name": "Paket Dummy 70", "msisdn": "6289123456070"},
+      // {"package_id": 71, "package_name": "Paket Dummy 71", "msisdn": "6289123456071"},
+      // {"package_id": 72, "package_name": "Paket Dummy 72", "msisdn": "6289123456072"},
+      // {"package_id": 73, "package_name": "Paket Dummy 73", "msisdn": "6289123456073"},
+      // {"package_id": 74, "package_name": "Paket Dummy 74", "msisdn": "6289123456074"},
+      // {"package_id": 75, "package_name": "Paket Dummy 75", "msisdn": "6289123456075"},
+      // {"package_id": 76, "package_name": "Paket Dummy 76", "msisdn": "6289123456076"},
+      // {"package_id": 77, "package_name": "Paket Dummy 77", "msisdn": "6289123456077"},
+      // {"package_id": 78, "package_name": "Paket Dummy 78", "msisdn": "6289123456078"},
+      // {"package_id": 79, "package_name": "Paket Dummy 79", "msisdn": "6289123456079"},
+      // {"package_id": 80, "package_name": "Paket Dummy 80", "msisdn": "6289123456080"},
+      // {"package_id": 81, "package_name": "Paket Dummy 81", "msisdn": "6289123456081"},
+      // {"package_id": 82, "package_name": "Paket Dummy 82", "msisdn": "6289123456082"},
+      // {"package_id": 83, "package_name": "Paket Dummy 83", "msisdn": "6289123456083"},
+      // {"package_id": 84, "package_name": "Paket Dummy 84", "msisdn": "6289123456084"},
+      // {"package_id": 85, "package_name": "Paket Dummy 85", "msisdn": "6289123456085"},
+      // {"package_id": 86, "package_name": "Paket Dummy 86", "msisdn": "6289123456086"},
+      // {"package_id": 87, "package_name": "Paket Dummy 87", "msisdn": "6289123456087"},
+      // {"package_id": 88, "package_name": "Paket Dummy 88", "msisdn": "6289123456088"},
+      // {"package_id": 89, "package_name": "Paket Dummy 89", "msisdn": "6289123456089"},
+      // {"package_id": 90, "package_name": "Paket Dummy 90", "msisdn": "6289123456090"},
+      // {"package_id": 91, "package_name": "Paket Dummy 91", "msisdn": "6289123456091"},
+      // {"package_id": 92, "package_name": "Paket Dummy 92", "msisdn": "6289123456092"},
+      // {"package_id": 93, "package_name": "Paket Dummy 93", "msisdn": "6289123456093"},
+      // {"package_id": 94, "package_name": "Paket Dummy 94", "msisdn": "6289123456094"},
+      // {"package_id": 95, "package_name": "Paket Dummy 95", "msisdn": "6289123456095"},
+      // {"package_id": 96, "package_name": "Paket Dummy 96", "msisdn": "6289123456096"},
+      // {"package_id": 97, "package_name": "Paket Dummy 97", "msisdn": "6289123456097"},
+      // {"package_id": 98, "package_name": "Paket Dummy 98", "msisdn": "6289123456098"},
+      // {"package_id": 99, "package_name": "Paket Dummy 99", "msisdn": "6289123456099"},
+      // {"package_id": 100, "package_name": "Paket Dummy 100", "msisdn": "6289123456100"}
     ],
     total_pages: 2,
     total_rows: 20,
@@ -680,8 +680,8 @@ const getAllPackage = () => {
   appStore.showLoader()
 
   const params = {
-    // row_length: rowPerPagePackage.value,
-    // page_number: currentPagePackage.value,
+    row_length: rowPerPagePackage.value,
+    page_number: currentPagePackage.value,
   }
 
   // dummymoffasdogetAllPackage | taSecure_POST
@@ -699,6 +699,7 @@ const getAllPackage = () => {
       }
 
       packageList.value = response.data  
+      totalPagesPackage.value = Math.ceil(response.total_data / Number(rowLength.value))
       appStore.hideLoader()      
 
       titleDialogPackage.value = 'Add Package Group'
@@ -730,11 +731,11 @@ const paginationData = computed(() => {
 // =============================================== User interaction
 const isLeftSidebarOpen = ref(true)
 
-const userDataString = localStorage.getItem('user')
-const userData = JSON.parse(userDataString)
-const priv = userData?.priv
+// const userDataString = localStorage.getItem('user')
+// const userData = JSON.parse(userDataString)
+// const priv = userData?.priv
 
-console.log("---------- hasil priv=", priv)
+// console.log("---------- hasil priv=", priv)
 
 const filter = ref({
   search: '',
@@ -1068,7 +1069,6 @@ onBeforeRouteLeave ((to, from) => {
       width="40%"
       :title="titleDialogGroup"
       :groupData="editAddGroupData"
-      :priv="priv"
       @create="data => {
         editAddGroupData.groupName = data.groupName
 
@@ -1090,7 +1090,6 @@ onBeforeRouteLeave ((to, from) => {
       :title="titleDialogPackage"
       :groupData="editAddGroupData"
       :packageList="packageList"
-      :priv="priv"
       @save="data => {
         editAddGroupData.newPackageGroup = data.newPackageGroup
 

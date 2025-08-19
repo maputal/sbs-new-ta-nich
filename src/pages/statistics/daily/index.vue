@@ -12,6 +12,24 @@ const currentPage = ref(1)
 
 // --- blacklist keys (these will not be displayed as columns) ---
 const blacklist = ['id', 'created_at', 'updated_at']
+
+const router = useRouter()
+const route = useRoute()
+
+const clickAction = {
+  activate: row => {
+    console.log(row)
+    router.push(route.path + '/activate/' + row.date)
+  },
+  terminate: row => {
+    console.log(row)
+    router.push(route.path + '/terminate/' + row.date)
+  },
+  trouble: row => {
+    console.log(row)
+    router.push(route.path + '/trouble/' + row.date)
+  },
+}
 </script>
 
 <template>
@@ -31,7 +49,7 @@ const blacklist = ['id', 'created_at', 'updated_at']
     <StatisticsTemplateHeader
       :package="['A']"
     >
-      <VDivider class="mb-6"/>
+      <VDivider class="mb-6" />
       <AltStatsDetailTemplate
         :fetcher="dummyFetcher"
         :page-size="10"
@@ -39,6 +57,8 @@ const blacklist = ['id', 'created_at', 'updated_at']
         show-row-count
         dense
         :show-checkbox="false"
+
+        :click-action="clickAction"
       />
     </StatisticsTemplateHeader>
   </section>

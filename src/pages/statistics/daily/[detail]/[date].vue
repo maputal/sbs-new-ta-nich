@@ -59,6 +59,8 @@ function fetch_detail() {
     //router.replace({ path: "/statistics/daily" })
     redirectToStaticAncestor()
   }
+
+  // set constants/path buat fetching user/API
 }
 
 watchEffect(fetch_detail)

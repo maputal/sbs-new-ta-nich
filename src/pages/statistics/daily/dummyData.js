@@ -34,10 +34,10 @@ export function dummyFetcher(params) {
       const trouble = Math.random() < 0.1 ? Math.floor(Math.random() * 5) + 1 : 0 // mostly 0, occasionally 1-5
       
       data.push({
-        Date: dateStr,
-        Activate: activate,
-        Terminate: terminate,
-        Trouble: trouble,
+        date: dateStr,
+        activate: activate,
+        terminate: terminate,
+        trouble: trouble,
       })
     }
     

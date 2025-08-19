@@ -1,22 +1,32 @@
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { useAppStore } from '@/store/app'
+import { useGlobalStore } from '@/store/useGlobalStore'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const appStore = useAppStore()
+const globalStore = useGlobalStore()
+const router = useRouter()
 
 const pageTitle = ref("Upload Data HLR")
+
+// Authentication check
+const checkAuthentication = () => {
+  const user = globalStore.user
+  if (!user) {
+    router.push('/login')
+    
+    return false
+  }
+  
+  return true
+}
 
 // Form data
 const uploadData = reactive({
   files: [],
   selectedFiles: [],
 })
-
-// UI state
-const isConfirmToastVisible = ref(false)
-const isSuccessToastVisible = ref(false)
-const isErrorToastVisible = ref(false)
-const isLoading = ref(false)
-const uploadProgress = ref(0)
-const errorMessage = ref("")
-const successMessage = ref("Files uploaded successfully")
 
 // File upload refs
 const fileInput = ref(null)
@@ -75,6 +85,7 @@ const clearAllFiles = () => {
 
 const formatFileSize = bytes => {
   if (bytes === 0) return '0 Bytes'
+
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
@@ -91,31 +102,32 @@ const onDragLeave = event => {
   event.preventDefault()
 }
 
-// Upload functionality
-const showConfirmToast = () => {
+// Show confirmation dialog
+const showConfirmDialog = () => {
+  if (!checkAuthentication()) return
+  
   if (isFormValid.value) {
-    isConfirmToastVisible.value = true
+    appStore.setPopup({
+      title: 'Confirm Upload',
+      word: `Do you want to proceed with uploading ${uploadData.files.length} file(s)?`,
+      action: '2',
+      onSucc: uploadFiles,
+    })
   }
 }
 
-const confirmUpload = () => {
-  isConfirmToastVisible.value = false
-  uploadFiles()
-}
-
-const cancelUpload = () => {
-  isConfirmToastVisible.value = false
-}
-
+// Upload functionality
 const uploadFiles = () => {
-  isLoading.value = true
-  uploadProgress.value = 0
+  appStore.showLoader()
   
   const onSuccess = response => {
-    isLoading.value = false
-    uploadProgress.value = 100
-    isSuccessToastVisible.value = true
-    successMessage.value = `Successfully uploaded ${uploadData.files.length} file(s)`
+    appStore.hideLoader()
+    appStore.setPopup({
+      title: 'Success!',
+      word: `Successfully uploaded ${uploadData.files.length} file(s)`,
+      action: 'success',
+      onSucc: () => {},
+    })
     
     // Mark all files as success
     uploadData.files.forEach(file => {
@@ -125,9 +137,8 @@ const uploadFiles = () => {
   }
 
   const onError = error => {
-    isLoading.value = false
-    errorMessage.value = error.message || "Failed to upload files"
-    isErrorToastVisible.value = true
+    appStore.hideLoader()
+    appStore.showError(error.message || "Failed to upload files")
     
     // Mark all files as error
     uploadData.files.forEach(file => {
@@ -142,23 +153,19 @@ const uploadFiles = () => {
     fileObj.status = 'uploading'
   })
 
-  // Simulate upload progress
-  const progressInterval = setInterval(() => {
-    if (uploadProgress.value < 90) {
-      uploadProgress.value += 10
-    }
-  }, 200)
-
   // MOFFAS API call for file upload
   if (window.moffas) {
     window.moffas.do_request("upload_hlr_files", { files: formData }, onSuccess, onError)
   } else {
     // Mock upload for development
     setTimeout(() => {
-      clearInterval(progressInterval)
-      isLoading.value = false
-      uploadProgress.value = 100
-      isSuccessToastVisible.value = true
+      appStore.hideLoader()
+      appStore.setPopup({
+        title: 'Success!',
+        word: `Successfully uploaded ${uploadData.files.length} file(s)`,
+        action: 'success',
+        onSucc: () => {},
+      })
       
       uploadData.files.forEach(file => {
         file.status = 'success'
@@ -168,174 +175,25 @@ const uploadFiles = () => {
   }
 }
 
-// Toast handlers
-const closeSuccessToast = () => {
-  isSuccessToastVisible.value = false
-}
-
-const closeErrorToast = () => {
-  isErrorToastVisible.value = false
-}
-
-// Auto close toasts after 5 seconds
-watch(isSuccessToastVisible, newVal => {
-  if (newVal) {
-    setTimeout(() => {
-      isSuccessToastVisible.value = false
-    }, 5000)
-  }
-})
-
-watch(isErrorToastVisible, newVal => {
-  if (newVal) {
-    setTimeout(() => {
-      isErrorToastVisible.value = false
-    }, 5000)
-  }
+// Component lifecycle
+onMounted(() => {
+  checkAuthentication()
 })
 </script>
 
 <template>
   <div class="hlr-upload">
-    <!-- Toast Notifications -->
-    <!-- Confirmation Toast -->
-    <Transition
-      name="toast-slide"
-      appear
+    <!-- Loading Overlay -->
+    <div
+      v-if="appStore.showProgressCircular"
+      class="loading-overlay"
     >
-      <div
-        v-if="isConfirmToastVisible"
-        class="toast-container confirmation-toast"
-      >
-        <VCard
-          class="toast-card"
-          elevation="8"
-          rounded="lg"
-        >
-          <VCardText class="pa-4">
-            <div class="d-flex align-center">
-              <VIcon
-                icon="mdi-alert-circle"
-                color="warning"
-                size="24"
-                class="me-3"
-              />
-              <div class="flex-grow-1">
-                <div class="text-h6 font-weight-bold text-warning">
-                  Confirm Upload
-                </div>
-                <div class="text-body-2 text-medium-emphasis">
-                  Do you want to proceed with uploading {{ uploadData.files.length }} file(s)?
-                </div>
-              </div>
-              <div class="d-flex gap-2 ms-4">
-                <VBtn
-                  color="success"
-                  size="small"
-                  @click="confirmUpload"
-                >
-                  OK
-                </VBtn>
-                <VBtn
-                  color="error"
-                  variant="outlined"
-                  size="small"
-                  @click="cancelUpload"
-                >
-                  Cancel
-                </VBtn>
-              </div>
-            </div>
-          </VCardText>
-        </VCard>
-      </div>
-    </Transition>
-
-    <!-- Success Toast -->
-    <Transition
-      name="toast-slide"
-      appear
-    >
-      <div
-        v-if="isSuccessToastVisible"
-        class="toast-container success-toast"
-      >
-        <VCard
-          class="toast-card"
-          elevation="8"
-          rounded="lg"
-        >
-          <VCardText class="pa-4">
-            <div class="d-flex align-center">
-              <VIcon
-                icon="mdi-check-circle"
-                color="success"
-                size="24"
-                class="me-3"
-              />
-              <div class="flex-grow-1">
-                <div class="text-h6 font-weight-bold text-success">
-                  Success!
-                </div>
-                <div class="text-body-2 text-medium-emphasis">
-                  {{ successMessage }}
-                </div>
-              </div>
-              <VBtn
-                color="success"
-                size="small"
-                @click="closeSuccessToast"
-              >
-                OK
-              </VBtn>
-            </div>
-          </VCardText>
-        </VCard>
-      </div>
-    </Transition>
-
-    <!-- Error Toast -->
-    <Transition
-      name="toast-slide"
-      appear
-    >
-      <div
-        v-if="isErrorToastVisible"
-        class="toast-container error-toast"
-      >
-        <VCard
-          class="toast-card"
-          elevation="8"
-          rounded="lg"
-        >
-          <VCardText class="pa-4">
-            <div class="d-flex align-center">
-              <VIcon
-                icon="mdi-alert-circle"
-                color="error"
-                size="24"
-                class="me-3"
-              />
-              <div class="flex-grow-1">
-                <div class="text-h6 font-weight-bold text-error">
-                  Error!
-                </div>
-                <div class="text-body-2 text-medium-emphasis">
-                  {{ errorMessage }}
-                </div>
-              </div>
-              <VBtn
-                color="error"
-                size="small"
-                @click="closeErrorToast"
-              >
-                OK
-              </VBtn>
-            </div>
-          </VCardText>
-        </VCard>
-      </div>
-    </Transition>
+      <VProgressCircular
+        indeterminate
+        color="primary"
+        size="64"
+      />
+    </div>
 
     <!-- Main Content -->
     <VRow class="mb-6">
@@ -489,9 +347,9 @@ watch(isErrorToastVisible, newVal => {
             <div class="d-flex justify-start">
               <VBtn
                 color="error"
-                :disabled="!isFormValid || isLoading"
-                :loading="isLoading"
-                @click="showConfirmToast"
+                :disabled="!isFormValid || appStore.showProgressCircular"
+                :loading="appStore.showProgressCircular"
+                @click="showConfirmDialog"
               >
                 <VIcon
                   icon="mdi-upload"
@@ -510,6 +368,20 @@ watch(isErrorToastVisible, newVal => {
 <style scoped>
 .hlr-upload {
   padding: 24px;
+  position: relative;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
 }
 
 /* Upload Drop Zone */
@@ -545,58 +417,5 @@ watch(isErrorToastVisible, newVal => {
 .file-item:last-child {
   margin-bottom: 0;
 }
-
-/* Toast Container Positioning */
-.toast-container {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  width: 90%;
-  max-width: 500px;
-}
-
-/* Toast Card Styling */
-.toast-card {
-  background-color: white !important;
-  border: 1px solid #e0e0e0;
-}
-
-/* Toast Slide Animation */
-.toast-slide-enter-active,
-.toast-slide-leave-active {
-  transition: all 0.3s ease;
-}
-
-.toast-slide-enter-from {
-  transform: translateX(-50%) translateY(-100%);
-  opacity: 0;
-}
-
-.toast-slide-leave-to {
-  transform: translateX(-50%) translateY(-100%);
-  opacity: 0;
-}
-
-.toast-slide-enter-to,
-.toast-slide-leave-from {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .hlr-upload {
-    padding: 16px;
-  }
-  
-  .upload-drop-zone {
-    padding: 32px 16px;
-  }
-  
-  .toast-container {
-    width: 95%;
-  }
-}
 </style>
+

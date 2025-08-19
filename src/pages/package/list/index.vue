@@ -1,9 +1,13 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue"
+import { useAppStore } from "@/store/app"
+import { useGlobalStore } from "@/store/useGlobalStore"
+import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 
 // Router
 const router = useRouter()
+const appStore = useAppStore()
+const globalStore = useGlobalStore()
 
 // Page title
 const pageTitle = ref("List Package")
@@ -73,19 +77,7 @@ const itemsPerPageOptions = ref([
 ])
 
 // Loading states
-const isLoading = ref(false)
-const isSearching = ref(false)
 const hasSearched = ref(false)
-
-// Toast states
-const isSuccessToastVisible = ref(false)
-const isErrorToastVisible = ref(false)
-const isConfirmToastVisible = ref(false)
-
-// Messages
-const errorMessage = ref("")
-const successMessage = ref("")
-const confirmMessage = ref("")
 const itemToDelete = ref(null)
 
 // Package data
@@ -283,7 +275,7 @@ const paginatedPackages = computed(() => {
 // Methods
 const searchPackages = async () => {
   try {
-    isSearching.value = true
+    appStore.showLoader()
 
     // TODO: API call
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -292,14 +284,17 @@ const searchPackages = async () => {
     currentPage.value = 1
     hasSearched.value = true
     
-    successMessage.value = `Found ${filteredPackages.value.length} packages`
-    isSuccessToastVisible.value = true
+    appStore.hideLoader()
+    appStore.setPopup({
+      title: 'Search Complete',
+      word: `Found ${filteredPackages.value.length} packages`,
+      action: 'success',
+      onSucc: () => {},
+    })
   } catch (error) {
     console.error("Search failed:", error)
-    errorMessage.value = error.message || "Search failed. Please try again."
-    isErrorToastVisible.value = true
-  } finally {
-    isSearching.value = false
+    appStore.hideLoader()
+    appStore.showError(error.message || "Search failed. Please try again.")
   }
 }
 
@@ -326,13 +321,19 @@ const editPackage = item => {
 
 const deletePackage = item => {
   itemToDelete.value = item
-  confirmMessage.value = `Are you sure you want to delete package "${item.packageName}"?`
-  isConfirmToastVisible.value = true
+  appStore.setPopup({
+    title: 'Delete List Package!',
+    word: `Are you sure you want to delete this package from the list? This action cannot be undone`,
+    action: 'confirm',
+    onSucc: () => {
+      confirmDelete()
+    },
+  })
 }
 
 const confirmDelete = async () => {
   try {
-    isConfirmToastVisible.value = false
+    appStore.showLoader()
     
     // TODO: Replace with actual delete API call
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -343,46 +344,31 @@ const confirmDelete = async () => {
       packages.value.splice(index, 1)
     }
     
-    successMessage.value = `Package "${itemToDelete.value.packageName}" deleted successfully`
-    isSuccessToastVisible.value = true
+    appStore.hideLoader()
+    appStore.setPopup({
+      title: 'Success!',
+      word: `Package "${itemToDelete.value.packageName}" deleted successfully`,
+      action: 'success',
+      onSucc: () => {},
+    })
     itemToDelete.value = null
   } catch (error) {
     console.error("Delete failed:", error)
-    errorMessage.value = error.message || "Failed to delete package. Please try again."
-    isErrorToastVisible.value = true
+    appStore.hideLoader()
+    appStore.showError(error.message || "Failed to delete package. Please try again.")
   }
 }
 
-const cancelDelete = () => {
-  isConfirmToastVisible.value = false
-  itemToDelete.value = null
-}
-
-// Close toasts
-const closeSuccessToast = () => {
-  isSuccessToastVisible.value = false
-}
-
-const closeErrorToast = () => {
-  isErrorToastVisible.value = false
-}
-
-// Auto close toasts after 5 seconds
-watch(isSuccessToastVisible, newVal => {
-  if (newVal) {
-    setTimeout(() => {
-      isSuccessToastVisible.value = false
-    }, 5000)
+// Authentication check
+const checkAuthentication = () => {
+  if (!globalStore.token || !globalStore.user) {
+    router.push('/')
+    
+    return false
   }
-})
-
-watch(isErrorToastVisible, newVal => {
-  if (newVal) {
-    setTimeout(() => {
-      isErrorToastVisible.value = false
-    }, 5000)
-  }
-})
+  
+  return true
+}
 
 // Format date helper
 const formatDate = dateString => {
@@ -399,6 +385,11 @@ const formatDate = dateString => {
 
 // Lifecycle
 onMounted(() => {
+  // Check if user is authenticated
+  if (!checkAuthentication()) {
+    return
+  }
+  
   // Load initial data if needed
 })
 </script>

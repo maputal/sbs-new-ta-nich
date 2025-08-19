@@ -1,7 +1,26 @@
 <script setup>
-import { ref, reactive, onMounted, watch } from "vue"
+import { useAppStore } from '@/store/app'
+import { useGlobalStore } from '@/store/useGlobalStore'
+import { onMounted, reactive, ref } from "vue"
+import { useRouter } from 'vue-router'
+
+const appStore = useAppStore()
+const globalStore = useGlobalStore()
+const router = useRouter()
 
 const pageTitle = ref("Alert Settings")
+
+// Authentication check
+const checkAuthentication = () => {
+  const user = globalStore.user
+  if (!user) {
+    router.push('/login')
+
+    return false
+  }
+
+  return true
+}
 
 // Form data
 const alertSettings = reactive({
@@ -9,14 +28,6 @@ const alertSettings = reactive({
   secondAlertTime: "",
   msisdn: "",
 })
-
-// UI state
-const isConfirmToastVisible = ref(false)
-const isSuccessToastVisible = ref(false)
-const isErrorToastVisible = ref(false)
-const isLoading = ref(false)
-const errorMessage = ref("")
-const successMessage = ref("Alert Settings Saved Successfully")
 
 // Form validation
 const isFormValid = ref(false)
@@ -38,7 +49,9 @@ const msisdnRules = [
 
 // Load current settings on component mount
 const loadSettings = () => {
-  isLoading.value = true
+  if (!checkAuthentication()) return
+  
+  appStore.showLoader()
 
   const onSuccess = response => {
     if (response.data) {
@@ -48,14 +61,13 @@ const loadSettings = () => {
         response.data.second_alert_time?.toString() || ""
       alertSettings.msisdn = response.data.msisdn || ""
     }
-    isLoading.value = false
+    appStore.hideLoader()
   }
 
   const onError = error => {
     console.error("Error loading alert settings:", error)
-    errorMessage.value = error.message || "Failed to load alert settings"
-    isErrorToastVisible.value = true
-    isLoading.value = false
+    appStore.showError(error.message || "Failed to load alert settings")
+    appStore.hideLoader()
   }
 
   // Replace with actual MOFFAS API call
@@ -67,43 +79,42 @@ const loadSettings = () => {
       alertSettings.firstAlertTime = "7"
       alertSettings.secondAlertTime = "14"
       alertSettings.msisdn = "628123456789\n628987654321\n628112233445"
-      isLoading.value = false
+      appStore.hideLoader()
     }, 1000)
   }
 }
 
-// Show confirmation toast
-const showConfirmToast = () => {
+// Show confirmation dialog
+const showConfirmDialog = () => {
+  if (!checkAuthentication()) return
+  
   if (isFormValid.value) {
-    isConfirmToastVisible.value = true
+    appStore.setPopup({
+      title: 'Confirm Saving Changes',
+      word: 'Do you want to proceed with saving the alert settings?',
+      action: '2',
+      onSucc: saveSettings,
+    })
   }
-}
-
-// Confirm saving changes
-const confirmSave = () => {
-  isConfirmToastVisible.value = false
-  saveSettings()
-}
-
-// Cancel saving changes
-const cancelSave = () => {
-  isConfirmToastVisible.value = false
 }
 
 // Save settings
 const saveSettings = () => {
-  isLoading.value = true
+  appStore.showLoader()
 
   const onSuccess = response => {
-    isLoading.value = false
-    isSuccessToastVisible.value = true
-    successMessage.value = "Alert Settings Saved Successfully"
+    appStore.hideLoader()
+    appStore.setPopup({
+      title: 'Success!',
+      word: 'Alert Settings Saved Successfully',
+      action: 'success',
+      onSucc: () => {},
+    })
   }
 
   const onError = error => {
-    isLoading.value = false
-    errorMessage.value = error.message || "Failed to save alert settings"
-    isErrorToastVisible.value = true
+    appStore.hideLoader()
+    appStore.showError(error.message || "Failed to save alert settings")
   }
 
   const params = {
@@ -118,47 +129,38 @@ const saveSettings = () => {
   } else {
     // Mock success for development
     setTimeout(() => {
-      isLoading.value = false
-      isSuccessToastVisible.value = true
+      appStore.hideLoader()
+      appStore.setPopup({
+        title: 'Success!',
+        word: 'Alert Settings Saved Successfully',
+        action: 'success',
+        onSucc: () => {},
+      })
     }, 1500)
   }
 }
 
-// Close toasts
-const closeSuccessToast = () => {
-  isSuccessToastVisible.value = false
-}
-
-const closeErrorToast = () => {
-  isErrorToastVisible.value = false
-}
-
-// Auto close toasts after 5 seconds
-watch(isSuccessToastVisible, newVal => {
-  if (newVal) {
-    setTimeout(() => {
-      isSuccessToastVisible.value = false
-    }, 5000)
-  }
-})
-
-watch(isErrorToastVisible, newVal => {
-  if (newVal) {
-    setTimeout(() => {
-      isErrorToastVisible.value = false
-    }, 5000)
-  }
-})
-
-// Load settings on component mount
+// Component lifecycle
 onMounted(() => {
-  loadSettings()
+  if (checkAuthentication()) {
+    loadSettings()
+  }
 })
 </script>
 
 <template>
   <div class="alert-settings">
-    <!-- Toast Notifications -->
+    <!-- Loading Overlay -->
+    <div
+      v-if="appStore.showProgressCircular"
+      class="loading-overlay"
+    >
+      <VProgressCircular
+        indeterminate
+        color="primary"
+        size="64"
+      />
+    </div>
     <!-- Confirmation Toast -->
     <Transition
       name="toast-slide"
@@ -316,25 +318,8 @@ onMounted(() => {
       </VCol>
     </VRow>
 
-    <!-- Loading State -->
-    <VRow v-if="isLoading && !alertSettings.firstAlertTime">
-      <VCol
-        cols="12"
-        class="text-center"
-      >
-        <VProgressCircular
-          indeterminate
-          color="primary"
-          size="48"
-        />
-        <div class="mt-3">
-          Loading alert settings...
-        </div>
-      </VCol>
-    </VRow>
-
     <!-- Settings Form -->
-    <VRow v-else>
+    <VRow>
       <VCol cols="12">
         <VCard class="pa-6">
           <VForm v-model="isFormValid">
@@ -355,7 +340,7 @@ onMounted(() => {
                   variant="outlined"
                   label="Days"
                   density="compact"
-                  :disabled="isLoading"
+                  :disabled="appStore.showProgressCircular"
                 />
               </VCol>
 
@@ -375,7 +360,7 @@ onMounted(() => {
                   variant="outlined"
                   label="Days"
                   density="compact"
-                  :disabled="isLoading"
+                  :disabled="appStore.showProgressCircular"
                 />
               </VCol>
 
@@ -392,7 +377,7 @@ onMounted(() => {
                   variant="outlined"
                   rows="6"
                   label="Text"
-                  :disabled="isLoading"
+                  :disabled="appStore.showProgressCircular"
                   class="msisdn-textarea"
                 />
               </VCol>
@@ -401,9 +386,9 @@ onMounted(() => {
               <VCol cols="12">
                 <VBtn
                   color="error"
-                  :disabled="!isFormValid || isLoading"
-                  :loading="isLoading"
-                  @click="showConfirmToast"
+                  :disabled="!isFormValid || appStore.showProgressCircular"
+                  :loading="appStore.showProgressCircular"
+                  @click="showConfirmDialog"
                 >
                   Save
                 </VBtn>
@@ -422,87 +407,22 @@ onMounted(() => {
   position: relative;
 }
 
-/* Toast Container Positioning */
-.toast-container {
+.loading-overlay {
   position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 9999;
-  min-width: 400px;
-  max-width: 600px;
-}
-
-/* Toast Card Styling */
-.toast-card {
-  border: 2px solid;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  background: white;
-}
-
-.confirmation-toast .toast-card {
-  border-color: #ff9800;
-}
-
-.success-toast .toast-card {
-  border-color: #4caf50;
-}
-
-.error-toast .toast-card {
-  border-color: #f44336;
-}
-
-/* Toast Slide Animation */
-.toast-slide-enter-active,
-.toast-slide-leave-active {
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.toast-slide-enter-from {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-100px);
-}
-
-.toast-slide-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-100px);
-}
-
-.toast-slide-enter-to,
-.toast-slide-leave-from {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
 }
 
 /* MSISDN Textarea Styling */
 .msisdn-textarea :deep(.v-field__input) {
   font-family: "Courier New", monospace;
   font-size: 14px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .toast-container {
-    min-width: 320px;
-    max-width: calc(100vw - 40px);
-    left: 20px;
-    right: 20px;
-    transform: none;
-  }
-
-  .toast-slide-enter-from,
-  .toast-slide-leave-to {
-    transform: translateY(-100px);
-  }
-
-  .toast-slide-enter-to,
-  .toast-slide-leave-from {
-    transform: translateY(0);
-  }
-}
-
-/* Additional styling for better visual hierarchy */
-.gap-2 > * + * {
-  margin-left: 8px;
 }
 </style>

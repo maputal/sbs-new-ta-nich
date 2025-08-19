@@ -1,11 +1,15 @@
 <script setup>
 import PackageForm from "@/components/package-management/PackageForm.vue"
-import { onMounted, ref, watch } from "vue"
+import { useAppStore } from "@/store/app"
+import { useGlobalStore } from "@/store/useGlobalStore"
+import { onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
 // Router
 const route = useRoute()
 const router = useRouter()
+const appStore = useAppStore()
+const globalStore = useGlobalStore()
 
 // Page title and breadcrumb
 const pageTitle = ref("Edit Package")
@@ -45,25 +49,12 @@ const packageData = ref({
 
 // Initial data for reset
 const initialPackageData = ref({})
-
-// Loading states
-const isLoading = ref(false)
-const isSubmitting = ref(false)
 const isPageLoading = ref(true)
-
-// Toast states
-const isSuccessToastVisible = ref(false)
-const isErrorToastVisible = ref(false)
-const isConfirmToastVisible = ref(false)
-
-// Messages
-const errorMessage = ref("")
-const successMessage = ref("")
 
 // Methods
 const loadPackageData = async () => {
   try {
-    isPageLoading.value = true
+    appStore.showLoader()
 
     // Mock API call - replace with actual API call
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -99,6 +90,8 @@ const loadPackageData = async () => {
 
     packageData.value = { ...mockPackageData }
     initialPackageData.value = { ...mockPackageData }
+    appStore.hideLoader()
+    isPageLoading.value = false
 
     // TODO: Replace with actual API call
     // const response = await window.moffas.do_request(
@@ -107,29 +100,36 @@ const loadPackageData = async () => {
     //   (data) => {
     //     packageData.value = { ...data };
     //     initialPackageData.value = { ...data };
+    //     appStore.hideLoader();
+    //     isPageLoading.value = false;
     //   },
     //   (error) => {
-    //     errorMessage.value = error.message || "Failed to load package data";
-    //     isErrorDialogVisible.value = true;
+    //     appStore.hideLoader();
+    //     appStore.showError(error.message || "Failed to load package data");
+    //     isPageLoading.value = false;
     //   }
     // );
   } catch (error) {
-    errorMessage.value = error.message || "Failed to load package data"
-    isErrorToastVisible.value = true
-  } finally {
+    appStore.hideLoader()
+    appStore.showError(error.message || "Failed to load package data")
     isPageLoading.value = false
   }
 }
 
 const handleSubmit = async formData => {
-  isConfirmToastVisible.value = true
+  appStore.setPopup({
+    title: 'Confirm Package Update',
+    word: 'Are you sure you want to update this package?',
+    action: 'confirm',
+    onSucc: () => {
+      confirmSubmit()
+    },
+  })
 }
 
 const confirmSubmit = async () => {
-  isConfirmToastVisible.value = false
-  
   try {
-    isSubmitting.value = true
+    appStore.showLoader()
 
     // Mock API call - replace with actual API call
     await new Promise(resolve => setTimeout(resolve, 2000))
@@ -142,67 +142,51 @@ const confirmSubmit = async () => {
     //     ...packageData.value
     //   },
     //   (data) => {
-    //     successMessage.value = "Package updated successfully!";
-    //     isSuccessToastVisible.value = true;
+    //     appStore.hideLoader();
+    //     appStore.setPopup({
+    //       title: 'Success!',
+    //       word: 'Package updated successfully!',
+    //       action: 'success',
+    //       onSucc: () => {
+    //         router.push("/package/list");
+    //       },
+    //     });
     //   },
     //   (error) => {
-    //     errorMessage.value = error.message || "Failed to update package";
-    //     isErrorToastVisible.value = true;
+    //     appStore.hideLoader();
+    //     appStore.showError(error.message || "Failed to update package");
     //   }
     // );
 
-    successMessage.value = "Package updated successfully!"
-    isSuccessToastVisible.value = true
+    appStore.hideLoader()
+    appStore.setPopup({
+      title: 'Success!',
+      word: 'Package updated successfully!',
+      action: 'success',
+      onSucc: () => {
+        router.push("/package/list")
+      },
+    })
   } catch (error) {
-    errorMessage.value = error.message || "Failed to update package"
-    isErrorToastVisible.value = true
-  } finally {
-    isSubmitting.value = false
+    appStore.hideLoader()
+    appStore.showError(error.message || "Failed to update package")
   }
-}
-
-const cancelSubmit = () => {
-  isConfirmToastVisible.value = false
 }
 
 const handleReset = () => {
   packageData.value = { ...initialPackageData.value }
 }
 
-const handleSuccessClose = () => {
-  // Navigate back to package list after successful update
-  router.push("/package/list")
-}
-
-// Close toasts
-const closeSuccessToast = () => {
-  isSuccessToastVisible.value = false
-
-  // Navigate back to package list after successful update
-  router.push("/package/list")
-}
-
-const closeErrorToast = () => {
-  isErrorToastVisible.value = false
-}
-
-// Auto close toasts after 5 seconds
-watch(isSuccessToastVisible, newVal => {
-  if (newVal) {
-    setTimeout(() => {
-      isSuccessToastVisible.value = false
-      router.push("/package/list")
-    }, 5000)
+// Authentication check
+const checkAuthentication = () => {
+  if (!globalStore.token || !globalStore.user) {
+    router.push('/')
+    
+    return false
   }
-})
-
-watch(isErrorToastVisible, newVal => {
-  if (newVal) {
-    setTimeout(() => {
-      isErrorToastVisible.value = false
-    }, 5000)
-  }
-})
+  
+  return true
+}
 
 const goBack = () => {
   router.push("/package/list")
@@ -226,9 +210,13 @@ const handleIMEIClick = id => {
 
 // Lifecycle
 onMounted(() => {
+  // Check if user is authenticated
+  if (!checkAuthentication()) {
+    return
+  }
+  
   if (!packageId.value) {
-    errorMessage.value = "Invalid package ID"
-    isErrorToastVisible.value = true
+    appStore.showError("Invalid package ID")
     
     return
   }
@@ -239,150 +227,6 @@ onMounted(() => {
 
 <template>
   <div class="edit-package-page">
-    <!-- Toast Notifications -->
-    <!-- Confirmation Toast -->
-    <Transition
-      name="toast-slide"
-      appear
-    >
-      <div
-        v-if="isConfirmToastVisible"
-        class="toast-container confirmation-toast"
-      >
-        <VCard
-          class="toast-card"
-          elevation="8"
-          rounded="lg"
-        >
-          <VCardText class="pa-4">
-            <div class="d-flex align-center">
-              <VIcon
-                icon="mdi-alert-circle"
-                color="warning"
-                size="24"
-                class="me-3"
-              />
-              <div class="flex-grow-1">
-                <div class="text-h6 font-weight-bold text-warning">
-                  Confirm Package Update
-                </div>
-                <div class="text-body-2 text-medium-emphasis">
-                  Are you sure you want to update this package?
-                </div>
-              </div>
-              <div class="d-flex gap-2 ms-4">
-                <VBtn
-                  size="small"
-                  variant="outlined"
-                  color="error"
-                  @click="cancelSubmit"
-                >
-                  Cancel
-                </VBtn>
-                <VBtn
-                  size="small"
-                  color="error"
-                  @click="confirmSubmit"
-                >
-                  OK
-                </VBtn>
-              </div>
-            </div>
-          </VCardText>
-        </VCard>
-      </div>
-    </Transition>
-
-    <!-- Success Toast -->
-    <Transition
-      name="toast-slide"
-      appear
-    >
-      <div
-        v-if="isSuccessToastVisible"
-        class="toast-container success-toast"
-      >
-        <VCard
-          class="toast-card"
-          elevation="8"
-          rounded="lg"
-        >
-          <VCardText class="pa-4">
-            <div class="d-flex align-center">
-              <VIcon
-                icon="mdi-check-circle"
-                color="success"
-                size="24"
-                class="me-3"
-              />
-              <div class="flex-grow-1">
-                <div class="text-h6 font-weight-bold text-success">
-                  Success!
-                </div>
-                <div class="text-body-2 text-medium-emphasis">
-                  {{ successMessage }}
-                </div>
-              </div>
-              <VBtn
-                size="small"
-                color="success"
-                variant="flat"
-                class="ms-4"
-                @click="closeSuccessToast"
-              >
-                OK
-              </VBtn>
-            </div>
-          </VCardText>
-        </VCard>
-      </div>
-    </Transition>
-
-    <!-- Error Toast -->
-    <Transition
-      name="toast-slide"
-      appear
-    >
-      <div
-        v-if="isErrorToastVisible"
-        class="toast-container error-toast"
-      >
-        <VCard
-          class="toast-card"
-          elevation="8"
-          rounded="lg"
-        >
-          <VCardText class="pa-4">
-            <div class="d-flex align-center">
-              <VIcon
-                icon="mdi-alert-circle"
-                color="error"
-                size="24"
-                class="me-3"
-              />
-              <div class="flex-grow-1">
-                <div class="text-h6 font-weight-bold text-error">
-                  Error!
-                </div>
-                <div class="text-body-2 text-medium-emphasis">
-                  {{ errorMessage }}
-                </div>
-              </div>
-              <VBtn
-                size="small"
-                color="error"
-                variant="flat"
-                class="ms-4"
-                @click="closeErrorToast"
-              >
-                OK
-              </VBtn>
-            </div>
-          </VCardText>
-        </VCard>
-      </div>
-    </Transition>
-
     <!-- Page Header -->
     <VRow class="mb-6">
       <VCol cols="12">
@@ -483,7 +327,7 @@ onMounted(() => {
           <VCardText>
             <PackageForm
               v-model="packageData"
-              :is-loading="isSubmitting"
+              :is-loading="appStore.showProgressCircular"
               mode="edit"
               @submit="handleSubmit"
               @reset="handleReset"
@@ -499,58 +343,6 @@ onMounted(() => {
 .edit-package-page {
   padding: 24px;
   position: relative;
-}
-
-/* Toast Container Positioning */
-.toast-container {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  min-width: 400px;
-  max-width: 600px;
-}
-
-/* Toast Card Styling */
-.toast-card {
-  border: 2px solid;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  background: white;
-}
-
-.confirmation-toast .toast-card {
-  border-color: #ff9800;
-}
-
-.success-toast .toast-card {
-  border-color: #4caf50;
-}
-
-.error-toast .toast-card {
-  border-color: #f44336;
-}
-
-/* Toast Slide Animation */
-.toast-slide-enter-active,
-.toast-slide-leave-active {
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.toast-slide-enter-from {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-100px);
-}
-
-.toast-slide-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-100px);
-}
-
-.toast-slide-enter-to,
-.toast-slide-leave-from {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
 }
 
 .connected-buttons {
@@ -586,31 +378,5 @@ onMounted(() => {
 .connected-buttons .v-btn:focus {
   z-index: 2;
   position: relative;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .toast-container {
-    min-width: 320px;
-    max-width: calc(100vw - 40px);
-    left: 20px;
-    right: 20px;
-    transform: none;
-  }
-
-  .toast-slide-enter-from,
-  .toast-slide-leave-to {
-    transform: translateY(-100px);
-  }
-
-  .toast-slide-enter-to,
-  .toast-slide-leave-from {
-    transform: translateY(0);
-  }
-}
-
-/* Additional styling for better visual hierarchy */
-.gap-2 > * + * {
-  margin-left: 8px;
 }
 </style>

@@ -1,6 +1,12 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { useAppStore } from '@/store/app'
+import { useGlobalStore } from '@/store/useGlobalStore'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+// Stores
+const appStore = useAppStore()
+const globalStore = useGlobalStore()
 
 // Get package ID from route parameter
 const route = useRoute()
@@ -12,13 +18,16 @@ const router = useRouter()
 const pageTitle = ref("Edit Package")
 const pageSubtitle = ref("Indosat Secure Bundling System")
 
-// Toast states
-const isSuccessToastVisible = ref(false)
-const isErrorToastVisible = ref(false)
-
-// Messages
-const errorMessage = ref("")
-const successMessage = ref("")
+// Authentication check
+const checkAuthentication = () => {
+  if (!globalStore.user || !globalStore.token) {
+    router.push('/')
+    
+    return false
+  }
+  
+  return true
+}
 
 // Date formatting utility
 const toTimeDMYHM = unixTimestamp => {
@@ -48,7 +57,6 @@ const toTimeDMYHM = unixTimestamp => {
 
 // Reactive data
 const activityData = ref([])
-const isLoading = ref(false)
 const searchQuery = ref('')
 const itemsPerPage = ref(10)
 const currentPage = ref(1)
@@ -128,7 +136,9 @@ const calculateTotalPages = () => {
 
 // Methods
 const fetchActivityLog = async () => {
-  isLoading.value = true
+  if (!checkAuthentication()) return
+
+  appStore.showLoader()
 
   try {
     // TODO: Replace with actual API call
@@ -139,42 +149,14 @@ const fetchActivityLog = async () => {
     activityData.value = mockActivityData
 
     calculateTotalPages()
-    successMessage.value = `Loaded ${activityData.value.length} activity records`
-    isSuccessToastVisible.value = true
+    
   } catch (error) {
     console.error('Failed to fetch activity log:', error)
-    errorMessage.value = error.message || 'Failed to load activity log. Please try again.'
-    isErrorToastVisible.value = true
+    appStore.showError(error.message || 'Failed to load activity log. Please try again.')
   } finally {
-    isLoading.value = false
+    appStore.hideLoader()
   }
 }
-
-// Close toasts
-const closeSuccessToast = () => {
-  isSuccessToastVisible.value = false
-}
-
-const closeErrorToast = () => {
-  isErrorToastVisible.value = false
-}
-
-// Auto close toasts after 5 seconds
-watch(isSuccessToastVisible, newVal => {
-  if (newVal) {
-    setTimeout(() => {
-      isSuccessToastVisible.value = false
-    }, 5000)
-  }
-})
-
-watch(isErrorToastVisible, newVal => {
-  if (newVal) {
-    setTimeout(() => {
-      isErrorToastVisible.value = false
-    }, 5000)
-  }
-})
 
 // Watch for search changes and recalculate pagination
 const onSearchChange = () => {
@@ -188,103 +170,14 @@ const goBack = item => {
 
 // Lifecycle
 onMounted(() => {
-  fetchActivityLog()
+  if (checkAuthentication()) {
+    fetchActivityLog()
+  }
 })
 </script>
 
 <template>
   <div class="package-activity-page">
-    <!-- Toast Notifications -->
-    <!-- Success Toast -->
-    <Transition
-      name="toast-slide"
-      appear
-    >
-      <div
-        v-if="isSuccessToastVisible"
-        class="toast-container success-toast"
-      >
-        <VCard
-          class="toast-card"
-          elevation="8"
-          rounded="lg"
-        >
-          <VCardText class="pa-4">
-            <div class="d-flex align-center">
-              <VIcon
-                icon="mdi-check-circle"
-                color="success"
-                size="24"
-                class="me-3"
-              />
-              <div class="flex-grow-1">
-                <div class="text-h6 font-weight-bold text-success">
-                  Success!
-                </div>
-                <div class="text-body-2 text-medium-emphasis">
-                  {{ successMessage }}
-                </div>
-              </div>
-              <VBtn
-                size="small"
-                color="success"
-                variant="flat"
-                class="ms-4"
-                @click="closeSuccessToast"
-              >
-                OK
-              </VBtn>
-            </div>
-          </VCardText>
-        </VCard>
-      </div>
-    </Transition>
-
-    <!-- Error Toast -->
-    <Transition
-      name="toast-slide"
-      appear
-    >
-      <div
-        v-if="isErrorToastVisible"
-        class="toast-container error-toast"
-      >
-        <VCard
-          class="toast-card"
-          elevation="8"
-          rounded="lg"
-        >
-          <VCardText class="pa-4">
-            <div class="d-flex align-center">
-              <VIcon
-                icon="mdi-alert-circle"
-                color="error"
-                size="24"
-                class="me-3"
-              />
-              <div class="flex-grow-1">
-                <div class="text-h6 font-weight-bold text-error">
-                  Error!
-                </div>
-                <div class="text-body-2 text-medium-emphasis">
-                  {{ errorMessage }}
-                </div>
-              </div>
-              <VBtn
-                size="small"
-                color="error"
-                variant="flat"
-                class="ms-4"
-                @click="closeErrorToast"
-              >
-                OK
-              </VBtn>
-            </div>
-          </VCardText>
-        </VCard>
-      </div>
-    </Transition>
-
     <!-- Page Header -->
     <VRow class="mb-6">
       <VCol cols="12">
@@ -377,7 +270,7 @@ onMounted(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-if="isLoading">
+            <tr v-if="appStore.showProgressCircular">
               <td
                 :colspan="tableHeaders.length"
                 class="text-center py-8"
@@ -475,54 +368,6 @@ onMounted(() => {
   position: relative;
 }
 
-/* Toast Container Positioning */
-.toast-container {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  min-width: 400px;
-  max-width: 600px;
-}
-
-/* Toast Card Styling */
-.toast-card {
-  border: 2px solid;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  background: white;
-}
-
-.success-toast .toast-card {
-  border-color: #4caf50;
-}
-
-.error-toast .toast-card {
-  border-color: #f44336;
-}
-
-/* Toast Slide Animation */
-.toast-slide-enter-active,
-.toast-slide-leave-active {
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.toast-slide-enter-from {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-100px);
-}
-
-.toast-slide-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-100px);
-}
-
-.toast-slide-enter-to,
-.toast-slide-leave-from {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
 .th-background-color {
   background-color: #ffc107 !important;
 }
@@ -548,22 +393,8 @@ onMounted(() => {
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
-  .toast-container {
-    min-width: 320px;
-    max-width: calc(100vw - 40px);
-    left: 20px;
-    right: 20px;
-    transform: none;
-  }
-
-  .toast-slide-enter-from,
-  .toast-slide-leave-to {
-    transform: translateY(-100px);
-  }
-
-  .toast-slide-enter-to,
-  .toast-slide-leave-from {
-    transform: translateY(0);
+  .package-activity-page {
+    padding: 16px;
   }
 }
 

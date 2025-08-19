@@ -15,7 +15,7 @@ const router = useRouter()
 const toLoginWaba = () => {
   router.replace('/')
 }
-  
+
 const todayDate = ref('')
 
 const months = {
@@ -68,7 +68,7 @@ const todayDateF = () => {
 const isErrorVisible = ref(false)
 const customErrorMessages = ref('')
 
-const showProgressCircular = ref(true)
+const showProgressCircular = ref(false)
 
 const urlBE = ref(window.moffas.config.url_backoffice_helper_api)
 const companyID = ref(window.moffas.config.param_company_id)
@@ -258,7 +258,9 @@ const fetchUsers = () => {
     name: '', 
     search_filter: filter.value.name || '',  
   }
-
+  
+  showProgressCircular.value = true
+  
   fetchMembersDummy(params)
   .then(function (response) {
     console.log('response user list=', response)
@@ -268,22 +270,20 @@ const fetchUsers = () => {
 
     if(response.data.error_code) {
       onDataError(response.data)
-
       return
     }
 
     tableData.value = responseData.data
     totalPage.value = responseData.page_total
     totalUser.value = responseData.recordsTotal 
-
-    // showProgressCircular.value = false
   })
   .catch(function (error) {
     console.log(error)
     onDataError(error.response)
   })
-  // axios.post(urlBE.value + 'retrieve_management_users', params)
-  
+  .finally(() => {
+    showProgressCircular.value = false
+  })
 }
 
 // const fetchUsers = () => {
@@ -574,7 +574,7 @@ function successPopup(success_message){
         <div class="mb-4">
           <!-- 👉 Address -->
           <p class="mb-0 font-weight-medium">
-            View Users 
+            View Users
           </p>
         </div>
 
@@ -615,10 +615,38 @@ function successPopup(success_message){
       <VSpacer />
       <CustomTable
         :table-header-names="tableHeader" 
-        :table-data-length="tableData.length"
+        :table-data-length="showProgressCircular ? rowPerPage : tableData.length"
       >
         <template #tableBody>
+          <!-- Skeleton Loader -->
           <tr
+            v-if="showProgressCircular"
+            v-for="n in rowPerPage"
+            :key="'skeleton-' + n"
+            class="bg-hover"
+          >
+            <td class="text-center">
+              <div class="skeleton-loader skeleton-text" style="width: 30px; height: 16px;"></div>
+            </td>
+            <td
+              v-for="(data, index) in dataHeader"
+              :key="'skeleton-' + index"
+              class="text-center"
+            >
+              <div class="skeleton-loader skeleton-text" :style="{ width: index === 1 ? '120px' : '80px', height: '16px' }"></div>
+            </td>
+            <td class="text-center">
+              <div class="skeleton-loader skeleton-chip" style="width: 60px; height: 16px;"></div>
+            </td>
+            <td class="d-flex justify-center align-center text-center">
+              <div class="skeleton-loader skeleton-button ma-2" style="width: 70px; height: 16px;"></div>
+              <div class="skeleton-loader skeleton-button ma-2" style="width: 70px; height: 16px;"></div>
+            </td>
+          </tr>
+          
+          <!-- Actual Data -->
+          <tr
+            v-else
             v-for="(row, index) in tableData"
             :key="index"
             class="bg-hover"
@@ -733,8 +761,52 @@ function successPopup(success_message){
   .bg-hover:hover {
     background-color: rgba(68, 73, 74, 5%);
   }
+
+  .skeleton-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -16px;
+  }
+
+  .skeleton-item {
+    background-color: #e0e0e0;
+    height: 48px;
+    margin: 8px 16px;
+    border-radius: 4px;
+  }
+
+  @keyframes wave {
+    0% {
+      background-position: -468px 0;
+    }
+    100% {
+      background-position: 468px 0;
+    }
+  }
+
+  .skeleton-loader {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    background-color: #e0e0e0;
+    background-image: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.2) 25%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0.2) 75%
+    );
+    background-size: 200% 100%;
+    animation: wave 1.5s infinite linear;
+  }
+
+
   </style>
   
+  <!-- <route lang="yaml">
+    meta:
+      requiresAuth: true
+  </route> -->
   <!-- <route lang="yaml">
     meta:
       requiresAuth: true

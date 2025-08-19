@@ -82,6 +82,7 @@ const role = ref([{"name":"Admin","id":1},{"name":"Customer Service","id":2},{"n
 const statuses = ref(['Active', 'Inactive'])
 const isErrorVisible = ref(false)
 const customErrorMessages = ref('')
+const isLoading = ref(false)
 
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
@@ -136,41 +137,43 @@ const onDataError = e => {
   customErrorMessages.value = e
 }
 
-const createUser = () => {
+const createUser = async () => {
   console.log('createUser')
+  isLoading.value = true
 
-let params = {
-    company_id: companyID.value,
-    session_id: sessionID.value,
-    op_crud: 1,
-
-    
-    data: {
-      nip: formSubmit.value.nip,
-      name: formSubmit.value.name,
-      password: formSubmit.value.password,
-      division: formSubmit.value.division,
-      role: formSubmit.value.role,
-      status: formSubmit.value.status
-    }
+  let params = 
+  {
+      company_id: companyID.value,
+      session_id: sessionID.value,
+      op_crud: 1,    
+      data: 
+      {
+        nip: formSubmit.value.nip,
+        name: formSubmit.value.name,
+        password: formSubmit.value.password,
+        division: formSubmit.value.division,
+        role: formSubmit.value.role,
+        status: formSubmit.value.status
+     }
   }
 
-  //   window.moffas.do_request(
-  //     'user_create',
-  //     params, 
-  //     onCreateUser,
-  //     onDataError,
-  //   )
-
-  // Ceritanya berhasil
-  successPopup("New user has been successfully saved")
-  // kalau gagal
-  // errorPopup("Apalah alasan nya")
-
-  // For now asumsi field clear, jadi user bisa lanjut nambah kalau mau
-  resetForm()
-
-  console.log(params.data)
+  try {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    // Ceritanya berhasil
+    successPopup("New user has been successfully saved")
+    
+    // For now asumsi field clear, jadi user bisa lanjut nambah kalau mau
+    resetForm()
+    
+    console.log(params.data)
+  } catch (error) {
+    // kalau gagal
+    errorPopup("Failed to create user")
+  } finally {
+    isLoading.value = false
+  }
 }
 
 // const onCreateUser = data => {
@@ -255,8 +258,8 @@ const getRoles = () => {
 //   role.value = response.data
 // }
 
-const confirmYes = () => { 
-  createUser()        
+const confirmYes = async () => { 
+  await createUser()        
 }
 
 onMounted(() => {
@@ -300,15 +303,24 @@ function successPopup(success_message){
       title: 'Success!',
       word: success_message || '',
       action: 'success',
-      onSucc: () => {
-        showDialogGroup.value = false
-      },
     })
 }
 </script>
 
 <template>
   <section>
+    <!-- Full-screen loading overlay -->
+    <div 
+      v-if="isLoading" 
+      class="loading-overlay"
+    >
+      <VProgressCircular
+        indeterminate
+        size="64"
+        color="primary"
+      />
+    </div>
+
     <LazyErrorDialogs
       v-if="isErrorVisible"
       v-model:isDialogVisible="isErrorVisible" 
@@ -440,4 +452,16 @@ function successPopup(success_message){
   :deep(.v-icon) { color: inherit; }
 }
 
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
 </style>

@@ -78,6 +78,7 @@ const role = ref([{ "name": "Admin", "id": 1 }, { "name": "Customer Service", "i
 const statuses = ref(['Active', 'Inactive'])
 const isErrorVisible = ref(false)
 const customErrorMessages = ref('')
+const isLoading = ref(false)
 
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
@@ -138,41 +139,40 @@ const onDataError = e => {
     customErrorMessages.value = e
 }
 
-const createUser = () => {
-    console.log('createUser')
+const createUser = async () => {
+  console.log('createUser')
+  isLoading.value = true
 
-    let params = {
-        company_id: companyID.value,
-        session_id: sessionID.value,
-        op_crud: 1,
+  let params = 
+  {
+      company_id: companyID.value,
+      session_id: sessionID.value,
+      op_crud: 1,    
+      data: 
+      {
+        nip: "nip123",
+        name: "John Doe",
+        password: "password123",
+        division: "IT",
+        role: "Admin",
+        status: "Active"
+     }
+  }
 
-
-        data: {
-            nip: formSubmit.value.nip,
-            name: formSubmit.value.name,
-            password: formSubmit.value.password,
-            division: formSubmit.value.division,
-            role: formSubmit.value.role,
-            status: formSubmit.value.status
-        }
-    }
-
-    //   window.moffas.do_request(
-    //     'user_create',
-    //     params, 
-    //     onCreateUser,
-    //     onDataError,
-    //   )
-
+  try {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
     // Ceritanya berhasil
     successPopup("New user has been successfully saved")
-    // kalau gagal
-    // errorPopup("Apalah alasan nya")
-
-    // For now asumsi field clear, jadi user bisa lanjut nambah kalau mau
-    resetForm()
-
+    
     console.log(params.data)
+  } catch (error) {
+    // kalau gagal
+    errorPopup("Failed to create user")
+  } finally {
+    isLoading.value = false
+  }
 }
 
 const onSubmit = () => {
@@ -211,9 +211,11 @@ const getRoles = () => {
         })
 }
 
-const confirmYes = () => {
-    //createUser()        
+const confirmYes = async () => { 
+  await createUser()        
 }
+
+
 
 onMounted(() => {
     let isEmbeddedSignup = store.payloadFin.embedded_signup
@@ -250,20 +252,27 @@ function errorPopup(error_message) {
     })
 }
 
-function successPopup(success_message) {
-    // appStore.setPopup({
-    //     title: 'Success!',
-    //     word: success_message || '',
-    //     action: 'success',
-    //     onSucc: () => {
-    //         showDialogGroup.value = false
-    //     },
-    // })
+function successPopup(success_message){
+  appStore.setPopup({
+      title: 'Success!',
+      word: success_message || '',
+      action: 'success',
+    })
 }
 </script>
 
 <template>
     <section>
+        <div 
+        v-if="isLoading" 
+        class="loading-overlay"
+        >
+            <VProgressCircular
+                indeterminate
+                size="64"
+                color="primary"
+            />
+        </div>
         <LazyErrorDialogs v-if="isErrorVisible" v-model:isDialogVisible="isErrorVisible"
             :custom-error-message="customErrorMessages" />
         <div>
@@ -275,7 +284,7 @@ function successPopup(success_message) {
                 <div class="mb-4">
                     <!-- 👉 Address -->
                     <p class="mb-0 font-weight-medium">
-                        Create User
+                        Edit User
                     </p>
                 </div>
 
@@ -294,7 +303,7 @@ function successPopup(success_message) {
                 <VCardText class="d-flex align-center" style="justify-content: space-between;">
                     <v-btn icon="mdi-arrow-left" to="/user-management/view-all" class="back" />
                     <h2 style="margin: 0;">
-                        Add New User
+                        Edit User
                     </h2>
                 </VCardText>
                 <hr/>
@@ -355,5 +364,18 @@ function successPopup(success_message) {
     :deep(.v-icon) {
         color: inherit;
     }
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
 }
 </style>

@@ -29,7 +29,7 @@ export async function fetchMembersDummy(params) {
   const paginatedMembers = allMembers.slice(startIndex, startIndex + row_length);
 
   // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 200));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
   return {
     data:{

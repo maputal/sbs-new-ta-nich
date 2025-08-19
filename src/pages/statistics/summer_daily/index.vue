@@ -65,10 +65,11 @@ const clickAction = {
           <td class="text-right">
             <VBtn
               size="small"
-              variant="text"
+              prepend-icon="mdi-tray-arrow-down"
+              class="text-none"
               @click.stop="() => alert(`Open ${item.id}`)"
             >
-              Open
+              Download
             </VBtn>
           </td>
         </template>

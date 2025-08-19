@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script>
 import ListUploader from '@/components/package-management/ListUploader.vue'
 import { useAppStore } from '@/store/app'
 import { useGlobalStore } from '@/store/useGlobalStore'

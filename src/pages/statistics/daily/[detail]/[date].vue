@@ -1,5 +1,6 @@
 <script setup>
 import AltStatsDetailTemplate from '@/components/statistics/AltStatsDetailTemplate.vue'
+import DateView from '@/components/statistics/DateView.vue'
 import { watchEffect } from 'vue'
 
 // Example fetcher (server-side ready; demo does client-side)
@@ -77,6 +78,7 @@ watchEffect(fetch_detail)
 </script>
 
 <template>
+  <DateView :date="route.params.date" title="Ciko" />
   <AltStatsDetailTemplate
     :fetcher="fetchUsers"
     :columns="columns"

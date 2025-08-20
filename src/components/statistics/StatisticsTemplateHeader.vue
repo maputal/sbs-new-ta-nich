@@ -1,33 +1,22 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
+import { onMounted, ref } from 'vue'
 
 const props = defineProps({
-  package: {
-    type: Array,
-    default: null,
-    validator: val => {
-      if (val !== null && Array.isArray(val) && val.length === 0) {
-        console.error('ERROR : Empty item set for "package"!')
-        
-        return false
-      }
-      
-      return true
-    },
-  },
-  group: {
-    type: Array,
-    default: null,
-    validator: val => {
-      if (val !== null && Array.isArray(val) && val.length === 0) {
-        console.error('ERROR : Empty item set for "group"!')
-        
-        return false
-      }
-      
-      return true
-    },
-  },
+  // Supply a function or null. Signature: async (query?: string) => Array
+  packageFetch: { type: Function, default: null },
+  groupFetch:   { type: Function, default: null },
+
+  // Optional UX knobs
+  pkgMinChars:     { type: Number, default: 0 },
+  grpMinChars:     { type: Number, default: 0 },
+  pkgDebounceMs:   { type: Number, default: 500 },
+  grpDebounceMs:   { type: Number, default: 500 },
+
+  // (kept from your original)
+  // You can delete these now since we no longer accept lists:
+  package: { type: Array, default: null },
+  group:   { type: Array, default: null },
 })
 
 const emit = defineEmits(['show'])
@@ -45,21 +34,68 @@ const dateConfig = {
 }
 
 // Normalize primitives -> { title, value }
-const toItems = list =>
+const normalize = list =>
   Array.isArray(list)
     ? list.map(it =>
-      typeof it === 'object' && it !== null
+      (it && typeof it === 'object')
         ? it
         : { title: String(it), value: it },
     )
     : []
 
-const packageItems = computed(() => toItems(props.package))
-const groupItems   = computed(() => toItems(props.group))
-
-// v-models for selects
+// v-models
 const pkg = ref(null)
 const grp = ref(null)
+
+// Server-driven items + search state
+const pkgItems   = ref([])
+const pkgSearch  = ref('')
+const pkgLoading = ref(false)
+
+const grpItems   = ref([])
+const grpSearch  = ref('')
+const grpLoading = ref(false)
+
+// Debounced fetchers
+const doPkgFetch = useDebounceFn(async (query = '') => {
+  if (!props.packageFetch) return
+  if ((query?.length ?? 0) < props.pkgMinChars) {
+    pkgItems.value = []
+    
+    return
+  }
+  pkgLoading.value = true
+  try {
+    const raw = await props.packageFetch(query)
+
+    pkgItems.value = normalize(raw)
+  } finally {
+    pkgLoading.value = false
+  }
+}, props.pkgDebounceMs)
+
+const doGrpFetch = useDebounceFn(async (query = '') => {
+  if (!props.groupFetch) return
+  if ((query?.length ?? 0) < props.grpMinChars) {
+    grpItems.value = []
+    
+    return
+  }
+  grpLoading.value = true
+  try {
+    const raw = await props.groupFetch(query)
+
+    grpItems.value = normalize(raw)
+  } finally {
+    grpLoading.value = false
+  }
+}, props.grpDebounceMs)
+
+// Optional initial fetch when minChars == 0
+onMounted(() => {
+  if (props.packageFetch && props.pkgMinChars === 0) doPkgFetch('')
+  if (props.groupFetch && props.grpMinChars === 0) doGrpFetch('')
+})
 
 // Build payload and emit
 function onShow() {
@@ -67,11 +103,9 @@ function onShow() {
     date: [startDate.value || null, endDate.value || null],
   }
 
-  if (packageItems.value.length) payload.package = pkg.value
-  if (groupItems.value.length)   payload.group   = grp.value
+  if (props.packageFetch) payload.package = pkg.value
+  if (props.groupFetch)   payload.group   = grp.value
 
-  // Optionally prune null dates:
-  // if both null, delete date; else keep as [maybe-null, maybe-null]
   if (!payload.date[0] && !payload.date[1]) delete payload.date
 
   emit('show', payload)
@@ -122,9 +156,9 @@ function onShow() {
         </VCol>
       </VRow>
 
-      <!-- Package Row (render only if non-empty list) -->
+      <!-- Package Row (only if fetch function provided) -->
       <VRow
-        v-if="packageItems.length"
+        v-if="packageFetch"
         class="mb-2"
       >
         <VCol
@@ -136,23 +170,31 @@ function onShow() {
           </VLabel>
         </VCol>
         <VCol cols="9">
-          <VSelect
+          <VAutocomplete
             v-model="pkg"
-            :items="packageItems"
+            v-model:search="pkgSearch"
+            :items="pkgItems"
             item-title="title"
             item-value="value"
-            label="Select package"
+            label="Search package"
             variant="outlined"
             density="comfortable"
             hide-details="auto"
             clearable
+            :loading="pkgLoading"
+            :no-filter="true"
+            :no-data-text="pkgSearch?.length < pkgMinChars
+              ? `Type at least ${pkgMinChars} characters`
+              : 'No results'"
+            @update:search="doPkgFetch($event)"
+            @update:menu="opened => { if (opened) doPkgFetch(pkgSearch) }"
           />
         </VCol>
       </VRow>
 
-      <!-- Group Row (render only if non-empty list) -->
+      <!-- Group Row (only if fetch function provided) -->
       <VRow
-        v-if="groupItems.length"
+        v-if="groupFetch"
         class="mb-2"
       >
         <VCol
@@ -164,16 +206,24 @@ function onShow() {
           </VLabel>
         </VCol>
         <VCol cols="9">
-          <VSelect
+          <VAutocomplete
             v-model="grp"
-            :items="groupItems"
+            v-model:search="grpSearch"
+            :items="grpItems"
             item-title="title"
             item-value="value"
-            label="Select group"
+            label="Search group"
             variant="outlined"
             density="comfortable"
             hide-details="auto"
             clearable
+            :loading="grpLoading"
+            :no-filter="true"
+            :no-data-text="grpSearch?.length < grpMinChars
+              ? `Type at least ${grpMinChars} characters`
+              : 'No results'"
+            @update:search="doGrpFetch($event)"
+            @update:menu="opened => { if (opened) doGrpFetch(grpSearch) }"
           />
         </VCol>
       </VRow>

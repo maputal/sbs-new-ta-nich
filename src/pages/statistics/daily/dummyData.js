@@ -85,3 +85,52 @@ export function dummyFetcher(params) {
 //   :fetcher="dummyFetcher"
 //   :click-action="clickActions"
 // />
+
+
+// dummy-fetchers.js
+
+// Fake "database"
+const dummyPackages = [
+  { id: 1, name: 'Starter Pack' },
+  { id: 2, name: 'Pro Bundle' },
+  { id: 3, name: 'Enterprise Suite' },
+  { id: 4, name: 'Holiday Special' },
+]
+
+const dummyGroups = [
+  { id: 'A', name: 'Group Alpha' },
+  { id: 'B', name: 'Group Beta' },
+  { id: 'C', name: 'Group Gamma' },
+  { id: 'D', name: 'Delta Force' },
+]
+
+// Utility to simulate async delay
+function simulateDelay(ms = 500) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+// Package fetcher
+export async function packageFetch(query = '') {
+  await simulateDelay(600) // simulate network latency
+
+  const q = query.toLowerCase()
+
+  const filtered = dummyPackages.filter(p =>
+    p.name.toLowerCase().includes(q),
+  )
+
+  return filtered.map(p => ({ title: p.name, value: p.id }))
+}
+
+// Group fetcher
+export async function groupFetch(query = '') {
+  await simulateDelay(400) // simulate network latency
+
+  const q = query.toLowerCase()
+
+  const filtered = dummyGroups.filter(g =>
+    g.name.toLowerCase().includes(q),
+  )
+
+  return filtered.map(g => ({ title: g.name, value: g.id }))
+}

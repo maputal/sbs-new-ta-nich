@@ -2,7 +2,7 @@
 import AltStatsDetailTemplate from '@/components/statistics/AltStatsDetailTemplate.vue'
 import StatisticsTemplateHeader from '@/components/statistics/StatisticsTemplateHeader.vue'
 import { ref } from 'vue'
-import { dummyFetcher } from './dummyData'
+import { dummyFetcher, groupFetch, packageFetch } from './dummyData'
 
 const totalPage = ref(1)
 const totalRow = ref(0)
@@ -41,13 +41,9 @@ const clickAction = {
       Indosat
     </h3>
 
-    <!--
-      :package="['A']"
-      :group="['A','B']"
-    -->
-
     <StatisticsTemplateHeader
-      :package="['A']"
+      :package-fetch="packageFetch"
+      :group-fetch="groupFetch"
     >
       <VDivider class="mb-6" />
       <AltStatsDetailTemplate

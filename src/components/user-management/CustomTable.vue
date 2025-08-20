@@ -17,7 +17,7 @@ const props = defineProps({
 
 <template>
   <VTable
-    class="text-no-wrap"
+    class="text-no-wrap noborder"
     style="border-radius: 0;"
   >
     <thead>
@@ -95,7 +95,7 @@ th {
 }
 
 .th-span-border {
-  border-inline-start: 0.2rem solid #f9fafc;
+  border-inline-start: 0.1rem solid #f9fafc;
   color: black;
   padding-inline-start: 2px;
 }
@@ -121,5 +121,14 @@ th {
   display: grid;
   align-items: center;
   grid-template-columns: 1fr 1fr 1fr; /* three equal thirds */
+}
+</style>
+
+
+<style>
+.noborder {
+  table {
+    border-radius: 0 !important;
+  }
 }
 </style>

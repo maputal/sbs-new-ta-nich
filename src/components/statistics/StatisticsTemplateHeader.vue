@@ -182,7 +182,10 @@ function onShow() {
       <VRow>
         <VCol cols="3" />
         <VCol cols="9">
-          <VBtn @click="onShow">
+          <VBtn
+            class="text-none"
+            @click="onShow"
+          >
             Show
           </VBtn>
         </VCol>

@@ -23,31 +23,18 @@ const updateModelValue = val => {
   // emit('update:isDialogVisible', val)
 
   appStore.hideError()
-
-  console.log('errorCode.value di updateModelValue', errorCode.value)
-  if (errorCode.value == '403004'){
-    location.reload()
-  }
 }
 
 const onConfirmation = () => {
-  if(errorResult.value.includes('401')){
+  if(errorResultObject.value.code == '401-004-001'){
     router.replace('/logout')
   }
-
-  isTraceID.value = false
   updateModelValue(false)
 }
 
 const localCustomErrorMessage = ref(toRaw(props.customErrorMessage))
 // const localCustomErrorMessage = ref(structuredClone(toRaw(props.customErrorMessage)))
 
-const errorResult = ref()
-const errorStatus = ref()
-const errorCode = ref()
-const isTraceID = ref(false)
-const isStatus403 = ref(false)
-const isInsufficientWallet = ref(false)
 const route = useRoute()
 const router = useRouter()
 const errorResultObject = ref({
@@ -56,47 +43,10 @@ const errorResultObject = ref({
   traceId: ''
 })
 
-
-// const onDataError = e => {
-//   console.log('e.value')
-//   console.log(e.value)
-//   if(typeof e.value == 'string'){
-//     errorResult.value = e.value
-//   } else if (typeof e.value == 'object' && e.value.error_code) {
-//     errorResultObject.value.code = e.value.error_code
-//     errorResultObject.value.message = e.value.error_message
-//   } else {
-//     if (e.value.status === 403 || e.value.status === 500 || e.value.status === 400) {
-//       if (e.value.errortext) {
-//         errorResult.value = JSON.parse(e.value.errortext).error
-//         if(e.value.status === 403) {
-//           errorStatus.value = JSON.parse(e.value.errortext).status
-//           isStatus403.value = true
-//         }
-//       } else {
-//         errorResultObject.value.code = e.value.status
-//         errorResultObject.value.message = e.value.statusText
-//       }
-//     } else if (e.value.status === 401) {
-//       onConfirmation()
-//       router.replace('/logout')
-//     } else if(e.value.hasOwnProperty('trace_id')){
-//       errorResult.value = e.value
-//       console.log(e)
-//       isTraceID.value = true
-//       errorCode.value = e.value.error_code
-//     } else if(e.value?.error){
-//       errorResult.value = e.value?.error || 'Something went wrong. Please try again.'
-//     }
-//   }
-// }
-
 const onDataError = e => {
   console.log('e.value')
   console.log(e.value)
-  if(typeof e.value == 'string'){
-    errorResult.value = e.value
-  } else if (typeof e.value == 'object' && e.value.error_code) {
+  if (typeof e.value == 'object' && e.value.error_code) {
     errorResultObject.value.code = e.value.error_code
     errorResultObject.value.message = e.value.error_message
 
@@ -151,9 +101,9 @@ onMounted(() => {
 </template>
 
 <style lang="scss">
-.error-dialog .v-overlay__scrim {
-  // backdrop-filter: blur(5px);
-}
+// .error-dialog .v-overlay__scrim {
+//   // backdrop-filter: blur(5px);
+// }
 
 .error-dialog
 .v-overlay__scrim,

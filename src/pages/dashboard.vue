@@ -33,13 +33,13 @@ import { useGlobalStore } from '@/store/useGlobalStore'
 
     appStore.showLoader()
 
-    // const params = {
-    //   // row_length: rowPerPagePackage.value,
-    //   // page_number: currentPagePackage.value,
-    //   // group_id: selectedGroup.value[0],
-    // }
+    const params = {
+      // row_length: rowPerPagePackage.value,
+      // page_number: currentPagePackage.value,
+      // group_id: selectedGroup.value[0],
+    }
 
-    const params = 'HALO MANIEZZ'
+    // const params = 'HALO MANIEZZ'
 
     globalRequest(
       'taSecure_POST',

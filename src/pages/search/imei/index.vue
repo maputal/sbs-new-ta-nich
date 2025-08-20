@@ -152,7 +152,7 @@ const deleteIMEI = () => {
 // =============================================== User interaction
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
-const priv = userData.priv
+const priv = userData?.priv
 
 console.log("---------- hasil priv=", priv)
 

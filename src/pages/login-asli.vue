@@ -1,6 +1,5 @@
 <script setup>
 import globalRequest from '@/plugins/globalRequest';
-import { useAppStore } from '@/store/app';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import buildingBackground from '@images/telakses/BG_Login.png';
 import Logo from '@images/telakses/Teleakses_Solusindo_Logo_cropt.png';
@@ -8,7 +7,6 @@ import {
   requiredValidator
 } from '@validators';
 
-const appStore = useAppStore()
 
 const store = useGlobalStore()
 const isPasswordVisible = ref(false)
@@ -26,27 +24,33 @@ const errors = ref({
 const refVForm = ref()
 const nip = ref('')
 const password = ref('')
-
-const userData = ref({})
-
+const response = ref('')
 const token = ref('')
 const payloadFin = ref({})
-
+const userData = ref({})
+const LazyErrorDialogs = defineAsyncComponent(() => import('@/views/pages/dialogs/Error.vue'))
+const isErrorVisible = ref(false)
+const customErrorMessages = ref()
 const windowInnerHeight = ref(window.innerHeight)
 
-const resetCredential = () => {
-  nip.value = ''
-  password.value = ''
+const onProceed = () => {
+  let pload = { fcm_token: 'dummy', deviceuuid: 'dummy' }
+  window.moffas.fin(
+    password.value,
+    pload,
+    onSuccess,
+    onUnauth,
+    onError,
+  )
 }
 
-const onDataError = (e) => {
-  console.log('masuk error di onDataError', e)
-  resetCredential()
-  appStore.hideLoader()
-  appStore.showError(e)
-}
+const onSuccess = data => {
+  console.log(data)
+  token.value = data.token
+  payloadFin.value = JSON.parse(data.payload)
 
-const getProfile = data => {
+  let pload = {}
+
   globalRequest(
     'window.moffas.do_request',
     'getProfile',
@@ -54,6 +58,13 @@ const getProfile = data => {
     onLoadOwnInfo,
     onDataError
   )
+}
+
+const onDataError = e => {
+  isErrorVisible.value = true
+  customErrorMessages.value = e
+  resetCredential()
+  console.log(e)
 }
 
 const onLoadOwnInfo = data => {
@@ -77,53 +88,48 @@ const onLoadOwnInfo = data => {
   // router.replace('/otp')
 }
 
+const onUnauth = () => {
+  isErrorVisible.value = true
+  customErrorMessages.value = 'Username atau Password salah'
+  resetCredential()
+
+  // console.log('Un-Auth')
+}
+
+const onDenied = () => {
+  isErrorVisible.value = true
+  customErrorMessages.value = 'User Denied'
+  resetCredential()
+
+  // console.log('Denied')
+}
+
+const onError = e => {
+  isErrorVisible.value = true
+  customErrorMessages.value = 'Gangguan Koneksi. Silakan coba lagi'
+  resetCredential()
+
+  // console.log(e)
+}
+
+const resetCredential = () => {
+  nip.value = ''
+  password.value = ''
+}
+
 const login = () => {
-  globalRequest(
-    'taSecure_Login',
-    '', // no op needed for login
-    { username: nip.value, password: password.value },
-    (res) => {
-      // const result = JSON.parse(res);
-      console.log('response login=', res)
-      let result = res
-  
-      if (result?.success) {
-        console.log('Login successful')
-        window.sessionStorage.setItem('username',nip.value)
-  
-        // getProfile()
-  
-        // Redirect to `to` query if exist or redirect to index route
-        console.log('route.query.redirect', route.query.redirect)
-        // router.push(route.query.redirect ? String(route.query.redirect) : '/')
-        router.replace(route.query.redirect ? String(route.query.redirect) : '/')
-  
-        // router.replace('/otp')        
-  
-        resetCredential()
-        
-
-        // appStore.hideLoader()
-      } else {
-        console.error('Login failed', result)
-        if(!result){
-          result = 'Login failed, please try again.'
-        }
-
-        onDataError(result)
-      }
-    },
-    (err) => {
-      console.error('Login failed', err)
-      onDataError(err)
-    }
+  window.moffas.login_start(
+    nip.value,
+    onProceed,
+    onUnauth,
+    onDenied,
+    onError,
   )
 }
 
 const onSubmit = () => {
   refVForm.value?.validate().then(({ valid: isValid }) => {
-    if (isValid)    
-      // appStore.showLoader()
+    if (isValid)
       login()
   })
 }
@@ -131,6 +137,12 @@ const onSubmit = () => {
 
 <template>
   <div>
+    <!-- erorr dialogs -->
+    <LazyErrorDialogs
+      v-if="isErrorVisible"
+      v-model:isDialogVisible="isErrorVisible" 
+      :custom-error-message="customErrorMessages"
+    />
     <!-- Title and Logo -->
     <div class="auth-logo d-flex align-start gap-x-3">
       <!-- <VNodeRenderer :nodes="themeConfig.app.logo" /> -->

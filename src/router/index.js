@@ -1,4 +1,4 @@
-import { useGlobalStore } from '@/store/useGlobalStore'
+// import { useGlobalStore } from '@/store/useGlobalStore'
 import { setupLayouts } from 'virtual:generated-layouts'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import routes from '~pages'
@@ -25,28 +25,32 @@ const router = createRouter({
 
 // Docs: https://router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
 router.beforeEach((to, from, next) => {
-  const store = useGlobalStore()
+  // const store = useGlobalStore()
   console.log(to)
   console.log(from)
+
+  const sessionId = sessionStorage.getItem('session_id')
+  const sessionSecret = sessionStorage.getItem('session_secret')
+
   // PROD
   // if (to.meta.requiresAuth && (!store.token || store.token === 'null')
-  // ) {
-  //   console.log('MASOK SINI SA')
-  //   // return next({ name: 'login', query: { to: to.name !== 'index' ? to.fullPath : undefined }})
-  //   next({
-  //     path: '/login',
-  //     query: { redirect: to.fullPath },
-  //   })
-  //   return
-  // } 
-  // else {
-  //   next();
-  //   return;
-  // }
+  if (to.meta.requiresAuth && !sessionId && !sessionSecret) {
+    console.log('MASOK SINI SA')
+    // return next({ name: 'login', query: { to: to.name !== 'index' ? to.fullPath : undefined }})
+    next({
+      path: '/login',
+      query: { redirect: to.fullPath },
+    })
+    return
+  } 
+  else {
+    next();
+    return;
+  }
 
   // // DEV MODE, DEL/COMMENT WHEN PROD!!!
-  next();
-  return;
+  // next();
+  // return;
 })
 
 export default router

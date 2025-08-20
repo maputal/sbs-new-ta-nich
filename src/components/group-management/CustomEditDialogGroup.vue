@@ -165,8 +165,8 @@ const dialogVisibleUpdate = val => {
         >
           Cancel
         </VBtn>
+        <!-- v-if ="priv.hasOwnProperty('create_group') && priv.hasOwnProperty('update_group') || Object.keys(priv).length === 0" -->
         <VBtn
-          v-if ="priv.hasOwnProperty('create_group') && priv.hasOwnProperty('update_group') || Object.keys(priv).length === 0"
           class="text-none"
           rounded="xl"
           variant="flat"

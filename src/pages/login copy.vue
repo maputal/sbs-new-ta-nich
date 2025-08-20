@@ -75,36 +75,38 @@ const onLoadOwnInfo = data => {
   // router.replace('/otp')
 }
 
-globalRequest(
-  'taSecure_Login',
-  '', // no op needed for login
-  { username: nip.value, password: password.value },
-  (res) => {
-    // const result = JSON.parse(res);
-    console.log('response login=', res)
-    const result = res
-
-    if (result.success) {
-      console.log('Login successful')
-      window.sessionStorage.setItem('username',nip.value)
-
-      // getProfile()
-
-      // Redirect to `to` query if exist or redirect to index route
-      console.log('route.query.redirect', route.query.redirect)
-      // router.push(route.query.redirect ? String(route.query.redirect) : '/')
-      router.replace(route.query.redirect ? String(route.query.redirect) : '/')
-
-      // router.replace('/otp')
+const login = () => {
+  globalRequest(
+    'taSecure_Login',
+    '', // no op needed for login
+    { username: nip.value, password: password.value },
+    (res) => {
+      // const result = JSON.parse(res);
+      console.log('response login=', res)
+      const result = res
+  
+      if (result.success) {
+        console.log('Login successful')
+        window.sessionStorage.setItem('username',nip.value)
+  
+        // getProfile()
+  
+        // Redirect to `to` query if exist or redirect to index route
+        console.log('route.query.redirect', route.query.redirect)
+        // router.push(route.query.redirect ? String(route.query.redirect) : '/')
+        router.replace(route.query.redirect ? String(route.query.redirect) : '/')
+  
+        // router.replace('/otp')
+      }
+  
+      resetCredential()
+    },
+    (err) => {
+      console.error('Login failed', err)
+      onDataError(err)
     }
-
-    resetCredential()
-  },
-  (err) => {
-    console.error('Login failed', err)
-    onDataError(err)
-  }
-)
+  )
+}
 
 const onSubmit = () => {
   refVForm.value?.validate().then(({ valid: isValid }) => {

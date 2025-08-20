@@ -85,7 +85,7 @@ const customErrorMessages = ref('')
 
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
-const priv = userData.priv
+const priv = userData?.priv
 
 console.log("---------- hasil priv=", priv)
 
@@ -417,8 +417,8 @@ function successPopup(success_message){
               </VCol>
             </span>
             <VSheet class="d-flex align-center pa-6 justify-end">
+              <!-- v-if="priv.hasOwnProperty('create_user') || Object.keys(priv).length === 0" -->
               <VBtn
-                v-if="priv.hasOwnProperty('create_user') || Object.keys(priv).length === 0"
                 class="text-none"
                 type="submit"
                 rounded="xl"

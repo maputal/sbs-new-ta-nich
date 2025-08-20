@@ -1,70 +1,24 @@
 <script setup>
-  import icon from '@/assets/images/svg/gg_hello.svg';
-import { useAppStore } from '@/store/app';
-import { useGlobalStore } from '@/store/useGlobalStore';
+import icon from '@/assets/images/svg/gg_hello.svg'
+import globalRequest from '@/plugins/globalRequest'
+import { useAppStore } from '@/store/app'
+import { useGlobalStore } from '@/store/useGlobalStore'
 
-const appStore = useAppStore()
-
+  const appStore = useAppStore()
   const store = useGlobalStore()
+
+  const userName = sessionStorage.getItem('username')
+
   const myUser = computed(() => ({
-    name: store.user?.name,
-    phone_number: store.user?.account_obj.phone_number,
-    email: store.user?.account_obj.email,
-    company_name: store.user?.company_name,
+    // name: store.user?.name,
+    name: userName ? userName : '',
+    // phone_number: store.user?.account_obj.phone_number,
+    // email: store.user?.account_obj.email,
+    // company_name: store.user?.company_name,
   }))
 
   const route = useRoute()
   const router = useRouter()
-
-  const toLoginWaba = () => {
-    router.replace('/')
-  }
-  
-  const todayDate = ref('')
-
-  const months = {
-    1:'January',
-    2:'February',
-    3:'March',
-    4:'April',
-    5:'May',
-    6:'June',
-    7:'July',
-    8:'August',
-    9:'September',
-    10:'October',
-    11:'November',
-    12:'Desember', 
-  }
-
-  const days = {
-    0:'Sunday',
-    1:'Monday',
-    2:'Tuesday',
-    3:'Wednesday',
-    4:'Thursday',
-    5:'Friday',
-    6:'Saturday',
-  }
-
-  const todayDateF = () => {
-    let today = new Date()
-    let dd = today.getDate()
-    let day = today.getDay();
-    let year = today.getFullYear()
-    let month = today.getMonth() + 1
-    let date =
-      dd < 10 ? '0' + dd : dd
-    return (
-      days[day] +
-      ', ' +
-      date +
-      ' ' +
-      months[month] +
-      ' ' +
-      year
-    )
-  }
 
   const onDataError = (e) => {
     console.log('masuk error di onDataError', e)
@@ -73,22 +27,54 @@ const appStore = useAppStore()
   }
 
   const onLoadOwnInfo = (data) => {}
+
+  const getUserInfo = () => {
+    console.log('Code getUserInfo!')
+
+    appStore.showLoader()
+
+    const params = {
+      // row_length: rowPerPagePackage.value,
+      // page_number: currentPagePackage.value,
+      // group_id: selectedGroup.value[0],
+    }
+
+    // const params = 'HALO MANIEZZ'
+
+    globalRequest(
+      'taSecure_POST',
+      'get_user_info',
+      params,
+      (data) => {
+        console.log('getUserInfo response1', data)
+        
+        const response = JSON.parse(data)
+        console.log('getUserInfo response2', response)
+
+        if (response?.success == false) {
+          console.log('masuk error')
+          appStore.hideLoader()
+          appStore.showError(response)
+          return
+        }
+
+        appStore.hideLoader()
+      },
+      onDataError
+    )
+  }
   
   onMounted(() => {
-    // let isEmbeddedSignup = store.payloadFin.embedded_signup
-    // if(!isEmbeddedSignup){
-    //   toLoginWaba()
-    // } else {
-    //   let pload = {}
-    //   globalRequest(
-    //     'window.moffas.do_request',
-    //     'getProfile',
-    //     pload,
-    //     onLoadOwnInfo,
-    //     onDataError
-    //   )
-    // }
-    // todayDate.value = todayDateF()
+    let pload = {}
+    // globalRequest(
+    //   'window.moffas.do_request',
+    //   'getUserInfo',
+    //   pload,
+    //   onLoadOwnInfo,
+    //   onDataError
+    // )
+
+    getUserInfo()
   })
 </script>
 <template>

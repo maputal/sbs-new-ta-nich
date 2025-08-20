@@ -1,6 +1,6 @@
 <script setup>
-import avatar1 from '@images/avatars/avatar-1.png'
 import { useGlobalStore } from '@/store/useGlobalStore';
+import avatar1 from '@images/avatars/avatar-1.png';
 
 const router = useRouter()
 const logout = () => {
@@ -10,12 +10,13 @@ const toChangePass = () => {
   router.push('/change-pass')
 }
 
-
+const userName = sessionStorage.getItem('username')
 
 const store = useGlobalStore()
 console.log('store di profile=', store)
 const myUser = computed(() => ({
-  name: store.user?.name || '',
+  // name: store.user?.name || '',
+  name: userName ? userName : '',
   role_name: store.user?.role_name || '',
 }))
 

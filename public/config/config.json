@@ -1,3 +1,4 @@
 {
-  "backend_url": "http://localhost:48000"
+  "backend_url": "https://sbs-dev.servobot.my.id",
+  "backend_url_login": "https://sbs-dev.servobot.my.id"
 }

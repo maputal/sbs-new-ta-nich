@@ -7,6 +7,10 @@ import DetailTicketOnConversation from '@/components/DetailTicketOnConversation.
 import TicketsOnConversation from '@/components/TicketsOnConversation.vue'
 import { useGlobalStore } from '@/store/useGlobalStore'
 
+import { useAppStore } from '@/store/app'
+
+const appStore = useAppStore()
+
 const store = useGlobalStore()
 const route = useRoute()
 const router = useRouter()
@@ -663,9 +667,16 @@ async function onError(response) {
 }
 
 function showPopUp(errMessage) {
-  errorMessage.value = errMessage
-  isError.value = true
-}
+  // errorMessage.value = errMessage
+  // isError.value = true
+  appStore.showError(errMessage)
+
+
+const onDataError = (e) => {
+  console.log('masuk error di onDataError', e)
+  appStore.hideLoader()
+  appStore.showError(e)
+}}
 
 // =============================================== User interaction
 const isLeftSidebarOpen = ref(true)
@@ -675,7 +686,7 @@ const successDialog = ref(false)
 
 const userDataString = localStorage.getItem('user')
 const userData = JSON.parse(userDataString)
-const priv = userData.priv
+const priv = userData?.priv
 
 console.log("---------- hasil priv=", priv)
 
